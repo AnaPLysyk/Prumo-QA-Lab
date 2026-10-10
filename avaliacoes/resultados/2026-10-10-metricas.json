@@ -1,0 +1,141 @@
+{
+  "geradoEm": "2026-10-10T20:25:14.338Z",
+  "deterministica": [
+    {
+      "arquivo": "2026-10-10-prumo-2.2.0-fc7cb07-deterministico.json",
+      "prumo": "2.2.0@fc7cb07",
+      "casosAprovados": "7/8",
+      "casosNaoAplicaveis": 6,
+      "criteriosAtendidos": 101,
+      "criteriosNaoAtendidos": 1,
+      "criteriosNaoAvaliados": 0,
+      "achadosObrigatoriosApontados": "10/11",
+      "falsosPositivos": 0,
+      "cenariosNecessariosOmitidos": 0,
+      "redundanciasIndevidas": 0,
+      "taxaCriterios": 99,
+      "falhas": [
+        "aponta WEAK_TEST em T2 (severidade low)"
+      ]
+    },
+    {
+      "arquivo": "2026-10-10-prumo-2.3.0-18a5803-deterministico.json",
+      "prumo": "2.3.0@18a5803",
+      "casosAprovados": "8/8",
+      "casosNaoAplicaveis": 0,
+      "criteriosAtendidos": 102,
+      "criteriosNaoAtendidos": 0,
+      "criteriosNaoAvaliados": 0,
+      "achadosObrigatoriosApontados": "11/11",
+      "falsosPositivos": 0,
+      "cenariosNecessariosOmitidos": 0,
+      "redundanciasIndevidas": 0,
+      "taxaCriterios": 100,
+      "falhas": []
+    },
+    {
+      "arquivo": "2026-10-10-prumo-2.3.0-5c26ff1-deterministico.json",
+      "prumo": "2.3.0@5c26ff1",
+      "casosAprovados": "7/8",
+      "casosNaoAplicaveis": 6,
+      "criteriosAtendidos": 101,
+      "criteriosNaoAtendidos": 1,
+      "criteriosNaoAvaliados": 0,
+      "achadosObrigatoriosApontados": "10/11",
+      "falsosPositivos": 0,
+      "cenariosNecessariosOmitidos": 0,
+      "redundanciasIndevidas": 0,
+      "taxaCriterios": 99,
+      "falhas": [
+        "aponta WEAK_TEST em T2 (severidade low)"
+      ]
+    },
+    {
+      "arquivo": "2026-10-10-prumo-2.3.1-4c7ee75-deterministico.json",
+      "prumo": "2.3.1@4c7ee75",
+      "casosAprovados": "8/8",
+      "casosNaoAplicaveis": 6,
+      "criteriosAtendidos": 102,
+      "criteriosNaoAtendidos": 0,
+      "criteriosNaoAvaliados": 0,
+      "achadosObrigatoriosApontados": "11/11",
+      "falsosPositivos": 0,
+      "cenariosNecessariosOmitidos": 0,
+      "redundanciasIndevidas": 0,
+      "taxaCriterios": 100,
+      "falhas": []
+    },
+    {
+      "arquivo": "2026-10-10-prumo-2.4.0-9d1939c-deterministico.json",
+      "prumo": "2.4.0@9d1939c",
+      "casosAprovados": "14/14",
+      "casosNaoAplicaveis": 0,
+      "criteriosAtendidos": 150,
+      "criteriosNaoAtendidos": 0,
+      "criteriosNaoAvaliados": 0,
+      "achadosObrigatoriosApontados": "23/23",
+      "falsosPositivos": 0,
+      "cenariosNecessariosOmitidos": 0,
+      "redundanciasIndevidas": 0,
+      "taxaCriterios": 100,
+      "falhas": []
+    }
+  ],
+  "mutantes": {
+    "arquivo": "2026-10-10-deteccao.json",
+    "total": 6,
+    "detectadosPelaSuiteOriginal": 2,
+    "sobreviventesDaSuiteOriginal": 4,
+    "sobreviventesDetectadosPorTesteNovo": 4,
+    "identificadosAutonomamentePeloPrumo": 0,
+    "identificadosParcialmentePeloPrumo": 1,
+    "taxaDeteccaoSuiteOriginal": 33.3,
+    "taxaDeteccaoTesteNovoSobreSobreviventes": 100,
+    "taxaIdentificacaoAutonomaDoPrumo": 0
+  },
+  "semantica": {
+    "arquivo": "2026-10-10-prumo-2.4.0-semantica.json",
+    "casos": 8,
+    "executados": 8,
+    "naoExecutados": 0,
+    "atendeu": 8,
+    "taxaAtendeuSobreExecutados": 100
+  },
+  "comparacao": {
+    "arquivo": "2026-10-10-comparacao-prumo-2.4.0.json",
+    "cliente": {
+      "nome": "codex",
+      "executavel": "codex.exe",
+      "modelo": "padrão do cliente (não informado)"
+    },
+    "repeticoes": 1,
+    "rubricaSha256": "4cd5f2cbbf044cf064a7e722402a5023e467088e56c7e2109cb190d8100b2fa0",
+    "A_semPrumo": {
+      "execucoes": 9,
+      "executadas": 9,
+      "naoExecutadas": 0,
+      "criteriosAtendidos": 65,
+      "criteriosAvaliados": 73,
+      "taxa": 89,
+      "cenariosPropostos": 3,
+      "duracaoMediaMs": 32219
+    },
+    "B_comPrumo": {
+      "execucoes": 9,
+      "executadas": 9,
+      "naoExecutadas": 0,
+      "criteriosAtendidos": 69,
+      "criteriosAvaliados": 73,
+      "taxa": 94.5,
+      "cenariosPropostos": 2.3,
+      "duracaoMediaMs": 49740
+    },
+    "conclusao": "Diferença observada em amostra pequena e sem teste estatístico; não é prova de superioridade."
+  },
+  "naoCalculado": [
+    "tokens",
+    "custo",
+    "cobertura funcional",
+    "bugs corrigidos"
+  ]
+}

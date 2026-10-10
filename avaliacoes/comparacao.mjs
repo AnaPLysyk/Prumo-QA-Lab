@@ -50,13 +50,14 @@ const fwd = (p) => p.replaceAll('\\', '/');
 function executar(codex, braco, n) {
   return new Promise((resolve) => {
     const neutro = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo lab neutro ')); const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo lab dados '));
-    const base = ['exec', '--ephemeral', '--ignore-user-config', '--json', '-s', 'read-only', '-C', neutro, ...(modelo ? ['-m', modelo] : [])];
+    // A pasta neutra é vazia de propósito (nenhum gabarito visível) e não é repositório Git: o Codex exige --skip-git-repo-check.
+    const base = ['exec', '--ephemeral', '--ignore-user-config', '--skip-git-repo-check', '--json', '-s', 'read-only', '-C', neutro, ...(modelo ? ['-m', modelo] : [])];
     const mcp = braco === 'B' ? ['-c', 'mcp_servers.prumo-lab.command="node"', '-c', `mcp_servers.prumo-lab.args=["${fwd(mcpJs)}","${fwd(lab)}"]`, '-c', `mcp_servers.prumo-lab.env={PRUMO_DATA_DIR="${fwd(dados)}"}`] : [];
     const filho = spawn(codex, [...base, ...mcp, braco === 'A' ? promptA(n) : promptB(n)], { windowsHide: true, shell: false, stdio: ['ignore', 'pipe', 'pipe'] });
-    let saida = ''; let expirou = false; const t0 = Date.now();
+    let saida = ''; let erroSaida = ''; let expirou = false; const t0 = Date.now();
     const timer = setTimeout(() => { expirou = true; filho.kill(); }, limite);
-    filho.stdout.on('data', (b) => { saida += b; }); filho.stderr.on('data', () => {});
-    const fim = (extra) => { clearTimeout(timer); for (const d of [neutro, dados]) fs.rmSync(d, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); resolve({ saida, expirou, ms: Date.now() - t0, ...extra }); };
+    filho.stdout.on('data', (b) => { saida += b; }); filho.stderr.on('data', (b) => { erroSaida = (erroSaida + b).slice(-1500); });
+    const fim = (extra) => { clearTimeout(timer); for (const d of [neutro, dados]) fs.rmSync(d, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); resolve({ saida, erroSaida, expirou, ms: Date.now() - t0, ...extra }); };
     filho.on('error', (e) => fim({ falha: e.message, codigo: null }));
     filho.on('close', (codigo) => fim({ codigo }));
   });
@@ -80,7 +81,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const base = { caso: n, titulo: rubricaCasos[n].titulo, braco, repeticao: rep };
     if (!codex) { registros.push({ ...base, estado: 'NAO_EXECUTADA', motivo: 'Codex CLI não encontrado neste ambiente' }); continue; }
     const r = await executar(codex, braco, n);
-    if (r.falha || r.expirou || r.codigo !== 0 || !r.saida) { registros.push({ ...base, estado: 'NAO_EXECUTADA', motivo: r.falha ? `falha ao iniciar: ${r.falha}` : r.expirou ? `tempo esgotado (${limite} ms)` : (falhaDoCliente(r.saida ?? '') ?? `Codex terminou com código ${r.codigo}`) }); console.log(`NAO_EXECUTADA caso ${n} braço ${braco}: ${registros.at(-1).motivo}`); continue; }
+    if (r.falha || r.expirou || r.codigo !== 0 || !r.saida) { registros.push({ ...base, estado: 'NAO_EXECUTADA', motivo: r.falha ? `falha ao iniciar: ${r.falha}` : r.expirou ? `tempo esgotado (${limite} ms)` : (falhaDoCliente(r.saida ?? '') ?? `Codex terminou com código ${r.codigo}${r.erroSaida ? ': ' + r.erroSaida.split(/\r?\n/).filter((l) => /error|erro|not|trusted|git/i.test(l)).slice(-1)[0]?.slice(0, 200) : ''}`) }); console.log(`NAO_EXECUTADA caso ${n} braço ${braco}: ${registros.at(-1).motivo}`); continue; }
     const { chamadas, final, modelo: m } = extrair(r.saida); if (m) cliente.modelo = m;
     const resposta = extrairJson(final); const doc = n === 14 ? '' : fs.readFileSync(path.join(lab, 'requisitos', `RQ-0${n}.md`), 'utf8');
     const criterios = avaliarResposta(n, resposta, doc);
