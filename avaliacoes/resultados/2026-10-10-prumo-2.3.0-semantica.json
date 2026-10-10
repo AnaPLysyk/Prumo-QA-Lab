@@ -1,0 +1,77 @@
+{
+  "tipo": "avaliacao-semantica",
+  "geradoEm": "2026-10-10T17:14:43.860Z",
+  "prumo": {
+    "versao": "2.3.0",
+    "skillSha256": "10a8100b2e6591e475562f0a123e93484065618000c780632cfb2e2d54f6c95f",
+    "skillEntregue": "inclusão no prompt"
+  },
+  "cliente": {
+    "nome": "codex",
+    "executavel": "codex.exe"
+  },
+  "casos": [
+    {
+      "caso": 1,
+      "titulo": "Valores-limite",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    },
+    {
+      "caso": 2,
+      "titulo": "Classes de equivalência",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    },
+    {
+      "caso": 3,
+      "titulo": "Permissões",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    },
+    {
+      "caso": 4,
+      "titulo": "Persistência após operação recusada",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    },
+    {
+      "caso": 5,
+      "titulo": "Redundância",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    },
+    {
+      "caso": 6,
+      "titulo": "Falta de oráculo",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    },
+    {
+      "caso": 7,
+      "titulo": "Falso positivo",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    },
+    {
+      "caso": 8,
+      "titulo": "Requisito contraditório e ambiente bloqueado",
+      "estado": "NAO_EXECUTADA",
+      "motivo": "You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 4:12 PM.",
+      "codigoDeSaida": 1
+    }
+  ],
+  "resumo": {
+    "atendeu": 0,
+    "naoAtendeu": 0,
+    "naoExecutada": 8
+  },
+  "observacao": "Critérios estruturais sobre chamadas MCP reais. A qualidade semântica final das explicações deve ser revista por uma pessoa (respostaFinalDoAgente)."
+}

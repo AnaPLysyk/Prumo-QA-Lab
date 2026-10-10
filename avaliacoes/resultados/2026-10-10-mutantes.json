@@ -1,0 +1,50 @@
+{
+  "tipo": "analise-de-mutantes",
+  "geradoEm": "2026-10-10T17:14:43.763Z",
+  "node": "v24.20.0",
+  "baseline": "ℹ tests 11 ℹ pass 10 ℹ fail 0 ℹ skipped 1",
+  "resultados": [
+    {
+      "id": "elegibilidade-limite-inferior",
+      "situacao": "sobrevive",
+      "esperado": "sobrevive",
+      "conforme": true,
+      "significado": "Off-by-one no limite inferior: nenhum teste exercita 18 (caso 1)."
+    },
+    {
+      "id": "acesso-gerente-fechado",
+      "situacao": "sobrevive",
+      "esperado": "sobrevive",
+      "conforme": true,
+      "significado": "GERENTE excluindo pedido fechado: perfil sem teste (caso 3)."
+    },
+    {
+      "id": "pedidos-recusa-altera-dado",
+      "situacao": "sobrevive",
+      "esperado": "sobrevive",
+      "conforme": true,
+      "significado": "Recusa que altera o dado: o teste só confere que lança erro (caso 4)."
+    },
+    {
+      "id": "cupom-desconto-errado",
+      "situacao": "sobrevive",
+      "esperado": "sobrevive",
+      "conforme": true,
+      "significado": "Desconto errado: um teste ignorado e outro que só confere o tipo (caso 7)."
+    },
+    {
+      "id": "frete-sul-errado",
+      "situacao": "morto",
+      "esperado": "morto",
+      "conforme": true,
+      "significado": "Controle: o teste de SUL tem oráculo e detecta o defeito."
+    },
+    {
+      "id": "frete-nordeste-errado",
+      "situacao": "morto",
+      "esperado": "morto",
+      "conforme": true,
+      "significado": "Controle: o teste de NORDESTE tem oráculo e detecta o defeito."
+    }
+  ]
+}

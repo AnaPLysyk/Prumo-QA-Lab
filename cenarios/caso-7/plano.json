@@ -1,0 +1,31 @@
+{
+  "requirement": "O desconto do cupom PRUMO10 precisa ser verificado por um teste que compare o total final com o valor esperado.",
+  "source": "RQ-07 §único",
+  "sourcePath": "requisitos/RQ-07.md",
+  "existingTests": [
+    {
+      "id": "T1",
+      "behavior": "cupom PRUMO10 concede 10% de desconto",
+      "testPath": "aplicacao/testes/superficial.test.mjs",
+      "technique": "equivalence"
+    },
+    {
+      "id": "T2",
+      "behavior": "aplicar cupom retorna um número",
+      "testPath": "aplicacao/testes/superficial.test.mjs",
+      "technique": "equivalence"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "c1",
+      "behavior": "Total final do cupom PRUMO10 é comparado ao valor esperado",
+      "source": "RQ-07 §único",
+      "risk": "Teste existente ignorado ou superficial não detecta erro no desconto",
+      "expected": "180",
+      "oracle": "aplicarCupom('PRUMO10', 200) === 180",
+      "technique": "equivalence",
+      "partition": "cupom-valido"
+    }
+  ]
+}

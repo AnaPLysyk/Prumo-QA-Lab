@@ -1,0 +1,35 @@
+{
+  "requirement": "Pedidos acima de 500 reais têm frete grátis para todos os clientes.",
+  "source": "RQ-08 §único",
+  "sourcePath": "requisitos/RQ-08.md",
+  "existingTests": [],
+  "contradictions": [
+    {
+      "source": "requisitos/RQ-08.md",
+      "statement": "Frete grátis acima de 500 reais para todos os clientes versus frete grátis exclusivo de clientes premium"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "c1",
+      "behavior": "Frete de pedido de 600 reais de cliente comum",
+      "source": "RQ-08 §único",
+      "risk": "Regra de frete grátis implementada na direção errada",
+      "expected": "indefinido enquanto o conflito persistir",
+      "oracle": "a definir após esclarecimento do requisito",
+      "technique": "decision_table",
+      "conditions": "valor>500; cliente=comum"
+    },
+    {
+      "id": "c2",
+      "behavior": "Validação de integração com banco de testes",
+      "source": "RQ-08 §único",
+      "risk": "Dados reais afetados por teste",
+      "expected": "dados persistidos corretamente",
+      "oracle": "consulta ao banco de testes após a operação",
+      "technique": "state_transition",
+      "conditions": "estado: banco isolado; evento: operação",
+      "blockedReason": "Banco de testes isolado ainda não provisionado"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "caso": 3,
+  "titulo": "Permissões",
+  "requisito": "RQ-03",
+  "obrigatorios": [
+    {
+      "type": "MISSING_CONDITIONS",
+      "scenario": "c6"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "MISSING_CONDITIONS",
+      "scenario": "c1"
+    },
+    {
+      "type": "MISSING_CONDITIONS",
+      "scenario": "c2"
+    },
+    {
+      "type": "MISSING_CONDITIONS",
+      "scenario": "c3"
+    },
+    {
+      "type": "MISSING_CONDITIONS",
+      "scenario": "c4"
+    },
+    {
+      "type": "MISSING_CONDITIONS",
+      "scenario": "c5"
+    },
+    {
+      "type": "MISSING_ORACLE"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY"
+    }
+  ],
+  "selecao": {
+    "inclui": [
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "c5"
+    ],
+    "exclui": []
+  },
+  "limitesConhecidos": [
+    "O Prumo não sabe que GERENTE e OPERADOR não têm teste existente; só a leitura semântica da IA compara a tabela de decisão com o que já existe."
+  ],
+  "mutantes": [
+    "acesso-gerente-fechado"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "requirement": "O frete é 10 para SUL e SUDESTE, 20 para NORDESTE e NORTE e 15 para CENTRO_OESTE. Região desconhecida é recusada.",
+  "source": "RQ-02 §único",
+  "sourcePath": "requisitos/RQ-02.md",
+  "existingTests": [],
+  "candidates": [
+    {
+      "id": "c-sul",
+      "behavior": "Frete da faixa 10",
+      "source": "RQ-02 §único",
+      "risk": "Tarifa incorreta para a faixa 10",
+      "expected": "10",
+      "oracle": "o frete retornado para a região é 10",
+      "technique": "equivalence",
+      "partition": "faixa-10"
+    },
+    {
+      "id": "c-sudeste",
+      "behavior": "Frete da faixa 10",
+      "source": "RQ-02 §único",
+      "risk": "Tarifa incorreta para a faixa 10",
+      "expected": "10",
+      "oracle": "o frete retornado para a região é 10",
+      "technique": "equivalence",
+      "partition": "faixa-10"
+    },
+    {
+      "id": "c-nordeste",
+      "behavior": "Frete da faixa 20",
+      "source": "RQ-02 §único",
+      "risk": "Tarifa incorreta para a faixa 20",
+      "expected": "20",
+      "oracle": "o frete retornado para a região é 20",
+      "technique": "equivalence",
+      "partition": "faixa-20"
+    },
+    {
+      "id": "c-centro-oeste",
+      "behavior": "Frete da faixa 15",
+      "source": "RQ-02 §único",
+      "risk": "Tarifa incorreta para a faixa 15",
+      "expected": "15",
+      "oracle": "o frete retornado para a região é 15",
+      "technique": "equivalence",
+      "partition": "faixa-15"
+    },
+    {
+      "id": "c-invalida",
+      "behavior": "Região desconhecida é recusada",
+      "source": "RQ-02 §único",
+      "risk": "Aceitar região fora da tabela",
+      "expected": "RangeError",
+      "oracle": "frete('LUA') lança RangeError",
+      "technique": "equivalence",
+      "partition": "regiao-invalida"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "caso": 5,
+  "titulo": "Redundância",
+  "requisito": "RQ-05",
+  "obrigatorios": [
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c1"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c2"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c3"
+    },
+    {
+      "type": "MISSING_ORACLE"
+    }
+  ],
+  "selecao": {
+    "inclui": [
+      "c2",
+      "c3"
+    ],
+    "exclui": [
+      "c1"
+    ]
+  },
+  "limitesConhecidos": [
+    "c3 só difere por condição; o Prumo não elimina cobertura necessária e deixa a decisão final à IA."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "caso": 2,
+  "titulo": "Classes de equivalência",
+  "requisito": "RQ-02",
+  "obrigatorios": [
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c-sudeste"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c-sul"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c-nordeste"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c-centro-oeste"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY",
+      "scenario": "c-invalida"
+    },
+    {
+      "type": "MISSING_ORACLE"
+    }
+  ],
+  "selecao": {
+    "inclui": [
+      "c-sul",
+      "c-nordeste",
+      "c-centro-oeste",
+      "c-invalida"
+    ],
+    "exclui": [
+      "c-sudeste"
+    ]
+  },
+  "limitesConhecidos": [
+    "Equivalência semântica entre SUL e SUDESTE é decisão da IA; o Prumo só aponta assinatura estrutural idêntica como candidata."
+  ]
+}

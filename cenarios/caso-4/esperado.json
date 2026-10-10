@@ -1,0 +1,35 @@
+{
+  "caso": 4,
+  "titulo": "Persistência após operação recusada",
+  "requisito": "RQ-04",
+  "obrigatorios": [
+    {
+      "type": "MISSING_ORACLE",
+      "scenario": "c2"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "MISSING_ORACLE",
+      "scenario": "c1"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY"
+    },
+    {
+      "type": "MISSING_CONDITIONS"
+    }
+  ],
+  "selecao": {
+    "inclui": [
+      "c1"
+    ],
+    "exclui": []
+  },
+  "limitesConhecidos": [
+    "O Prumo não consegue dizer que \"lançar erro\" não prova persistência no teste existente T1; isso é demonstrado pela análise de mutantes do laboratório e pelo julgamento da IA."
+  ],
+  "mutantes": [
+    "pedidos-recusa-altera-dado"
+  ]
+}

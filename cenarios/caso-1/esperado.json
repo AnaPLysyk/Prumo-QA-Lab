@@ -1,0 +1,57 @@
+{
+  "caso": 1,
+  "titulo": "Valores-limite",
+  "requisito": "RQ-01",
+  "obrigatorios": [
+    {
+      "type": "MISSING_BOUNDARY",
+      "scenario": "c5"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "MISSING_ORACLE"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY"
+    },
+    {
+      "type": "WEAK_TEST"
+    },
+    {
+      "type": "UNVERIFIED_SOURCE"
+    },
+    {
+      "type": "MISSING_BOUNDARY",
+      "scenario": "c1"
+    },
+    {
+      "type": "MISSING_BOUNDARY",
+      "scenario": "c2"
+    },
+    {
+      "type": "MISSING_BOUNDARY",
+      "scenario": "c3"
+    },
+    {
+      "type": "MISSING_BOUNDARY",
+      "scenario": "c4"
+    }
+  ],
+  "selecao": {
+    "inclui": [
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "c6"
+    ],
+    "exclui": []
+  },
+  "limitesConhecidos": [
+    "O Prumo confere que o limite foi declarado; não decide se 17, 18, 65 e 66 são os valores certos nem se o conjunto basta (julgamento semântico da IA)."
+  ],
+  "mutantes": [
+    "elegibilidade-limite-inferior"
+  ]
+}

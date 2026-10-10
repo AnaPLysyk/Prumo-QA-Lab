@@ -1,0 +1,74 @@
+{
+  "requirement": "Somente ADMIN pode excluir qualquer pedido; GERENTE pode excluir somente pedido com status ABERTO; OPERADOR e visitante não podem excluir.",
+  "source": "RQ-03 §único",
+  "sourcePath": "requisitos/RQ-03.md",
+  "existingTests": [
+    {
+      "id": "T1",
+      "behavior": "ADMIN pode excluir",
+      "testPath": "aplicacao/testes/acesso.test.mjs",
+      "technique": "decision_table"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "c1",
+      "behavior": "Exclusão por ADMIN em pedido FECHADO",
+      "source": "RQ-03 §único",
+      "risk": "Perfil indevido consegue excluir ou perfil devido é bloqueado",
+      "expected": "exclusão permitida",
+      "oracle": "podeExcluir(ADMIN, FECHADO) === true",
+      "technique": "decision_table",
+      "conditions": "perfil=ADMIN; status=FECHADO"
+    },
+    {
+      "id": "c2",
+      "behavior": "Exclusão por GERENTE em pedido ABERTO",
+      "source": "RQ-03 §único",
+      "risk": "Perfil indevido consegue excluir ou perfil devido é bloqueado",
+      "expected": "exclusão permitida",
+      "oracle": "podeExcluir(GERENTE, ABERTO) === true",
+      "technique": "decision_table",
+      "conditions": "perfil=GERENTE; status=ABERTO"
+    },
+    {
+      "id": "c3",
+      "behavior": "Exclusão por GERENTE em pedido FECHADO",
+      "source": "RQ-03 §único",
+      "risk": "Perfil indevido consegue excluir ou perfil devido é bloqueado",
+      "expected": "exclusão recusada",
+      "oracle": "podeExcluir(GERENTE, FECHADO) === false",
+      "technique": "decision_table",
+      "conditions": "perfil=GERENTE; status=FECHADO"
+    },
+    {
+      "id": "c4",
+      "behavior": "Exclusão por OPERADOR em pedido ABERTO",
+      "source": "RQ-03 §único",
+      "risk": "Perfil indevido consegue excluir ou perfil devido é bloqueado",
+      "expected": "exclusão recusada",
+      "oracle": "podeExcluir(OPERADOR, ABERTO) === false",
+      "technique": "decision_table",
+      "conditions": "perfil=OPERADOR; status=ABERTO"
+    },
+    {
+      "id": "c5",
+      "behavior": "Exclusão por VISITANTE em pedido ABERTO",
+      "source": "RQ-03 §único",
+      "risk": "Perfil indevido consegue excluir ou perfil devido é bloqueado",
+      "expected": "exclusão recusada",
+      "oracle": "podeExcluir(VISITANTE, ABERTO) === false",
+      "technique": "decision_table",
+      "conditions": "perfil=VISITANTE; status=ABERTO"
+    },
+    {
+      "id": "c6",
+      "behavior": "Exclusão por perfil e status",
+      "source": "RQ-03 §único",
+      "risk": "Combinação de perfil e status não coberta",
+      "expected": "conforme a tabela",
+      "oracle": "resultado conforme a tabela de decisão",
+      "technique": "decision_table"
+    }
+  ]
+}

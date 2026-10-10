@@ -1,0 +1,28 @@
+{
+  "requirement": "O cupom PRUMO10 concede 10 por cento de desconto sobre o total do pedido; qualquer outro código não altera o total.",
+  "source": "RQ-06 §único",
+  "sourcePath": "requisitos/RQ-06.md",
+  "existingTests": [],
+  "candidates": [
+    {
+      "id": "c1",
+      "behavior": "Cupom PRUMO10 aplica 10% de desconto",
+      "source": "RQ-06 §único",
+      "risk": "Desconto calculado errado",
+      "expected": "180",
+      "oracle": "aplicarCupom('PRUMO10', 200) === 180",
+      "technique": "equivalence",
+      "partition": "cupom-valido"
+    },
+    {
+      "id": "c2",
+      "behavior": "Outro código de cupom não altera o total",
+      "source": "RQ-06 §único",
+      "risk": "Cupom inválido reduzindo o total",
+      "expected": "",
+      "oracle": "",
+      "technique": "equivalence",
+      "partition": "cupom-invalido"
+    }
+  ]
+}

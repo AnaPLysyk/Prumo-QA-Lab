@@ -1,0 +1,51 @@
+{
+  "requirement": "Regiões da mesma faixa de frete (SUL e SUDESTE) se comportam de forma equivalente e não exigem testes independentes.",
+  "source": "RQ-05 §único",
+  "sourcePath": "requisitos/RQ-05.md",
+  "existingTests": [
+    {
+      "id": "T1",
+      "behavior": "Frete da região SUL é 10",
+      "expected": "10",
+      "oracle": "frete('SUL') === 10",
+      "risk": "Tarifa incorreta na faixa 10",
+      "partition": "faixa-10",
+      "source": "RQ-05 §único",
+      "technique": "equivalence",
+      "testPath": "aplicacao/testes/frete.test.mjs"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "c1",
+      "behavior": "Frete da região SUL é 10",
+      "source": "RQ-05 §único",
+      "risk": "Tarifa incorreta na faixa 10",
+      "expected": "10",
+      "oracle": "frete('SUL') === 10",
+      "technique": "equivalence",
+      "partition": "faixa-10"
+    },
+    {
+      "id": "c2",
+      "behavior": "Frete da região NORDESTE é 20",
+      "source": "RQ-05 §único",
+      "risk": "Tarifa incorreta na faixa 20",
+      "expected": "20",
+      "oracle": "frete('NORDESTE') === 20",
+      "technique": "equivalence",
+      "partition": "faixa-20"
+    },
+    {
+      "id": "c3",
+      "behavior": "Frete da região SUL é 10",
+      "source": "RQ-05 §único",
+      "risk": "Tarifa incorreta na faixa 10",
+      "expected": "10",
+      "oracle": "frete('SUL') === 10",
+      "technique": "equivalence",
+      "partition": "faixa-10",
+      "conditions": "cliente em lista de isenção promocional"
+    }
+  ]
+}

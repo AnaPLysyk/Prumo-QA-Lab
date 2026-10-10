@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "id": "prumo-qa-lab",
+  "name": "Prumo QA Lab — laboratório de avaliação",
+  "context": {
+    "documentation": ["requisitos/"],
+    "tests": ["aplicacao/testes/"],
+    "code": ["aplicacao/src/"]
+  },
+  "commands": {
+    "unit": {
+      "executable": "node",
+      "args": ["--test", "aplicacao/testes/elegibilidade.test.mjs", "aplicacao/testes/frete.test.mjs", "aplicacao/testes/acesso.test.mjs", "aplicacao/testes/pedidos.test.mjs", "aplicacao/testes/superficial.test.mjs"],
+      "requiredFiles": ["requisitos/RQ-01.md"]
+    },
+    "integracao": { "executable": "node", "args": ["aplicacao/testes/integracao-ambiente.mjs"] }
+  },
+  "execution": { "requireApproval": true, "blockedByDefault": ["integracao"], "environment": "host", "envAllowlist": [], "timeoutMs": 20000, "maxOutputBytes": 65536 }
+}

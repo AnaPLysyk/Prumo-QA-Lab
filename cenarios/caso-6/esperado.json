@@ -1,0 +1,30 @@
+{
+  "caso": 6,
+  "titulo": "Falta de oráculo",
+  "requisito": "RQ-06",
+  "obrigatorios": [
+    {
+      "type": "MISSING_ORACLE",
+      "scenario": "c2"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "MISSING_ORACLE",
+      "scenario": "c1"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY"
+    }
+  ],
+  "selecao": {
+    "inclui": [
+      "c1",
+      "c2"
+    ],
+    "exclui": []
+  },
+  "limitesConhecidos": [
+    "O Prumo aponta a ausência de oráculo; escolher o resultado esperado correto depende de requisito, não de inferência."
+  ]
+}

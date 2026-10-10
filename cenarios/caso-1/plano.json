@@ -1,0 +1,74 @@
+{
+  "requirement": "O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.",
+  "source": "RQ-01 §único",
+  "sourcePath": "requisitos/RQ-01.md",
+  "existingTests": [
+    {
+      "id": "T1",
+      "behavior": "adulto de 30 anos é elegível",
+      "testPath": "aplicacao/testes/elegibilidade.test.mjs",
+      "technique": "equivalence"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "c1",
+      "behavior": "Elegibilidade com idade 17 (limite inferior inválido)",
+      "source": "RQ-01 §único",
+      "risk": "Erro de off-by-one no limite do intervalo 18–65",
+      "expected": "não elegível",
+      "oracle": "elegivel(17) === false",
+      "technique": "boundary",
+      "boundary": 17
+    },
+    {
+      "id": "c2",
+      "behavior": "Elegibilidade com idade 18 (limite inferior válido)",
+      "source": "RQ-01 §único",
+      "risk": "Erro de off-by-one no limite do intervalo 18–65",
+      "expected": "elegível",
+      "oracle": "elegivel(18) === true",
+      "technique": "boundary",
+      "boundary": 18
+    },
+    {
+      "id": "c3",
+      "behavior": "Elegibilidade com idade 65 (limite superior válido)",
+      "source": "RQ-01 §único",
+      "risk": "Erro de off-by-one no limite do intervalo 18–65",
+      "expected": "elegível",
+      "oracle": "elegivel(65) === true",
+      "technique": "boundary",
+      "boundary": 65
+    },
+    {
+      "id": "c4",
+      "behavior": "Elegibilidade com idade 66 (limite superior inválido)",
+      "source": "RQ-01 §único",
+      "risk": "Erro de off-by-one no limite do intervalo 18–65",
+      "expected": "não elegível",
+      "oracle": "elegivel(66) === false",
+      "technique": "boundary",
+      "boundary": 66
+    },
+    {
+      "id": "c5",
+      "behavior": "Elegibilidade nos limites do intervalo",
+      "source": "RQ-01 §único",
+      "risk": "Limite mal interpretado",
+      "expected": "depende do limite",
+      "oracle": "resultado compatível com o limite",
+      "technique": "boundary"
+    },
+    {
+      "id": "c6",
+      "behavior": "Idade não inteira é recusada",
+      "source": "RQ-01 §único",
+      "risk": "Aceitar entrada fora do domínio",
+      "expected": "TypeError",
+      "oracle": "elegivel(17.5) lança TypeError",
+      "technique": "equivalence",
+      "partition": "idade-nao-inteira"
+    }
+  ]
+}

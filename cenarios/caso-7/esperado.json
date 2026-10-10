@@ -1,0 +1,34 @@
+{
+  "caso": 7,
+  "titulo": "Falso positivo",
+  "requisito": "RQ-07",
+  "obrigatorios": [
+    {
+      "type": "WEAK_TEST",
+      "scenario": "T1"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "MISSING_ORACLE"
+    },
+    {
+      "type": "POTENTIAL_REDUNDANCY"
+    },
+    {
+      "type": "UNVERIFIED_TEST"
+    }
+  ],
+  "selecao": {
+    "inclui": [
+      "c1"
+    ],
+    "exclui": []
+  },
+  "limitesConhecidos": [
+    "A detecção de teste ignorado é por arquivo: T2 também é sinalizado. O Prumo não avalia o conteúdo das assertions: \"retorna um número\" não é reconhecido como superficial; isso é demonstrado pelos mutantes."
+  ],
+  "mutantes": [
+    "cupom-desconto-errado"
+  ]
+}

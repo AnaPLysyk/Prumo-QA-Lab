@@ -1,0 +1,32 @@
+{
+  "caso": 8,
+  "titulo": "Requisito contraditório e ambiente bloqueado",
+  "requisito": "RQ-08",
+  "obrigatorios": [
+    {
+      "type": "CONTRADICTORY_REQUIREMENT"
+    },
+    {
+      "type": "BLOCKING_CONDITION",
+      "scenario": "c2"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "POTENTIAL_REDUNDANCY"
+    }
+  ],
+  "selecao": {
+    "inclui": [],
+    "exclui": []
+  },
+  "capacidades": [
+    {
+      "capability": "integracao",
+      "estadoEsperado": "BLOCKED"
+    }
+  ],
+  "limitesConhecidos": [
+    "O Prumo registra a contradição informada e o bloqueio; não resolve o conflito nem inventa a regra de frete."
+  ]
+}

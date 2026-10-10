@@ -1,0 +1,35 @@
+{
+  "requirement": "Quando a exclusão de um pedido é recusada por falta de autorização, o pedido permanece existente e inalterado.",
+  "source": "RQ-04 §único",
+  "sourcePath": "requisitos/RQ-04.md",
+  "existingTests": [
+    {
+      "id": "T1",
+      "behavior": "operador não consegue excluir (lança erro)",
+      "testPath": "aplicacao/testes/pedidos.test.mjs",
+      "technique": "equivalence"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "c1",
+      "behavior": "Exclusão recusada mantém o pedido existente e inalterado",
+      "source": "RQ-04 §único",
+      "risk": "Dado removido ou alterado por operação negada",
+      "expected": "pedido permanece com os mesmos dados",
+      "oracle": "loja.obter(1) igual ao pedido original e loja.total() === 1 após a recusa",
+      "technique": "state_transition",
+      "conditions": "estado: pedido 1 existente; evento: exclusão por OPERADOR; destino: pedido 1 inalterado"
+    },
+    {
+      "id": "c2",
+      "behavior": "Exclusão por OPERADOR é recusada",
+      "source": "RQ-04 §único",
+      "risk": "Dado alterado por operação negada",
+      "expected": "",
+      "oracle": "",
+      "technique": "state_transition",
+      "conditions": "estado: pedido 1 existente; evento: exclusão por OPERADOR"
+    }
+  ]
+}
