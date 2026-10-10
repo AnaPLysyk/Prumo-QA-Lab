@@ -1,7 +1,7 @@
 // Critérios determinísticos para avaliar respostas do Prumo. Não dependem de IA nem de texto exato:
 // olham tipos de achado, estados, assinaturas e seleção sugerida. Falham quando algo é afirmado sem base.
-const tem = (achados, regra) => achados.some((f) => f.type === regra.type && (!regra.scenario || f.scenario === regra.scenario));
-const rotulo = (r) => `${r.type}${r.scenario ? ' em ' + r.scenario : ''}`;
+const tem = (achados, regra) => achados.some((f) => f.type === regra.type && (!regra.scenario || f.scenario === regra.scenario) && (!regra.severity || f.severity === regra.severity));
+const rotulo = (r) => `${r.type}${r.scenario ? ' em ' + r.scenario : ''}${r.severity ? ' (severidade ' + r.severity + ')' : ''}`;
 
 /** Avalia a resposta de revisar_cobertura contra o esperado do caso. Devolve uma lista de verificações. */
 export function avaliarRevisao(esperado, resposta) {

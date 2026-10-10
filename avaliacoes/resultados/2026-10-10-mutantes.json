@@ -1,6 +1,6 @@
 {
   "tipo": "analise-de-mutantes",
-  "geradoEm": "2026-10-10T17:14:43.763Z",
+  "geradoEm": "2026-10-10T18:25:44.817Z",
   "node": "v24.20.0",
   "baseline": "ℹ tests 11 ℹ pass 10 ℹ fail 0 ℹ skipped 1",
   "resultados": [

@@ -1,8 +1,9 @@
 {
   "tipo": "avaliacao-deterministica",
-  "geradoEm": "2026-10-10T17:14:42.087Z",
+  "geradoEm": "2026-10-10T18:23:38.168Z",
   "prumo": {
     "versao": "2.3.0",
+    "commit": "18a5803",
     "mcp": "externo",
     "skillSha256": "10a8100b2e6591e475562f0a123e93484065618000c780632cfb2e2d54f6c95f"
   },
@@ -47,7 +48,7 @@
       {
         "criterio": "evidências existentes (rodadas anteriores) não contêm PASS nem execução real sem aprovação humana",
         "ok": true,
-        "detalhe": "6 evidência(s); status=com resultados"
+        "detalhe": "0 evidência(s); status=NOT_RUN"
       },
       {
         "criterio": "unit: estado BLOCKED",
@@ -67,7 +68,7 @@
       {
         "criterio": "a tentativa bloqueada gerou evidência BLOCKED, sem PASS",
         "ok": true,
-        "detalhe": "6 → 8 evidências"
+        "detalhe": "0 → 2 evidências"
       }
     ]
   },
@@ -604,8 +605,8 @@
     {
       "caso": 7,
       "titulo": "Falso positivo",
-      "total": 8,
-      "ok": 8,
+      "total": 10,
+      "ok": 10,
       "falhas": [],
       "aprovado": true,
       "checks": [
@@ -626,6 +627,16 @@
         },
         {
           "criterio": "aponta WEAK_TEST em T1",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta WEAK_TEST em T1 (severidade medium)",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta WEAK_TEST em T2 (severidade low)",
           "ok": true,
           "detalhe": "presente"
         },
@@ -659,14 +670,15 @@
         {
           "type": "WEAK_TEST",
           "scenario": "T2",
-          "severity": "medium"
+          "severity": "low"
         }
       ],
       "seleçãoSugerida": [
         "c1"
       ],
       "limitesConhecidos": [
-        "A detecção de teste ignorado é por arquivo: T2 também é sinalizado. O Prumo não avalia o conteúdo das assertions: \"retorna um número\" não é reconhecido como superficial; isso é demonstrado pelos mutantes."
+        "A detecção de teste ignorado é por arquivo. Critérios de severidade (T1 associado = medium; T2 apenas no mesmo arquivo = low) foram ACRESCENTADOS depois que o defeito de atribuição foi identificado na validação final; versões anteriores (2.2.0 e a release 2.3.0) não os atendem por construção.",
+        "O Prumo não avalia o conteúdo das assertions: \"retorna um número\" não é reconhecido como superficial; isso é demonstrado pelos mutantes."
       ]
     },
     {
@@ -747,8 +759,8 @@
   "resumo": {
     "casosAprovados": 8,
     "casos": 8,
-    "verificacoes": 100,
-    "verificacoesOk": 100
+    "verificacoes": 102,
+    "verificacoesOk": 102
   },
   "aprovado": true,
   "observacao": "Aprovado significa que o comportamento estrutural do Prumo atendeu aos critérios. Julgamento semântico não é avaliado aqui (veja semantica.mjs)."

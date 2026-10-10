@@ -12,7 +12,10 @@
     "mutantes": "node avaliacoes/mutantes.mjs",
     "semantica": "node avaliacoes/semantica.mjs",
     "comparar": "node avaliacoes/comparar.mjs",
-    "check": "node --test avaliacoes/laboratorio.test.mjs"
+    "deteccao": "node avaliacoes/deteccao.mjs",
+    "comparacao": "node avaliacoes/comparacao.mjs",
+    "metricas": "node avaliacoes/metricas.mjs",
+    "check": "node --test avaliacoes/laboratorio.test.mjs avaliacoes/rubrica-comparacao.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1"

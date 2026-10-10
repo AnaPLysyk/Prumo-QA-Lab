@@ -6,6 +6,16 @@
     {
       "type": "WEAK_TEST",
       "scenario": "T1"
+    },
+    {
+      "type": "WEAK_TEST",
+      "scenario": "T1",
+      "severity": "medium"
+    },
+    {
+      "type": "WEAK_TEST",
+      "scenario": "T2",
+      "severity": "low"
     }
   ],
   "proibidos": [
@@ -26,7 +36,8 @@
     "exclui": []
   },
   "limitesConhecidos": [
-    "A detecção de teste ignorado é por arquivo: T2 também é sinalizado. O Prumo não avalia o conteúdo das assertions: \"retorna um número\" não é reconhecido como superficial; isso é demonstrado pelos mutantes."
+    "A detecção de teste ignorado é por arquivo. Critérios de severidade (T1 associado = medium; T2 apenas no mesmo arquivo = low) foram ACRESCENTADOS depois que o defeito de atribuição foi identificado na validação final; versões anteriores (2.2.0 e a release 2.3.0) não os atendem por construção.",
+    "O Prumo não avalia o conteúdo das assertions: \"retorna um número\" não é reconhecido como superficial; isso é demonstrado pelos mutantes."
   ],
   "mutantes": [
     "cupom-desconto-errado"

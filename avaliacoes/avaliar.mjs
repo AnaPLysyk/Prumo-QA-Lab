@@ -4,6 +4,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -23,6 +24,9 @@ await client.connect(new StdioClientTransport({ command: comando, args: [mcpJs, 
 const chamar = async (name, args) => { const r = await client.callTool({ name, arguments: args }); const texto = r.content?.[0]?.text ?? ''; try { return JSON.parse(texto); } catch { return { erro: texto, isError: r.isError }; } };
 try {
   const versaoPrumo = client.getServerVersion()?.version ?? 'desconhecida';
+  // Commit do código do Prumo avaliado (a mesma versão 2.3.0 pode ter commits pós-release); "-dirty" se houver alterações locais.
+  const git = (...a) => spawnSync('git', ['-C', path.resolve(path.dirname(mcpJs), '..'), ...a], { encoding: 'utf8' });
+  const commit = git('rev-parse', '--short', 'HEAD').status === 0 ? git('rev-parse', '--short', 'HEAD').stdout.trim() + (git('status', '--porcelain', '--', 'src', 'skills', 'package.json').stdout.trim() ? '-dirty' : '') : null;
   const skill = path.resolve(path.dirname(mcpJs), '..', 'skills', 'qa', 'SKILL.md');
   const skillSha = fs.existsSync(skill) ? createHash('sha256').update(fs.readFileSync(skill)).digest('hex') : null;
   const ferramentas = (await client.listTools()).tools.map((t) => t.name).sort();
@@ -52,19 +56,19 @@ try {
   const evidDepois = await chamar('consultar_evidencias', {});
   gerais.push({ criterio: 'a tentativa bloqueada gerou evidência BLOCKED, sem PASS', ok: (evidDepois.results ?? []).length === resultadosIniciais.length + 2 && evidDepois.results.every((e) => e.status === 'BLOCKED'), detalhe: `${resultadosIniciais.length} → ${(evidDepois.results ?? []).length} evidências` });
 
-  const resultado = { tipo: 'avaliacao-deterministica', geradoEm: new Date().toISOString(), prumo: { versao: versaoPrumo, mcp: path.relative(lab, mcpJs).startsWith('..') ? 'externo' : mcpJs, skillSha256: skillSha }, node: process.version,
+  const resultado = { tipo: 'avaliacao-deterministica', geradoEm: new Date().toISOString(), prumo: { versao: versaoPrumo, commit, mcp: path.relative(lab, mcpJs).startsWith('..') ? 'externo' : mcpJs, skillSha256: skillSha }, node: process.version,
     ferramentas, gerais: { ...resumir(gerais), checks: gerais }, casos,
     resumo: { casosAprovados: casos.filter((c) => c.aprovado).length, casos: casos.length, verificacoes: casos.reduce((n, c) => n + c.total, 0) + gerais.length, verificacoesOk: casos.reduce((n, c) => n + c.ok, 0) + gerais.filter((g) => g.ok).length },
     aprovado: casos.every((c) => c.aprovado) && gerais.every((g) => g.ok),
     observacao: 'Aprovado significa que o comportamento estrutural do Prumo atendeu aos critérios. Julgamento semântico não é avaliado aqui (veja semantica.mjs).' };
   if (!process.argv.includes('--sem-gravar')) {
-    const nome = `${resultado.geradoEm.slice(0, 10)}-prumo-${versaoPrumo}-deterministico.json`;
+    const nome = `${resultado.geradoEm.slice(0, 10)}-prumo-${versaoPrumo}${commit ? '-' + commit : ''}-deterministico.json`;
     fs.mkdirSync(path.join(lab, 'avaliacoes', 'resultados'), { recursive: true });
     fs.writeFileSync(path.join(lab, 'avaliacoes', 'resultados', nome), JSON.stringify(resultado, null, 2) + '\n');
     console.log('Resultado gravado em avaliacoes/resultados/' + nome);
   }
   for (const c of casos) console.log(`${c.aprovado ? 'OK    ' : 'FALHOU'} caso ${c.caso} — ${c.titulo}: ${c.ok}/${c.total}${c.falhas.length ? ' · ' + c.falhas.join(' | ') : ''}`);
   console.log(`${gerais.every((g) => g.ok) ? 'OK    ' : 'FALHOU'} gerais: ${gerais.filter((g) => g.ok).length}/${gerais.length}${gerais.filter((g) => !g.ok).map((g) => ' · ' + g.criterio).join('')}`);
-  console.log(`Prumo ${versaoPrumo}: ${resultado.resumo.casosAprovados}/${resultado.resumo.casos} casos, ${resultado.resumo.verificacoesOk}/${resultado.resumo.verificacoes} verificações.`);
+  console.log(`Prumo ${versaoPrumo}${commit ? ' @' + commit : ''}: ${resultado.resumo.casosAprovados}/${resultado.resumo.casos} casos, ${resultado.resumo.verificacoesOk}/${resultado.resumo.verificacoes} verificações.`);
   process.exitCode = resultado.aprovado ? 0 : 1;
 } finally { await client.close(); }
