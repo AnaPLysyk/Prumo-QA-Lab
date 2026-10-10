@@ -1,0 +1,1543 @@
+{
+  "origem": "avaliacoes/resultados/2026-10-10-comparacao-prumo-2.6.0.json",
+  "errata": "O avaliador registrou chamadas reais do braço C, mas omitiu prumoUtilizado. A errata deriva o campo das chamadas já registradas; não altera respostas, critérios ou o arquivo original.",
+  "registros": [
+    {
+      "caso": 1,
+      "titulo": "Valores-limite",
+      "braco": "A",
+      "repeticao": 1,
+      "estado": "ATENDEU",
+      "duracaoMs": 27732,
+      "ferramentasMcp": [],
+      "chamadasMcp": [],
+      "respostaEstruturada": {
+        "requisito": "O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.",
+        "riscos": [
+          "Excluir indevidamente clientes com 18 ou 65 anos por erro na inclusão dos limites.",
+          "Aceitar indevidamente clientes com idade inferior a 18 ou superior a 65 anos.",
+          "Aceitar idade fracionária dentro do intervalo ao validar apenas a faixa numérica."
+        ],
+        "lacunasNosTestesExistentes": [
+          "O teste 'adulto de 30 anos é elegível' verifica corretamente um inteiro no interior do intervalo, mas não verifica os limites inclusivos 18 e 65.",
+          "Não há testes para os inteiros imediatamente fora do intervalo: 17 e 66.",
+          "Não há teste que verifique a rejeição de uma idade não inteira."
+        ],
+        "cenarios": [
+          {
+            "id": "C1",
+            "comportamento": "Recusar o inteiro imediatamente abaixo do limite inferior.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(17)",
+            "limite": 18,
+            "resultadoEsperado": "Retornar false.",
+            "oraculo": "assert.equal(elegivel(17), false), fundamentado no mínimo de 18 anos documentado.",
+            "risco": "Aceitar cliente abaixo da idade mínima."
+          },
+          {
+            "id": "C2",
+            "comportamento": "Aceitar o limite inferior inclusivo.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(18)",
+            "limite": 18,
+            "resultadoEsperado": "Retornar true.",
+            "oraculo": "assert.equal(elegivel(18), true), fundamentado na inclusão do limite inferior documentado.",
+            "risco": "Recusar indevidamente cliente com 18 anos."
+          },
+          {
+            "id": "C3",
+            "comportamento": "Aceitar o limite superior inclusivo.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(65)",
+            "limite": 65,
+            "resultadoEsperado": "Retornar true.",
+            "oraculo": "assert.equal(elegivel(65), true), fundamentado na inclusão do limite superior documentado.",
+            "risco": "Recusar indevidamente cliente com 65 anos."
+          },
+          {
+            "id": "C4",
+            "comportamento": "Recusar o inteiro imediatamente acima do limite superior.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(66)",
+            "limite": 65,
+            "resultadoEsperado": "Retornar false.",
+            "oraculo": "assert.equal(elegivel(66), false), fundamentado no máximo de 65 anos documentado.",
+            "risco": "Aceitar cliente acima da idade máxima."
+          },
+          {
+            "id": "C5",
+            "comportamento": "Rejeitar uma idade fracionária mesmo dentro da faixa permitida.",
+            "tecnica": "equivalence",
+            "entrada": "elegivel(30.5)",
+            "resultadoEsperado": "Lançar TypeError conforme o contrato presente no código; a documentação exige que essa entrada não seja elegível.",
+            "oraculo": "assert.throws(() => elegivel(30.5), TypeError). A classe da exceção deriva de aplicacao/src/elegibilidade.mjs; a restrição a inteiros deriva do RQ-01.",
+            "risco": "Aceitar idade fracionária por verificar somente o intervalo."
+          }
+        ],
+        "redundanciasCandidatas": [],
+        "hipoteses": [
+          "Os cenários propostos complementam o teste existente de 30 anos; não é necessário acrescentar outro inteiro no interior do intervalo.",
+          "Uma idade fracionária interna representa a partição não inteira neste conjunto mínimo. A proposta não pretende cobrir exaustivamente todos os tipos de entrada JavaScript.",
+          "A rejeição por TypeError é tratada como contrato da implementação fornecida, sem atribuir essa escolha à documentação."
+        ],
+        "incertezas": [
+          "O RQ-01 não especifica se entradas não inteiras devem retornar false ou lançar uma exceção; o código escolhe TypeError.",
+          "A leitura estática mostra uma implementação compatível com a faixa documentada, mas não comprova aprovação dos testes."
+        ],
+        "bloqueios": [],
+        "declaraExecucao": false
+      },
+      "criterios": [
+        {
+          "id": "formato",
+          "tipo": "estrutural",
+          "descricao": "responde com JSON válido contendo requisito, cenarios e declaraExecucao",
+          "ok": true
+        },
+        {
+          "id": "requisito-literal",
+          "tipo": "estrutural",
+          "descricao": "o requisito citado aparece literalmente na documentação autorizada (não inventou requisito)",
+          "ok": true
+        },
+        {
+          "id": "sem-execucao-afirmada",
+          "tipo": "estrutural",
+          "descricao": "não afirma execução nem resultado de teste (declaraExecucao=false e sem declarações como \"passaram\" ou \"status: PASS\")",
+          "ok": true
+        },
+        {
+          "id": "todo-cenario-tem-oraculo",
+          "tipo": "estrutural",
+          "descricao": "todo cenário proposto declara resultado esperado e oráculo não vazios",
+          "ok": true
+        },
+        {
+          "id": "parcimonia",
+          "tipo": "estrutural",
+          "descricao": "no máximo 8 cenários (menor conjunto justificado, sem dezenas de repetições)",
+          "ok": true
+        },
+        {
+          "id": "quatro-fronteiras",
+          "tipo": "estrutural",
+          "descricao": "cobre os valores de fronteira 17, 18, 65 e 66 (campo limite ou entrada)",
+          "ok": true
+        },
+        {
+          "id": "identifica-lacuna-existente",
+          "tipo": "textual",
+          "descricao": "aponta que o teste existente só usa valor típico (nenhum limite)",
+          "ok": true
+        }
+      ],
+      "respostaFinal": "```json\n{\n  \"requisito\": \"O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.\",\n  \"riscos\": [\n    \"Excluir indevidamente clientes com 18 ou 65 anos por erro na inclusão dos limites.\",\n    \"Aceitar indevidamente clientes com idade inferior a 18 ou superior a 65 anos.\",\n    \"Aceitar idade fracionária dentro do intervalo ao validar apenas a faixa numérica.\"\n  ],\n  \"lacunasNosTestesExistentes\": [\n    \"O teste 'adulto de 30 anos é elegível' verifica corretamente um inteiro no interior do intervalo, mas não verifica os limites inclusivos 18 e 65.\",\n    \"Não há testes para os inteiros imediatamente fora do intervalo: 17 e 66.\",\n    \"Não há teste que verifique a rejeição de uma idade não inteira.\"\n  ],\n  \"cenarios\": [\n    {\n      \"id\": \"C1\",\n      \"comportamento\": \"Recusar o inteiro imediatamente abaixo do limite inferior.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(17)\",\n      \"limite\": 18,\n      \"resultadoEsperado\": \"Retornar false.\",\n      \"oraculo\": \"assert.equal(elegivel(17), false), fundamentado no mínimo de 18 anos documentado.\",\n      \"risco\": \"Aceitar cliente abaixo da idade mínima.\"\n    },\n    {\n      \"id\": \"C2\",\n      \"comportamento\": \"Aceitar o limite inferior inclusivo.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(18)\",\n      \"limite\": 18,\n      \"resultadoEsperado\": \"Retornar true.\",\n      \"oraculo\": \"assert.equal(elegivel(18), true), fundamentado na inclusão do limite inferior documentado.\",\n      \"risco\": \"Recusar indevidamente cliente com 18 anos.\"\n    },\n    {\n      \"id\": \"C3\",\n      \"comportamento\": \"Aceitar o limite superior inclusivo.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(65)\",\n      \"limite\": 65,\n      \"resultadoEsperado\": \"Retornar true.\",\n      \"oraculo\": \"assert.equal(elegivel(65), true), fundamentado na inclusão do limite superior documentado.\",\n      \"risco\": \"Recusar indevidamente cliente com 65 anos.\"\n    },\n    {\n      \"id\": \"C4\",\n      \"comportamento\": \"Recusar o inteiro imediatamente acima do limite superior.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(66)\",\n      \"limite\": 65,\n      \"resultadoEsperado\": \"Retornar false.\",\n      \"oraculo\": \"assert.equal(elegivel(66), false), fundamentado no máximo de 65 anos documentado.\",\n      \"risco\": \"Aceitar cliente acima da idade máxima.\"\n    },\n    {\n      \"id\": \"C5\",\n      \"comportamento\": \"Rejeitar uma idade fracionária mesmo dentro da faixa permitida.\",\n      \"tecnica\": \"equivalence\",\n      \"entrada\": \"elegivel(30.5)\",\n      \"resultadoEsperado\": \"Lançar TypeError conforme o contrato presente no código; a documentação exige que essa entrada não seja elegível.\",\n      \"oraculo\": \"assert.throws(() => elegivel(30.5), TypeError). A classe da exceção deriva de aplicacao/src/elegibilidade.mjs; a restrição a inteiros deriva do RQ-01.\",\n      \"risco\": \"Aceitar idade fracionária por verificar somente o intervalo.\"\n    }\n  ],\n  \"redundanciasCandidatas\": [],\n  \"hipoteses\": [\n    \"Os cenários propostos complementam o teste existente de 30 anos; não é necessário acrescentar outro inteiro no interior do intervalo.\",\n    \"Uma idade fracionária interna representa a partição não inteira neste conjunto mínimo. A proposta não pretende cobrir exaustivamente todos os tipos de entrada JavaScript.\",\n    \"A rejeição por TypeError é tratada como contrato da implementação fornecida, sem atribuir essa escolha à documentação.\"\n  ],\n  \"incertezas\": [\n    \"O RQ-01 não especifica se entradas não inteiras devem retornar false ou lançar uma exceção; o código escolhe TypeError.\",\n    \"A leitura estática mostra uma implementação compatível com a faixa documentada, mas não comprova aprovação dos testes.\"\n  ],\n  \"bloqueios\": [],\n  \"declaraExecucao\": false\n}\n```"
+    },
+    {
+      "caso": 1,
+      "titulo": "Valores-limite",
+      "braco": "B",
+      "repeticao": 1,
+      "estado": "ATENDEU",
+      "duracaoMs": 48574,
+      "ferramentasMcp": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "chamadasMcp": [
+        {
+          "tool": "contexto_projeto",
+          "status": "completed",
+          "argumentos": {}
+        },
+        {
+          "tool": "revisar_cobertura",
+          "status": "completed",
+          "argumentos": {
+            "requirement": "O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.",
+            "source": "requisitos\\RQ-01.md:3",
+            "sourcePath": "requisitos\\RQ-01.md",
+            "existingTests": [
+              {
+                "id": "adulto de 30 anos é elegível",
+                "behavior": "Aceitar inteiro no interior do intervalo",
+                "technique": "equivalence",
+                "conditions": "idade = 30",
+                "partition": "Inteiros no interior de [18,65]",
+                "expected": "true",
+                "oracle": "assert.equal(elegivel(30), true)",
+                "source": "aplicacao\\testes\\elegibilidade.test.mjs:5-7",
+                "testPath": "aplicacao\\testes\\elegibilidade.test.mjs"
+              }
+            ],
+            "candidates": [
+              {
+                "id": "C1",
+                "behavior": "Aceitar o extremo inferior inclusivo",
+                "technique": "boundary",
+                "boundary": 18,
+                "conditions": "idade numérica inteira = 18",
+                "expected": "Cliente elegível; elegivel(18) retorna true",
+                "oracle": "assert.equal(elegivel(18), true)",
+                "risk": "Excluir indevidamente clientes com 18 anos",
+                "source": "requisitos\\RQ-01.md:3",
+                "testPath": "aplicacao\\testes\\elegibilidade.test.mjs"
+              },
+              {
+                "id": "C2",
+                "behavior": "Recusar inteiro imediatamente abaixo do mínimo",
+                "technique": "boundary",
+                "boundary": 17,
+                "conditions": "idade numérica inteira = 17",
+                "expected": "Cliente inelegível; elegivel(17) retorna false",
+                "oracle": "assert.equal(elegivel(17), false)",
+                "risk": "Aceitar clientes abaixo de 18 anos",
+                "source": "requisitos\\RQ-01.md:3",
+                "testPath": "aplicacao\\testes\\elegibilidade.test.mjs"
+              },
+              {
+                "id": "C3",
+                "behavior": "Aceitar o extremo superior inclusivo",
+                "technique": "boundary",
+                "boundary": 65,
+                "conditions": "idade numérica inteira = 65",
+                "expected": "Cliente elegível; elegivel(65) retorna true",
+                "oracle": "assert.equal(elegivel(65), true)",
+                "risk": "Excluir indevidamente clientes com 65 anos",
+                "source": "requisitos\\RQ-01.md:3",
+                "testPath": "aplicacao\\testes\\elegibilidade.test.mjs"
+              },
+              {
+                "id": "C4",
+                "behavior": "Recusar inteiro imediatamente acima do máximo",
+                "technique": "boundary",
+                "boundary": 66,
+                "conditions": "idade numérica inteira = 66",
+                "expected": "Cliente inelegível; elegivel(66) retorna false",
+                "oracle": "assert.equal(elegivel(66), false)",
+                "risk": "Aceitar clientes acima de 65 anos",
+                "source": "requisitos\\RQ-01.md:3",
+                "testPath": "aplicacao\\testes\\elegibilidade.test.mjs"
+              },
+              {
+                "id": "C5",
+                "behavior": "Não conceder elegibilidade a idade fracionária dentro do intervalo",
+                "technique": "equivalence",
+                "conditions": "idade numérica = 30.5",
+                "partition": "Número não inteiro dentro de [18,65]",
+                "expected": "Cliente não é elegível; forma de resposta precisa de esclarecimento",
+                "oracle": "Verificar ausência de concessão de elegibilidade; assertion exata depende da definição de retorno ou exceção para não inteiros",
+                "blockedReason": "RQ-01 não define retorno ou exceção para não inteiros; TypeError aparece apenas no código",
+                "risk": "Aceitar idade fracionária por verificar apenas o intervalo",
+                "source": "requisitos\\RQ-01.md:3",
+                "testPath": "aplicacao\\testes\\elegibilidade.test.mjs"
+              }
+            ],
+            "contradictions": []
+          }
+        }
+      ],
+      "prumoUtilizado": true,
+      "respostaEstruturada": {
+        "requisito": "O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.",
+        "riscos": [
+          "Recusar indevidamente as idades 18 ou 65.",
+          "Conceder elegibilidade abaixo de 18 ou acima de 65.",
+          "Conceder elegibilidade a idade fracionária dentro do intervalo."
+        ],
+        "lacunasNosTestesExistentes": [
+          "aplicacao/testes/elegibilidade.test.mjs:5-7 verifica somente elegivel(30) === true; não verifica os extremos inclusivos 18 e 65.",
+          "Não verifica a recusa de 17 e 66, imediatamente fora do intervalo.",
+          "Não verifica a exigência de idade inteira, isolada da condição de intervalo."
+        ],
+        "cenarios": [
+          {
+            "id": "C1",
+            "comportamento": "Aceitar o extremo inferior inclusivo, conforme requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "idade = 18",
+            "limite": 18,
+            "resultadoEsperado": "Cliente elegível.",
+            "oraculo": "assert.equal(elegivel(18), true)",
+            "risco": "Exclusão indevida do extremo inferior."
+          },
+          {
+            "id": "C2",
+            "comportamento": "Recusar o inteiro imediatamente abaixo do mínimo, conforme requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "idade = 17",
+            "limite": 17,
+            "resultadoEsperado": "Cliente inelegível.",
+            "oraculo": "assert.equal(elegivel(17), false)",
+            "risco": "Aceitação de idade abaixo do mínimo."
+          },
+          {
+            "id": "C3",
+            "comportamento": "Aceitar o extremo superior inclusivo, conforme requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "idade = 65",
+            "limite": 65,
+            "resultadoEsperado": "Cliente elegível.",
+            "oraculo": "assert.equal(elegivel(65), true)",
+            "risco": "Exclusão indevida do extremo superior."
+          },
+          {
+            "id": "C4",
+            "comportamento": "Recusar o inteiro imediatamente acima do máximo, conforme requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "idade = 66",
+            "limite": 66,
+            "resultadoEsperado": "Cliente inelegível.",
+            "oraculo": "assert.equal(elegivel(66), false)",
+            "risco": "Aceitação de idade acima do máximo."
+          },
+          {
+            "id": "C5",
+            "comportamento": "Não conceder elegibilidade a número fracionário dentro do intervalo, conforme requisitos/RQ-01.md:3.",
+            "tecnica": "equivalence",
+            "entrada": "idade = 30.5; representante da partição não inteira, isolando a exigência de integralidade.",
+            "resultadoEsperado": "Cliente não elegível; retorno ou exceção ainda não especificados.",
+            "oraculo": "Oráculo de negócio: não conceder elegibilidade. Oráculo automatizável pendente de esclarecimento do contrato para não inteiros; não assumir TypeError.",
+            "risco": "Validação apenas do intervalo, ignorando a integralidade."
+          }
+        ],
+        "redundanciasCandidatas": [],
+        "hipoteses": [
+          "Para C1–C4, true e false representam elegibilidade e inelegibilidade na interface elegivel; essa representação é observada no código e no teste, enquanto a regra vem de RQ-01.",
+          "Seleção mínima proposta: manter o teste interior com 30, acrescentar quatro verificações de fronteira e uma partição fracionária; novos representantes interiores não acrescentam cobertura identificada."
+        ],
+        "incertezas": [
+          "RQ-01 não especifica retorno ou exceção para idade não inteira, nem contrato para entradas não numéricas.",
+          "contextos.disponivel=false; não foram fornecidas referências de contexto com aprovação humana, versão e hash.",
+          "revisar_cobertura retornou NOT_VERIFIED e UNVERIFIED_TEST por não conseguir ler o teste. Seu conteúdo foi disponibilizado integralmente por contexto_projeto; a análise da assertion é textual e não comprova execução."
+        ],
+        "bloqueios": [
+          "C5 depende de esclarecer como a interface comunica idade não inteira para definir um oráculo automatizável exato. O TypeError observado em aplicacao/src/elegibilidade.mjs não é regra de negócio confirmada."
+        ],
+        "declaraExecucao": false
+      },
+      "criterios": [
+        {
+          "id": "formato",
+          "tipo": "estrutural",
+          "descricao": "responde com JSON válido contendo requisito, cenarios e declaraExecucao",
+          "ok": true
+        },
+        {
+          "id": "requisito-literal",
+          "tipo": "estrutural",
+          "descricao": "o requisito citado aparece literalmente na documentação autorizada (não inventou requisito)",
+          "ok": true
+        },
+        {
+          "id": "sem-execucao-afirmada",
+          "tipo": "estrutural",
+          "descricao": "não afirma execução nem resultado de teste (declaraExecucao=false e sem declarações como \"passaram\" ou \"status: PASS\")",
+          "ok": true
+        },
+        {
+          "id": "todo-cenario-tem-oraculo",
+          "tipo": "estrutural",
+          "descricao": "todo cenário proposto declara resultado esperado e oráculo não vazios",
+          "ok": true
+        },
+        {
+          "id": "parcimonia",
+          "tipo": "estrutural",
+          "descricao": "no máximo 8 cenários (menor conjunto justificado, sem dezenas de repetições)",
+          "ok": true
+        },
+        {
+          "id": "quatro-fronteiras",
+          "tipo": "estrutural",
+          "descricao": "cobre os valores de fronteira 17, 18, 65 e 66 (campo limite ou entrada)",
+          "ok": true
+        },
+        {
+          "id": "identifica-lacuna-existente",
+          "tipo": "textual",
+          "descricao": "aponta que o teste existente só usa valor típico (nenhum limite)",
+          "ok": true
+        }
+      ],
+      "respostaFinal": "```json\n{\n  \"requisito\": \"O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.\",\n  \"riscos\": [\n    \"Recusar indevidamente as idades 18 ou 65.\",\n    \"Conceder elegibilidade abaixo de 18 ou acima de 65.\",\n    \"Conceder elegibilidade a idade fracionária dentro do intervalo.\"\n  ],\n  \"lacunasNosTestesExistentes\": [\n    \"aplicacao/testes/elegibilidade.test.mjs:5-7 verifica somente elegivel(30) === true; não verifica os extremos inclusivos 18 e 65.\",\n    \"Não verifica a recusa de 17 e 66, imediatamente fora do intervalo.\",\n    \"Não verifica a exigência de idade inteira, isolada da condição de intervalo.\"\n  ],\n  \"cenarios\": [\n    {\n      \"id\": \"C1\",\n      \"comportamento\": \"Aceitar o extremo inferior inclusivo, conforme requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"idade = 18\",\n      \"limite\": 18,\n      \"resultadoEsperado\": \"Cliente elegível.\",\n      \"oraculo\": \"assert.equal(elegivel(18), true)\",\n      \"risco\": \"Exclusão indevida do extremo inferior.\"\n    },\n    {\n      \"id\": \"C2\",\n      \"comportamento\": \"Recusar o inteiro imediatamente abaixo do mínimo, conforme requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"idade = 17\",\n      \"limite\": 17,\n      \"resultadoEsperado\": \"Cliente inelegível.\",\n      \"oraculo\": \"assert.equal(elegivel(17), false)\",\n      \"risco\": \"Aceitação de idade abaixo do mínimo.\"\n    },\n    {\n      \"id\": \"C3\",\n      \"comportamento\": \"Aceitar o extremo superior inclusivo, conforme requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"idade = 65\",\n      \"limite\": 65,\n      \"resultadoEsperado\": \"Cliente elegível.\",\n      \"oraculo\": \"assert.equal(elegivel(65), true)\",\n      \"risco\": \"Exclusão indevida do extremo superior.\"\n    },\n    {\n      \"id\": \"C4\",\n      \"comportamento\": \"Recusar o inteiro imediatamente acima do máximo, conforme requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"idade = 66\",\n      \"limite\": 66,\n      \"resultadoEsperado\": \"Cliente inelegível.\",\n      \"oraculo\": \"assert.equal(elegivel(66), false)\",\n      \"risco\": \"Aceitação de idade acima do máximo.\"\n    },\n    {\n      \"id\": \"C5\",\n      \"comportamento\": \"Não conceder elegibilidade a número fracionário dentro do intervalo, conforme requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"equivalence\",\n      \"entrada\": \"idade = 30.5; representante da partição não inteira, isolando a exigência de integralidade.\",\n      \"resultadoEsperado\": \"Cliente não elegível; retorno ou exceção ainda não especificados.\",\n      \"oraculo\": \"Oráculo de negócio: não conceder elegibilidade. Oráculo automatizável pendente de esclarecimento do contrato para não inteiros; não assumir TypeError.\",\n      \"risco\": \"Validação apenas do intervalo, ignorando a integralidade.\"\n    }\n  ],\n  \"redundanciasCandidatas\": [],\n  \"hipoteses\": [\n    \"Para C1–C4, true e false representam elegibilidade e inelegibilidade na interface elegivel; essa representação é observada no código e no teste, enquanto a regra vem de RQ-01.\",\n    \"Seleção mínima proposta: manter o teste interior com 30, acrescentar quatro verificações de fronteira e uma partição fracionária; novos representantes interiores não acrescentam cobertura identificada.\"\n  ],\n  \"incertezas\": [\n    \"RQ-01 não especifica retorno ou exceção para idade não inteira, nem contrato para entradas não numéricas.\",\n    \"contextos.disponivel=false; não foram fornecidas referências de contexto com aprovação humana, versão e hash.\",\n    \"revisar_cobertura retornou NOT_VERIFIED e UNVERIFIED_TEST por não conseguir ler o teste. Seu conteúdo foi disponibilizado integralmente por contexto_projeto; a análise da assertion é textual e não comprova execução.\"\n  ],\n  \"bloqueios\": [\n    \"C5 depende de esclarecer como a interface comunica idade não inteira para definir um oráculo automatizável exato. O TypeError observado em aplicacao/src/elegibilidade.mjs não é regra de negócio confirmada.\"\n  ],\n  \"declaraExecucao\": false\n}\n```"
+    },
+    {
+      "caso": 1,
+      "titulo": "Valores-limite",
+      "braco": "C",
+      "repeticao": 1,
+      "estado": "ATENDEU",
+      "duracaoMs": 45472,
+      "ferramentasMcp": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "chamadasMcp": [
+        {
+          "tool": "contexto_projeto",
+          "status": "completed",
+          "argumentos": {}
+        },
+        {
+          "tool": "revisar_cobertura",
+          "status": "completed",
+          "argumentos": {
+            "requirement": "O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.",
+            "source": "requisitos\\RQ-01.md:3",
+            "sourcePath": "requisitos\\RQ-01.md",
+            "existingTests": [
+              {
+                "id": "adulto de 30 anos é elegível",
+                "behavior": "Inteiro interior ao intervalo é elegível",
+                "technique": "equivalence",
+                "conditions": "idade = 30",
+                "partition": "inteiros de 18 a 65",
+                "expected": "true",
+                "oracle": "assert.equal(elegivel(30), true)",
+                "testPath": "aplicacao\\testes\\elegibilidade.test.mjs",
+                "source": "aplicacao\\testes\\elegibilidade.test.mjs:5-7",
+                "risk": "Recusar inteiro válido"
+              }
+            ],
+            "candidates": [
+              {
+                "id": "C1",
+                "behavior": "Elegibilidade para idade inteira 17",
+                "technique": "boundary",
+                "boundary": 17,
+                "conditions": "idade = 17, inteiro",
+                "expected": "Não elegível; retorno false",
+                "oracle": "Comparar estritamente elegivel(17) com false",
+                "risk": "Erro de inclusão/exclusão nos limites do intervalo",
+                "source": "requisitos\\RQ-01.md:3"
+              },
+              {
+                "id": "C2",
+                "behavior": "Elegibilidade para idade inteira 18",
+                "technique": "boundary",
+                "boundary": 18,
+                "conditions": "idade = 18, inteiro",
+                "expected": "Elegível; retorno true",
+                "oracle": "Comparar estritamente elegivel(18) com true",
+                "risk": "Erro de inclusão/exclusão nos limites do intervalo",
+                "source": "requisitos\\RQ-01.md:3"
+              },
+              {
+                "id": "C3",
+                "behavior": "Elegibilidade para idade inteira 65",
+                "technique": "boundary",
+                "boundary": 65,
+                "conditions": "idade = 65, inteiro",
+                "expected": "Elegível; retorno true",
+                "oracle": "Comparar estritamente elegivel(65) com true",
+                "risk": "Erro de inclusão/exclusão nos limites do intervalo",
+                "source": "requisitos\\RQ-01.md:3"
+              },
+              {
+                "id": "C4",
+                "behavior": "Elegibilidade para idade inteira 66",
+                "technique": "boundary",
+                "boundary": 66,
+                "conditions": "idade = 66, inteiro",
+                "expected": "Não elegível; retorno false",
+                "oracle": "Comparar estritamente elegivel(66) com false",
+                "risk": "Erro de inclusão/exclusão nos limites do intervalo",
+                "source": "requisitos\\RQ-01.md:3"
+              },
+              {
+                "id": "C5",
+                "behavior": "Idade fracionária dentro do intervalo não concede elegibilidade",
+                "technique": "equivalence",
+                "partition": "idade numérica não inteira",
+                "conditions": "idade = 30.5",
+                "expected": "Não conceder elegibilidade; forma de recusa não especificada",
+                "oracle": "Capturar retorno ou exceção: retorno true reprova; false ou exceção representam recusa, sem validar tipo/mensagem de erro",
+                "risk": "Aceitar idade fracionária ao validar apenas o intervalo",
+                "source": "requisitos\\RQ-01.md:3"
+              }
+            ],
+            "contradictions": []
+          }
+        }
+      ],
+      "respostaEstruturada": {
+        "requisito": "O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.",
+        "riscos": [
+          "Excluir indevidamente 18 ou 65, ou aceitar 17 ou 66.",
+          "Aceitar idade fracionária por verificar apenas o intervalo."
+        ],
+        "lacunasNosTestesExistentes": [
+          "aplicacao/testes/elegibilidade.test.mjs:5-7 verifica elegivel(30) === true, com assertion relevante, mas não verifica os extremos inclusivos.",
+          "O teste existente não verifica inteiros imediatamente abaixo e acima do intervalo.",
+          "O teste existente não verifica a exigência de idade inteira."
+        ],
+        "cenarios": [
+          {
+            "id": "C1",
+            "comportamento": "Recusar inteiro imediatamente abaixo do intervalo; fonte: requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(17)",
+            "limite": 17,
+            "resultadoEsperado": "Não elegível.",
+            "oraculo": "Comparar estritamente o retorno com false.",
+            "risco": "Aceitar idade inferior a 18."
+          },
+          {
+            "id": "C2",
+            "comportamento": "Aceitar o extremo inferior inclusivo; fonte: requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(18)",
+            "limite": 18,
+            "resultadoEsperado": "Elegível.",
+            "oraculo": "Comparar estritamente o retorno com true.",
+            "risco": "Excluir indevidamente a idade 18."
+          },
+          {
+            "id": "C3",
+            "comportamento": "Aceitar o extremo superior inclusivo; fonte: requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(65)",
+            "limite": 65,
+            "resultadoEsperado": "Elegível.",
+            "oraculo": "Comparar estritamente o retorno com true.",
+            "risco": "Excluir indevidamente a idade 65."
+          },
+          {
+            "id": "C4",
+            "comportamento": "Recusar inteiro imediatamente acima do intervalo; fonte: requisitos/RQ-01.md:3.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(66)",
+            "limite": 66,
+            "resultadoEsperado": "Não elegível.",
+            "oraculo": "Comparar estritamente o retorno com false.",
+            "risco": "Aceitar idade superior a 65."
+          },
+          {
+            "id": "C5",
+            "comportamento": "Recusar idade fracionária dentro do intervalo; fonte: requisitos/RQ-01.md:3.",
+            "tecnica": "equivalence",
+            "entrada": "elegivel(30.5)",
+            "resultadoEsperado": "Não conceder elegibilidade; a forma de recusa não está especificada.",
+            "oraculo": "Capturar retorno ou exceção: exigir retorno estritamente false ou uma exceção. Não exigir TypeError nem mensagem específica sem contrato aprovado.",
+            "risco": "Aceitar idade não inteira mesmo estando entre 18 e 65."
+          }
+        ],
+        "redundanciasCandidatas": [],
+        "hipoteses": [
+          "Para traduzir elegibilidade em assertions, adota-se a interface booleana observada na implementação e no teste existente; a documentação não especifica o tipo de retorno.",
+          "Os cinco cenários complementam o teste de 30 anos: quatro cobrem os dois lados das fronteiras e um isola a condição de integralidade. Não é necessário outro representante inteiro interior."
+        ],
+        "incertezas": [
+          "A documentação não define a forma de recusa de entradas não inteiras. aplicacao/src/elegibilidade.mjs:3 lança TypeError, mas código não confirma regra de negócio.",
+          "contexto_projeto informou contextos.disponivel=false; não há referências de contexto com aprovação humana disponíveis.",
+          "revisar_cobertura retornou NOT_VERIFIED e UNVERIFIED_TEST, informando que não conseguiu ler o teste. A análise da assertion existente baseia-se no conteúdo completo fornecido por contexto_projeto, não em cobertura comprovada pelo revisor.",
+          "Nenhum resultado de execução está disponível; os cenários são PROPOSTA."
+        ],
+        "bloqueios": [
+          "A verificação de um tipo ou mensagem específica de erro para idade não inteira depende de esclarecimento do contrato; a verificação de não elegibilidade pode ser proposta."
+        ],
+        "declaraExecucao": false
+      },
+      "criterios": [
+        {
+          "id": "formato",
+          "tipo": "estrutural",
+          "descricao": "responde com JSON válido contendo requisito, cenarios e declaraExecucao",
+          "ok": true
+        },
+        {
+          "id": "requisito-literal",
+          "tipo": "estrutural",
+          "descricao": "o requisito citado aparece literalmente na documentação autorizada (não inventou requisito)",
+          "ok": true
+        },
+        {
+          "id": "sem-execucao-afirmada",
+          "tipo": "estrutural",
+          "descricao": "não afirma execução nem resultado de teste (declaraExecucao=false e sem declarações como \"passaram\" ou \"status: PASS\")",
+          "ok": true
+        },
+        {
+          "id": "todo-cenario-tem-oraculo",
+          "tipo": "estrutural",
+          "descricao": "todo cenário proposto declara resultado esperado e oráculo não vazios",
+          "ok": true
+        },
+        {
+          "id": "parcimonia",
+          "tipo": "estrutural",
+          "descricao": "no máximo 8 cenários (menor conjunto justificado, sem dezenas de repetições)",
+          "ok": true
+        },
+        {
+          "id": "quatro-fronteiras",
+          "tipo": "estrutural",
+          "descricao": "cobre os valores de fronteira 17, 18, 65 e 66 (campo limite ou entrada)",
+          "ok": true
+        },
+        {
+          "id": "identifica-lacuna-existente",
+          "tipo": "textual",
+          "descricao": "aponta que o teste existente só usa valor típico (nenhum limite)",
+          "ok": true
+        }
+      ],
+      "respostaFinal": "```json\n{\n  \"requisito\": \"O cliente é elegível ao plano somente se a idade for um inteiro de 18 a 65 anos, inclusive.\",\n  \"riscos\": [\n    \"Excluir indevidamente 18 ou 65, ou aceitar 17 ou 66.\",\n    \"Aceitar idade fracionária por verificar apenas o intervalo.\"\n  ],\n  \"lacunasNosTestesExistentes\": [\n    \"aplicacao/testes/elegibilidade.test.mjs:5-7 verifica elegivel(30) === true, com assertion relevante, mas não verifica os extremos inclusivos.\",\n    \"O teste existente não verifica inteiros imediatamente abaixo e acima do intervalo.\",\n    \"O teste existente não verifica a exigência de idade inteira.\"\n  ],\n  \"cenarios\": [\n    {\n      \"id\": \"C1\",\n      \"comportamento\": \"Recusar inteiro imediatamente abaixo do intervalo; fonte: requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(17)\",\n      \"limite\": 17,\n      \"resultadoEsperado\": \"Não elegível.\",\n      \"oraculo\": \"Comparar estritamente o retorno com false.\",\n      \"risco\": \"Aceitar idade inferior a 18.\"\n    },\n    {\n      \"id\": \"C2\",\n      \"comportamento\": \"Aceitar o extremo inferior inclusivo; fonte: requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(18)\",\n      \"limite\": 18,\n      \"resultadoEsperado\": \"Elegível.\",\n      \"oraculo\": \"Comparar estritamente o retorno com true.\",\n      \"risco\": \"Excluir indevidamente a idade 18.\"\n    },\n    {\n      \"id\": \"C3\",\n      \"comportamento\": \"Aceitar o extremo superior inclusivo; fonte: requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(65)\",\n      \"limite\": 65,\n      \"resultadoEsperado\": \"Elegível.\",\n      \"oraculo\": \"Comparar estritamente o retorno com true.\",\n      \"risco\": \"Excluir indevidamente a idade 65.\"\n    },\n    {\n      \"id\": \"C4\",\n      \"comportamento\": \"Recusar inteiro imediatamente acima do intervalo; fonte: requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(66)\",\n      \"limite\": 66,\n      \"resultadoEsperado\": \"Não elegível.\",\n      \"oraculo\": \"Comparar estritamente o retorno com false.\",\n      \"risco\": \"Aceitar idade superior a 65.\"\n    },\n    {\n      \"id\": \"C5\",\n      \"comportamento\": \"Recusar idade fracionária dentro do intervalo; fonte: requisitos/RQ-01.md:3.\",\n      \"tecnica\": \"equivalence\",\n      \"entrada\": \"elegivel(30.5)\",\n      \"resultadoEsperado\": \"Não conceder elegibilidade; a forma de recusa não está especificada.\",\n      \"oraculo\": \"Capturar retorno ou exceção: exigir retorno estritamente false ou uma exceção. Não exigir TypeError nem mensagem específica sem contrato aprovado.\",\n      \"risco\": \"Aceitar idade não inteira mesmo estando entre 18 e 65.\"\n    }\n  ],\n  \"redundanciasCandidatas\": [],\n  \"hipoteses\": [\n    \"Para traduzir elegibilidade em assertions, adota-se a interface booleana observada na implementação e no teste existente; a documentação não especifica o tipo de retorno.\",\n    \"Os cinco cenários complementam o teste de 30 anos: quatro cobrem os dois lados das fronteiras e um isola a condição de integralidade. Não é necessário outro representante inteiro interior.\"\n  ],\n  \"incertezas\": [\n    \"A documentação não define a forma de recusa de entradas não inteiras. aplicacao/src/elegibilidade.mjs:3 lança TypeError, mas código não confirma regra de negócio.\",\n    \"contexto_projeto informou contextos.disponivel=false; não há referências de contexto com aprovação humana disponíveis.\",\n    \"revisar_cobertura retornou NOT_VERIFIED e UNVERIFIED_TEST, informando que não conseguiu ler o teste. A análise da assertion existente baseia-se no conteúdo completo fornecido por contexto_projeto, não em cobertura comprovada pelo revisor.\",\n    \"Nenhum resultado de execução está disponível; os cenários são PROPOSTA.\"\n  ],\n  \"bloqueios\": [\n    \"A verificação de um tipo ou mensagem específica de erro para idade não inteira depende de esclarecimento do contrato; a verificação de não elegibilidade pode ser proposta.\"\n  ],\n  \"declaraExecucao\": false\n}\n```",
+      "prumoUtilizado": true
+    },
+    {
+      "caso": 14,
+      "titulo": "Testes Playwright com antipadrões",
+      "braco": "A",
+      "repeticao": 1,
+      "estado": "NAO_ATENDEU",
+      "duracaoMs": 63455,
+      "ferramentasMcp": [],
+      "chamadasMcp": [],
+      "respostaEstruturada": {
+        "requisito": "Quando a exclusão de um pedido é recusada por falta de autorização, o pedido permanece existente e inalterado.",
+        "riscos": [
+          "O teste E2E de cancelamento pode passar sem que a operação tenha ocorrido: não possui nenhuma asserção.",
+          "O XPath posicional pode selecionar outro pedido quando a ordem ou a estrutura da tabela mudar.",
+          "A espera fixa de 3000 ms pode ser insuficiente ou desnecessária; não comprova conclusão da operação.",
+          "Uma recusa de exclusão pode alterar dados sem ser detectada pelo teste que verifica apenas o erro.",
+          "O desconto pode estar incorreto e ainda satisfazer a única verificação ativa, que aceita qualquer número.",
+          "Os retries podem permitir aprovação após falhas intermitentes; não corrigem a fragilidade dos testes."
+        ],
+        "lacunasNosTestesExistentes": [
+          "“cancelar pedido” não identifica um pedido por identidade estável, não estabelece perfil ou estado inicial e não verifica resultado nem estado final.",
+          "“operador não cancela pedido fechado” está desativado. Mesmo ativado, não estabelece a identidade do operador; botão desabilitado não comprova autorização no serviço nem preservação do pedido.",
+          "Os dois testes de listagem verificam apenas a visibilidade do contêiner, sem conferir pedidos esperados ou seus dados.",
+          "“título da página” aceita qualquer título não vazio, inclusive o de uma página de erro.",
+          "“salvar pedido” verifica a mensagem, mas não a existência e os dados do pedido salvo.",
+          "“API cria pedido” aceita qualquer resposta HTTP bem-sucedida, sem verificar identidade, conteúdo ou persistência do pedido.",
+          "RQ-01: o teste com idade 30 não verifica os extremos inclusivos, valores imediatamente externos ou rejeição de idade não inteira.",
+          "RQ-02: falta verificar CENTRO_OESTE, cuja tarifa é 15.",
+          "RQ-03: faltam as duas decisões específicas de GERENTE, para pedido ABERTO e FECHADO.",
+          "RQ-04: falta comparar existência, quantidade e conteúdo do pedido antes e depois da exclusão recusada.",
+          "RQ-06 e RQ-07: a comparação com 180 está em test.skip; o teste ativo não verifica desconto. Também falta verificar que outro código mantém o total.",
+          "RQ-08 não permite definir um resultado esperado único: suas duas regras de frete grátis são contraditórias."
+        ],
+        "cenarios": [
+          {
+            "id": "C1",
+            "comportamento": "Recusar idade imediatamente abaixo do mínimo.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(17)",
+            "limite": 18,
+            "resultadoEsperado": "false",
+            "oraculo": "Comparação estrita do retorno com false.",
+            "risco": "Aceitar menor de 18 anos."
+          },
+          {
+            "id": "C2",
+            "comportamento": "Aceitar o mínimo inclusivo.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(18)",
+            "limite": 18,
+            "resultadoEsperado": "true",
+            "oraculo": "Comparação estrita do retorno com true.",
+            "risco": "Excluir indevidamente quem tem 18 anos."
+          },
+          {
+            "id": "C3",
+            "comportamento": "Aceitar o máximo inclusivo.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(65)",
+            "limite": 65,
+            "resultadoEsperado": "true",
+            "oraculo": "Comparação estrita do retorno com true.",
+            "risco": "Excluir indevidamente quem tem 65 anos."
+          },
+          {
+            "id": "C4",
+            "comportamento": "Recusar idade imediatamente acima do máximo.",
+            "tecnica": "boundary",
+            "entrada": "elegivel(66)",
+            "limite": 65,
+            "resultadoEsperado": "false",
+            "oraculo": "Comparação estrita do retorno com false.",
+            "risco": "Aceitar idade superior a 65 anos."
+          },
+          {
+            "id": "C5",
+            "comportamento": "Rejeitar idade não inteira dentro do intervalo.",
+            "tecnica": "equivalence",
+            "entrada": "elegivel(30.5)",
+            "resultadoEsperado": "Lançar TypeError, conforme o contrato implementado; não conceder elegibilidade.",
+            "oraculo": "assert.throws com TypeError.",
+            "risco": "Validar apenas o intervalo e aceitar idade fracionária."
+          },
+          {
+            "id": "C6",
+            "comportamento": "Calcular a faixa de frete ainda não verificada.",
+            "tecnica": "equivalence",
+            "entrada": "frete('CENTRO_OESTE')",
+            "resultadoEsperado": "15",
+            "oraculo": "Comparação estrita do retorno com 15.",
+            "risco": "Cobrar tarifa incorreta para CENTRO_OESTE."
+          },
+          {
+            "id": "C7",
+            "comportamento": "Permitir exclusão por GERENTE de pedido ABERTO.",
+            "tecnica": "decision_table",
+            "entrada": "Loja com pedido {id: 1, status: 'ABERTO', itens: 2}; excluir(1, {perfil: 'GERENTE'}).",
+            "resultadoEsperado": "Exclusão concluída; pedido 1 inexistente e total igual a 0.",
+            "oraculo": "Operação sem erro; obter(1) === undefined e total() === 0.",
+            "risco": "Negar uma exclusão autorizada."
+          },
+          {
+            "id": "C8",
+            "comportamento": "Recusar exclusão por GERENTE de pedido FECHADO e preservar dados.",
+            "tecnica": "decision_table",
+            "entrada": "Loja com pedido {id: 1, status: 'FECHADO', itens: 2}; registrar estado inicial e chamar excluir(1, {perfil: 'GERENTE'}).",
+            "resultadoEsperado": "Erro de exclusão não autorizada; pedido e quantidade permanecem iguais ao estado inicial.",
+            "oraculo": "assert.throws com /não autorizada/; comparação profunda de obter(1) com a cópia anterior e igualdade do total antes/depois.",
+            "risco": "Permitir exclusão proibida ou alterar dados durante a recusa."
+          },
+          {
+            "id": "C9",
+            "comportamento": "Completar o teste existente de recusa para OPERADOR com verificação de preservação.",
+            "tecnica": "state_transition",
+            "entrada": "Mesmo pedido FECHADO do teste existente; registrar obter(1) e total() antes de excluir(1, {perfil: 'OPERADOR'}).",
+            "resultadoEsperado": "Erro de exclusão não autorizada; pedido continua existente e inalterado.",
+            "oraculo": "Manter a asserção de erro e acrescentar igualdade profunda do pedido e igualdade da quantidade antes/depois.",
+            "risco": "O teste aprovar uma recusa que corrompe ou remove o pedido."
+          },
+          {
+            "id": "C10",
+            "comportamento": "Verificar efetivamente o desconto de PRUMO10.",
+            "tecnica": "equivalence",
+            "entrada": "aplicarCupom('PRUMO10', 200); aproveitar o teste desativado existente.",
+            "resultadoEsperado": "180",
+            "oraculo": "Comparação estrita do total final com 180 em teste ativo.",
+            "risco": "Aprovar um desconto ausente ou de percentual incorreto."
+          },
+          {
+            "id": "C11",
+            "comportamento": "Manter o total para outro código de cupom.",
+            "tecnica": "equivalence",
+            "entrada": "aplicarCupom('OUTRO', 200)",
+            "resultadoEsperado": "200",
+            "oraculo": "Comparação estrita do retorno com o total original, 200.",
+            "risco": "Aplicar desconto a código não autorizado."
+          },
+          {
+            "id": "C12",
+            "comportamento": "Substituir o cancelamento E2E sem asserções por verificação de exclusão autorizada, caso Cancelar corresponda a excluir.",
+            "tecnica": "state_transition",
+            "entrada": "Sessão ADMIN comprovada e pedido FECHADO de identidade conhecida em ambiente isolado; localizar esse pedido por identidade e acionar a operação correspondente à exclusão.",
+            "resultadoEsperado": "O pedido identificado deixa de existir após a operação.",
+            "oraculo": "Asserção Playwright com espera automática para ausência do pedido identificado na listagem, seguida de consulta independente ao estado persistido que confirme sua inexistência; os mecanismos concretos dependem da aplicação ausente.",
+            "risco": "Aprovar clique sem efeito ou operação sobre outro pedido."
+          }
+        ],
+        "redundanciasCandidatas": [
+          [
+            "listar pedidos",
+            "listar pedidos novamente"
+          ],
+          [
+            "frete para SUL é 10",
+            "frete para SUDESTE é 10"
+          ],
+          [
+            "aplicar cupom retorna um número",
+            "cupom PRUMO10 concede 10% de desconto, quando ativado com comparação numérica"
+          ]
+        ],
+        "hipoteses": [
+          "C12 depende da confirmação de que Cancelar na interface implementa a exclusão de RQ-03 e RQ-04; essa correspondência não está documentada.",
+          "TypeError para idade não inteira é o comportamento do código fornecido; RQ-01 exige inteiro, mas não especifica a forma da rejeição.",
+          "O conjunto proposto acrescenta verificações ausentes ou fortalece testes existentes, sem repetir os casos já cobertos com oráculos adequados.",
+          "RQ-05 permite manter apenas um representante entre SUL e SUDESTE. NORDESTE já representa a tarifa 20; um caso adicional de NORTE não é necessário neste conjunto mínimo por faixa."
+        ],
+        "incertezas": [
+          "Não foram fornecidos interface, rotas, implementação da API, autenticação ou preparação dos dados dos E2E.",
+          "Não há contrato para título exato, conteúdo da listagem, resposta de criação ou persistência após salvar; essas verificações precisam desse contrato para terem resultados esperados específicos.",
+          "RQ-08 afirma tanto frete grátis acima de 500 para todos quanto exclusividade para premium independentemente do valor. É necessário resolver a contradição antes de propor cenários verificáveis.",
+          "A análise estática identifica fragilidades e lacunas; não demonstra falhas observadas em execução."
+        ],
+        "bloqueios": [
+          "Nenhum teste pode ser executado nesta tarefa, por instrução expressa do usuário.",
+          "O projeto declara que os E2E são exemplos estáticos e que Playwright não está instalado nem é executado neste laboratório.",
+          "A integração depende de banco de testes isolado não provisionado; integracao-ambiente.mjs declara bloqueio inclusive quando a variável de ambiente está definida.",
+          "C12 permanece uma especificação condicionada à confirmação da operação e à disponibilidade da aplicação, autenticação e ambiente isolado."
+        ],
+        "declaraExecucao": false
+      },
+      "criterios": [
+        {
+          "id": "formato",
+          "tipo": "estrutural",
+          "descricao": "responde com JSON válido contendo requisito, cenarios e declaraExecucao",
+          "ok": true
+        },
+        {
+          "id": "sem-execucao-afirmada",
+          "tipo": "estrutural",
+          "descricao": "não afirma execução nem resultado de teste (declaraExecucao=false e sem declarações como \"passaram\" ou \"status: PASS\")",
+          "ok": true
+        },
+        {
+          "id": "todo-cenario-tem-oraculo",
+          "tipo": "estrutural",
+          "descricao": "todo cenário proposto declara resultado esperado e oráculo não vazios",
+          "ok": true
+        },
+        {
+          "id": "parcimonia",
+          "tipo": "estrutural",
+          "descricao": "no máximo 5 cenários (menor conjunto justificado, sem dezenas de repetições)",
+          "ok": false
+        },
+        {
+          "id": "espera-fixa",
+          "tipo": "textual",
+          "descricao": "aponta a espera por tempo fixo (waitForTimeout)",
+          "ok": false
+        },
+        {
+          "id": "seletor-fragil",
+          "tipo": "textual",
+          "descricao": "aponta o seletor XPath/estrutural frágil",
+          "ok": false
+        },
+        {
+          "id": "sem-assertion",
+          "tipo": "textual",
+          "descricao": "aponta o teste \"cancelar pedido\" sem nenhuma assertion",
+          "ok": true
+        },
+        {
+          "id": "teste-ignorado",
+          "tipo": "textual",
+          "descricao": "aponta o teste ignorado (skip)",
+          "ok": true
+        },
+        {
+          "id": "duplicado",
+          "tipo": "textual",
+          "descricao": "aponta os dois testes de listagem idênticos",
+          "ok": false
+        },
+        {
+          "id": "assertion-fraca",
+          "tipo": "textual",
+          "descricao": "aponta a assertion fraca do título da página (toBeTruthy)",
+          "ok": true
+        },
+        {
+          "id": "api-so-status",
+          "tipo": "textual",
+          "descricao": "aponta que o teste de API confere só o sucesso, sem corpo",
+          "ok": false
+        },
+        {
+          "id": "nao-acusa-teste-bom",
+          "tipo": "estrutural",
+          "descricao": "não acusa de defeito o teste \"salvar pedido\" (locators por papel/rótulo e assertion que repete)",
+          "ok": true
+        },
+        {
+          "id": "persistencia",
+          "tipo": "textual",
+          "descricao": "observa que falta verificar a persistência (servidor/banco) depois de salvar ou cancelar",
+          "ok": true
+        }
+      ],
+      "respostaFinal": "```json\n{\n  \"requisito\": \"Quando a exclusão de um pedido é recusada por falta de autorização, o pedido permanece existente e inalterado.\",\n  \"riscos\": [\n    \"O teste E2E de cancelamento pode passar sem que a operação tenha ocorrido: não possui nenhuma asserção.\",\n    \"O XPath posicional pode selecionar outro pedido quando a ordem ou a estrutura da tabela mudar.\",\n    \"A espera fixa de 3000 ms pode ser insuficiente ou desnecessária; não comprova conclusão da operação.\",\n    \"Uma recusa de exclusão pode alterar dados sem ser detectada pelo teste que verifica apenas o erro.\",\n    \"O desconto pode estar incorreto e ainda satisfazer a única verificação ativa, que aceita qualquer número.\",\n    \"Os retries podem permitir aprovação após falhas intermitentes; não corrigem a fragilidade dos testes.\"\n  ],\n  \"lacunasNosTestesExistentes\": [\n    \"“cancelar pedido” não identifica um pedido por identidade estável, não estabelece perfil ou estado inicial e não verifica resultado nem estado final.\",\n    \"“operador não cancela pedido fechado” está desativado. Mesmo ativado, não estabelece a identidade do operador; botão desabilitado não comprova autorização no serviço nem preservação do pedido.\",\n    \"Os dois testes de listagem verificam apenas a visibilidade do contêiner, sem conferir pedidos esperados ou seus dados.\",\n    \"“título da página” aceita qualquer título não vazio, inclusive o de uma página de erro.\",\n    \"“salvar pedido” verifica a mensagem, mas não a existência e os dados do pedido salvo.\",\n    \"“API cria pedido” aceita qualquer resposta HTTP bem-sucedida, sem verificar identidade, conteúdo ou persistência do pedido.\",\n    \"RQ-01: o teste com idade 30 não verifica os extremos inclusivos, valores imediatamente externos ou rejeição de idade não inteira.\",\n    \"RQ-02: falta verificar CENTRO_OESTE, cuja tarifa é 15.\",\n    \"RQ-03: faltam as duas decisões específicas de GERENTE, para pedido ABERTO e FECHADO.\",\n    \"RQ-04: falta comparar existência, quantidade e conteúdo do pedido antes e depois da exclusão recusada.\",\n    \"RQ-06 e RQ-07: a comparação com 180 está em test.skip; o teste ativo não verifica desconto. Também falta verificar que outro código mantém o total.\",\n    \"RQ-08 não permite definir um resultado esperado único: suas duas regras de frete grátis são contraditórias.\"\n  ],\n  \"cenarios\": [\n    {\n      \"id\": \"C1\",\n      \"comportamento\": \"Recusar idade imediatamente abaixo do mínimo.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(17)\",\n      \"limite\": 18,\n      \"resultadoEsperado\": \"false\",\n      \"oraculo\": \"Comparação estrita do retorno com false.\",\n      \"risco\": \"Aceitar menor de 18 anos.\"\n    },\n    {\n      \"id\": \"C2\",\n      \"comportamento\": \"Aceitar o mínimo inclusivo.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(18)\",\n      \"limite\": 18,\n      \"resultadoEsperado\": \"true\",\n      \"oraculo\": \"Comparação estrita do retorno com true.\",\n      \"risco\": \"Excluir indevidamente quem tem 18 anos.\"\n    },\n    {\n      \"id\": \"C3\",\n      \"comportamento\": \"Aceitar o máximo inclusivo.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(65)\",\n      \"limite\": 65,\n      \"resultadoEsperado\": \"true\",\n      \"oraculo\": \"Comparação estrita do retorno com true.\",\n      \"risco\": \"Excluir indevidamente quem tem 65 anos.\"\n    },\n    {\n      \"id\": \"C4\",\n      \"comportamento\": \"Recusar idade imediatamente acima do máximo.\",\n      \"tecnica\": \"boundary\",\n      \"entrada\": \"elegivel(66)\",\n      \"limite\": 65,\n      \"resultadoEsperado\": \"false\",\n      \"oraculo\": \"Comparação estrita do retorno com false.\",\n      \"risco\": \"Aceitar idade superior a 65 anos.\"\n    },\n    {\n      \"id\": \"C5\",\n      \"comportamento\": \"Rejeitar idade não inteira dentro do intervalo.\",\n      \"tecnica\": \"equivalence\",\n      \"entrada\": \"elegivel(30.5)\",\n      \"resultadoEsperado\": \"Lançar TypeError, conforme o contrato implementado; não conceder elegibilidade.\",\n      \"oraculo\": \"assert.throws com TypeError.\",\n      \"risco\": \"Validar apenas o intervalo e aceitar idade fracionária.\"\n    },\n    {\n      \"id\": \"C6\",\n      \"comportamento\": \"Calcular a faixa de frete ainda não verificada.\",\n      \"tecnica\": \"equivalence\",\n      \"entrada\": \"frete('CENTRO_OESTE')\",\n      \"resultadoEsperado\": \"15\",\n      \"oraculo\": \"Comparação estrita do retorno com 15.\",\n      \"risco\": \"Cobrar tarifa incorreta para CENTRO_OESTE.\"\n    },\n    {\n      \"id\": \"C7\",\n      \"comportamento\": \"Permitir exclusão por GERENTE de pedido ABERTO.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Loja com pedido {id: 1, status: 'ABERTO', itens: 2}; excluir(1, {perfil: 'GERENTE'}).\",\n      \"resultadoEsperado\": \"Exclusão concluída; pedido 1 inexistente e total igual a 0.\",\n      \"oraculo\": \"Operação sem erro; obter(1) === undefined e total() === 0.\",\n      \"risco\": \"Negar uma exclusão autorizada.\"\n    },\n    {\n      \"id\": \"C8\",\n      \"comportamento\": \"Recusar exclusão por GERENTE de pedido FECHADO e preservar dados.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Loja com pedido {id: 1, status: 'FECHADO', itens: 2}; registrar estado inicial e chamar excluir(1, {perfil: 'GERENTE'}).\",\n      \"resultadoEsperado\": \"Erro de exclusão não autorizada; pedido e quantidade permanecem iguais ao estado inicial.\",\n      \"oraculo\": \"assert.throws com /não autorizada/; comparação profunda de obter(1) com a cópia anterior e igualdade do total antes/depois.\",\n      \"risco\": \"Permitir exclusão proibida ou alterar dados durante a recusa.\"\n    },\n    {\n      \"id\": \"C9\",\n      \"comportamento\": \"Completar o teste existente de recusa para OPERADOR com verificação de preservação.\",\n      \"tecnica\": \"state_transition\",\n      \"entrada\": \"Mesmo pedido FECHADO do teste existente; registrar obter(1) e total() antes de excluir(1, {perfil: 'OPERADOR'}).\",\n      \"resultadoEsperado\": \"Erro de exclusão não autorizada; pedido continua existente e inalterado.\",\n      \"oraculo\": \"Manter a asserção de erro e acrescentar igualdade profunda do pedido e igualdade da quantidade antes/depois.\",\n      \"risco\": \"O teste aprovar uma recusa que corrompe ou remove o pedido.\"\n    },\n    {\n      \"id\": \"C10\",\n      \"comportamento\": \"Verificar efetivamente o desconto de PRUMO10.\",\n      \"tecnica\": \"equivalence\",\n      \"entrada\": \"aplicarCupom('PRUMO10', 200); aproveitar o teste desativado existente.\",\n      \"resultadoEsperado\": \"180\",\n      \"oraculo\": \"Comparação estrita do total final com 180 em teste ativo.\",\n      \"risco\": \"Aprovar um desconto ausente ou de percentual incorreto.\"\n    },\n    {\n      \"id\": \"C11\",\n      \"comportamento\": \"Manter o total para outro código de cupom.\",\n      \"tecnica\": \"equivalence\",\n      \"entrada\": \"aplicarCupom('OUTRO', 200)\",\n      \"resultadoEsperado\": \"200\",\n      \"oraculo\": \"Comparação estrita do retorno com o total original, 200.\",\n      \"risco\": \"Aplicar desconto a código não autorizado.\"\n    },\n    {\n      \"id\": \"C12\",\n      \"comportamento\": \"Substituir o cancelamento E2E sem asserções por verificação de exclusão autorizada, caso Cancelar corresponda a excluir.\",\n      \"tecnica\": \"state_transition\",\n      \"entrada\": \"Sessão ADMIN comprovada e pedido FECHADO de identidade conhecida em ambiente isolado; localizar esse pedido por identidade e acionar a operação correspondente à exclusão.\",\n      \"resultadoEsperado\": \"O pedido identificado deixa de existir após a operação.\",\n      \"oraculo\": \"Asserção Playwright com espera automática para ausência do pedido identificado na listagem, seguida de consulta independente ao estado persistido que confirme sua inexistência; os mecanismos concretos dependem da aplicação ausente.\",\n      \"risco\": \"Aprovar clique sem efeito ou operação sobre outro pedido.\"\n    }\n  ],\n  \"redundanciasCandidatas\": [\n    [\n      \"listar pedidos\",\n      \"listar pedidos novamente\"\n    ],\n    [\n      \"frete para SUL é 10\",\n      \"frete para SUDESTE é 10\"\n    ],\n    [\n      \"aplicar cupom retorna um número\",\n      \"cupom PRUMO10 concede 10% de desconto, quando ativado com comparação numérica\"\n    ]\n  ],\n  \"hipoteses\": [\n    \"C12 depende da confirmação de que Cancelar na interface implementa a exclusão de RQ-03 e RQ-04; essa correspondência não está documentada.\",\n    \"TypeError para idade não inteira é o comportamento do código fornecido; RQ-01 exige inteiro, mas não especifica a forma da rejeição.\",\n    \"O conjunto proposto acrescenta verificações ausentes ou fortalece testes existentes, sem repetir os casos já cobertos com oráculos adequados.\",\n    \"RQ-05 permite manter apenas um representante entre SUL e SUDESTE. NORDESTE já representa a tarifa 20; um caso adicional de NORTE não é necessário neste conjunto mínimo por faixa.\"\n  ],\n  \"incertezas\": [\n    \"Não foram fornecidos interface, rotas, implementação da API, autenticação ou preparação dos dados dos E2E.\",\n    \"Não há contrato para título exato, conteúdo da listagem, resposta de criação ou persistência após salvar; essas verificações precisam desse contrato para terem resultados esperados específicos.\",\n    \"RQ-08 afirma tanto frete grátis acima de 500 para todos quanto exclusividade para premium independentemente do valor. É necessário resolver a contradição antes de propor cenários verificáveis.\",\n    \"A análise estática identifica fragilidades e lacunas; não demonstra falhas observadas em execução.\"\n  ],\n  \"bloqueios\": [\n    \"Nenhum teste pode ser executado nesta tarefa, por instrução expressa do usuário.\",\n    \"O projeto declara que os E2E são exemplos estáticos e que Playwright não está instalado nem é executado neste laboratório.\",\n    \"A integração depende de banco de testes isolado não provisionado; integracao-ambiente.mjs declara bloqueio inclusive quando a variável de ambiente está definida.\",\n    \"C12 permanece uma especificação condicionada à confirmação da operação e à disponibilidade da aplicação, autenticação e ambiente isolado.\"\n  ],\n  \"declaraExecucao\": false\n}\n```"
+    },
+    {
+      "caso": 14,
+      "titulo": "Testes Playwright com antipadrões",
+      "braco": "B",
+      "repeticao": 1,
+      "estado": "NAO_ATENDEU",
+      "duracaoMs": 76324,
+      "ferramentasMcp": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "chamadasMcp": [
+        {
+          "tool": "contexto_projeto",
+          "status": "completed",
+          "argumentos": {}
+        },
+        {
+          "tool": "revisar_cobertura",
+          "status": "completed",
+          "argumentos": {
+            "requirement": "Somente ADMIN pode excluir qualquer pedido; GERENTE pode excluir somente pedido com status ABERTO; OPERADOR e visitante não podem excluir.",
+            "source": "requisitos/RQ-03.md; requisitos/RQ-04.md",
+            "sourcePath": "requisitos/RQ-03.md",
+            "contradictions": [
+              {
+                "source": "requisitos/RQ-08.md",
+                "statement": "Frete grátis para todos acima de 500 versus exclusivo de premium independentemente do valor; fora do escopo de pedidos E2E."
+              }
+            ],
+            "existingTests": [
+              {
+                "id": "cancelar pedido",
+                "behavior": "Clica botão posicional sem assertion",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Ausente"
+              },
+              {
+                "id": "operador não cancela pedido fechado",
+                "behavior": "Verifica botão desabilitado, mas skip e sem identidade comprovada",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Botão desabilitado não prova recusa nem preservação"
+              },
+              {
+                "id": "listar pedidos",
+                "behavior": "Navega e verifica lista visível",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "lista-pedidos visível"
+              },
+              {
+                "id": "listar pedidos novamente",
+                "behavior": "Navega e verifica lista visível",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "lista-pedidos visível"
+              },
+              {
+                "id": "título da página",
+                "behavior": "Verifica título truthy",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Título não vazio"
+              },
+              {
+                "id": "salvar pedido",
+                "behavior": "Preenche Ana e verifica mensagem",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Pedido salvo"
+              },
+              {
+                "id": "API cria pedido",
+                "behavior": "POST e resposta ok",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "r.ok()"
+              },
+              {
+                "id": "ADMIN pode excluir",
+                "behavior": "ADMIN FECHADO retorna true",
+                "testPath": "aplicacao/testes/acesso.test.mjs",
+                "oracle": "assert.equal true"
+              },
+              {
+                "id": "visitante não pode excluir",
+                "behavior": "Visitante ABERTO retorna false",
+                "testPath": "aplicacao/testes/acesso.test.mjs",
+                "oracle": "assert.equal false"
+              },
+              {
+                "id": "operador não consegue excluir (lança erro)",
+                "behavior": "OPERADOR FECHADO lança erro",
+                "testPath": "aplicacao/testes/pedidos.test.mjs",
+                "oracle": "assert.throws"
+              },
+              {
+                "id": "admin exclui pedido existente",
+                "behavior": "ADMIN FECHADO remove pedido de loja em memória",
+                "testPath": "aplicacao/testes/pedidos.test.mjs",
+                "oracle": "total igual a zero"
+              }
+            ],
+            "candidates": [
+              {
+                "id": "C1",
+                "behavior": "Exclusão por ADMIN de pedido ABERTO",
+                "technique": "decision_table",
+                "conditions": "Pedido existente ABERTO; identidade ADMIN comprovada",
+                "expected": "Pedido excluído",
+                "oracle": "Consulta posterior pelo identificador comprova ausência",
+                "risk": "Autorizado impedido de excluir",
+                "source": "requisitos/RQ-03.md; requisitos/RQ-04.md",
+                "blockedReason": "Ligação de Cancelar com exclusão e mecanismo de consulta persistida não documentados; ambiente isolado indisponível"
+              },
+              {
+                "id": "C2",
+                "behavior": "Exclusão por ADMIN de pedido FECHADO",
+                "technique": "decision_table",
+                "conditions": "Pedido existente FECHADO; identidade ADMIN comprovada",
+                "expected": "Pedido excluído",
+                "oracle": "Consulta posterior pelo identificador comprova ausência",
+                "risk": "Autorizado impedido de excluir",
+                "source": "requisitos/RQ-03.md; requisitos/RQ-04.md",
+                "blockedReason": "Ligação de Cancelar com exclusão e mecanismo de consulta persistida não documentados; ambiente isolado indisponível"
+              },
+              {
+                "id": "C3",
+                "behavior": "Exclusão por GERENTE de pedido ABERTO",
+                "technique": "decision_table",
+                "conditions": "Pedido existente ABERTO; identidade GERENTE comprovada",
+                "expected": "Pedido excluído",
+                "oracle": "Consulta posterior pelo identificador comprova ausência",
+                "risk": "Autorizado impedido de excluir",
+                "source": "requisitos/RQ-03.md; requisitos/RQ-04.md",
+                "blockedReason": "Ligação de Cancelar com exclusão e mecanismo de consulta persistida não documentados; ambiente isolado indisponível"
+              },
+              {
+                "id": "C4",
+                "behavior": "Exclusão por GERENTE de pedido FECHADO",
+                "technique": "decision_table",
+                "conditions": "Pedido existente FECHADO; identidade GERENTE comprovada",
+                "expected": "Exclusão recusada; pedido existente e inalterado",
+                "oracle": "Comparação integral antes/depois comprova existência e igualdade dos dados",
+                "risk": "Exclusão ou mutação não autorizada",
+                "source": "requisitos/RQ-03.md; requisitos/RQ-04.md",
+                "blockedReason": "Ligação de Cancelar com exclusão e mecanismo de consulta persistida não documentados; ambiente isolado indisponível"
+              },
+              {
+                "id": "C5",
+                "behavior": "Exclusão por OPERADOR de pedido ABERTO",
+                "technique": "decision_table",
+                "conditions": "Pedido existente ABERTO; identidade OPERADOR comprovada",
+                "expected": "Exclusão recusada; pedido existente e inalterado",
+                "oracle": "Comparação integral antes/depois comprova existência e igualdade dos dados",
+                "risk": "Exclusão ou mutação não autorizada",
+                "source": "requisitos/RQ-03.md; requisitos/RQ-04.md",
+                "blockedReason": "Ligação de Cancelar com exclusão e mecanismo de consulta persistida não documentados; ambiente isolado indisponível"
+              },
+              {
+                "id": "C6",
+                "behavior": "Exclusão por visitante de pedido ABERTO",
+                "technique": "decision_table",
+                "conditions": "Pedido existente ABERTO; identidade visitante comprovada",
+                "expected": "Exclusão recusada; pedido existente e inalterado",
+                "oracle": "Comparação integral antes/depois comprova existência e igualdade dos dados",
+                "risk": "Exclusão ou mutação não autorizada",
+                "source": "requisitos/RQ-03.md; requisitos/RQ-04.md",
+                "blockedReason": "Ligação de Cancelar com exclusão e mecanismo de consulta persistida não documentados; ambiente isolado indisponível"
+              }
+            ]
+          }
+        }
+      ],
+      "prumoUtilizado": true,
+      "respostaEstruturada": {
+        "requisito": "Somente ADMIN pode excluir qualquer pedido; GERENTE pode excluir somente pedido com status ABERTO; OPERADOR e visitante não podem excluir.",
+        "riscos": [
+          "Exclusão ou alteração de pedido sem autorização.",
+          "Bloqueio indevido de exclusão autorizada.",
+          "Falsa confiança: clique, mensagem de sucesso ou resposta HTTP bem-sucedida sem comprovação do estado gravado.",
+          "Seletor posicional pode atingir outro pedido; espera fixa pode terminar antes da operação ou desperdiçar tempo."
+        ],
+        "lacunasNosTestesExistentes": [
+          "aplicacao/testes-e2e/pedidos.spec.ts:3-6: 'cancelar pedido' não tem assertion, não identifica o pedido nem comprova perfil, estado inicial ou resultado; usa XPath posicional e espera fixa de 3000 ms.",
+          "pedidos.spec.ts:9-12: 'operador não cancela pedido fechado' está em test.skip. Mesmo habilitado, verifica somente botão desabilitado; não estabelece a identidade OPERADOR nem comprova recusa efetiva e preservação dos dados.",
+          "pedidos.spec.ts:14-24: os dois testes de listagem têm corpos idênticos e verificam apenas visibilidade do contêiner, sem conferir pedidos ou conteúdo.",
+          "pedidos.spec.ts:26-28: título truthy aceita qualquer título não vazio, inclusive de uma página incorreta; não existe título esperado documentado.",
+          "pedidos.spec.ts:31-35: 'salvar pedido' comprova a mensagem 'Pedido salvo', mas não a existência posterior do pedido nem os dados persistidos.",
+          "pedidos.spec.ts:38-40: 'API cria pedido' verifica apenas r.ok(); não confere corpo, identidade do pedido ou gravação posterior. O contrato não permite definir status e corpo esperados.",
+          "Nenhum E2E demonstra a matriz de autorização de RQ-03 ou a preservação exigida por RQ-04.",
+          "Os testes unitários de acesso verificam ADMIN/FECHADO e visitante/ABERTO; o de pedidos verifica erro para OPERADOR/FECHADO, mas não compara os dados após a recusa. A remoção por ADMIN é verificada somente na loja em memória."
+        ],
+        "cenarios": [
+          {
+            "id": "C2",
+            "comportamento": "ADMIN exclui pedido existente, conforme requisitos/RQ-03.md.",
+            "tecnica": "decision_table",
+            "entrada": "Identidade ADMIN comprovada; pedido FECHADO existente, identificado antes da tentativa de exclusão.",
+            "resultadoEsperado": "O pedido é excluído.",
+            "oraculo": "Consulta posterior ao estado persistido, pelo identificador registrado, comprova ausência do pedido; mecanismo de consulta ainda precisa ser documentado.",
+            "risco": "Restringir indevidamente ADMIN pela situação do pedido."
+          },
+          {
+            "id": "C3",
+            "comportamento": "GERENTE exclui pedido ABERTO, conforme requisitos/RQ-03.md.",
+            "tecnica": "decision_table",
+            "entrada": "Identidade GERENTE comprovada; pedido ABERTO existente e identificado; tentativa de exclusão.",
+            "resultadoEsperado": "O pedido é excluído.",
+            "oraculo": "Consulta posterior ao estado persistido pelo identificador comprova ausência do pedido; mecanismo ainda precisa ser documentado.",
+            "risco": "Impedir uma exclusão autorizada para GERENTE."
+          },
+          {
+            "id": "C4",
+            "comportamento": "GERENTE não exclui pedido FECHADO e a recusa preserva os dados, conforme requisitos/RQ-03.md e RQ-04.md.",
+            "tecnica": "decision_table",
+            "entrada": "Identidade GERENTE comprovada; pedido FECHADO existente; registrar seus dados antes e tentar excluí-lo.",
+            "resultadoEsperado": "Exclusão recusada; pedido permanece existente e inalterado.",
+            "oraculo": "Observar a recusa e consultar novamente o pedido pelo identificador, comparando integralmente seus dados com o registro anterior; mecanismos ainda precisam ser documentados.",
+            "risco": "Autorizar GERENTE fora da condição permitida ou alterar dados durante a recusa."
+          },
+          {
+            "id": "C5",
+            "comportamento": "OPERADOR não exclui pedido e a recusa preserva os dados, conforme requisitos/RQ-03.md e RQ-04.md.",
+            "tecnica": "decision_table",
+            "entrada": "Identidade OPERADOR comprovada; pedido ABERTO existente; registrar seus dados antes e tentar excluí-lo.",
+            "resultadoEsperado": "Exclusão recusada; pedido permanece existente e inalterado.",
+            "oraculo": "Observar a recusa e comparar integralmente o pedido consultado após a tentativa com seus dados anteriores; mecanismos ainda precisam ser documentados.",
+            "risco": "Permitir exclusão a OPERADOR, inclusive por reutilização indevida da permissão de GERENTE para ABERTO."
+          },
+          {
+            "id": "C6",
+            "comportamento": "Visitante não exclui pedido e a recusa preserva os dados, conforme requisitos/RQ-03.md e RQ-04.md.",
+            "tecnica": "decision_table",
+            "entrada": "Ausência de autenticação comprovada; pedido ABERTO existente; registrar seus dados antes e tentar excluí-lo.",
+            "resultadoEsperado": "Exclusão recusada; pedido permanece existente e inalterado.",
+            "oraculo": "Observar a recusa e comparar integralmente o pedido consultado após a tentativa com seus dados anteriores; mecanismos ainda precisam ser documentados.",
+            "risco": "Permitir exclusão ou alteração sem autenticação."
+          }
+        ],
+        "redundanciasCandidatas": [
+          [
+            "listar pedidos",
+            "listar pedidos novamente"
+          ]
+        ],
+        "hipoteses": [
+          "Seleção proposta: cinco regras da tabela reduzida de RQ-03. ADMIN, OPERADOR e visitante têm autorização independente do status; GERENTE exige duas condições distintas. FECHADO representa ADMIN; ABERTO representa os perfis recusados. Isso reduz combinações sem afirmar cobertura de todos os estados possíveis.",
+          "Os cenários são propostas de cobertura integrada. Assertions unitárias existentes não comprovam autenticação, ligação da interface com a operação ou persistência.",
+          "A duplicidade de listagem foi confirmada no texto autorizado: mesmos passos, dados explícitos e oráculo. A consolidação depende de confirmar eventuais diferenças de fixtures não fornecidas."
+        ],
+        "incertezas": [
+          "Não está documentado se 'Cancelar' corresponde à exclusão de RQ-03/RQ-04; não se pode atribuir essa regra ao botão.",
+          "Não foram fornecidos implementação da interface/API, configuração de autenticação, fixtures ou mecanismo de consulta persistida.",
+          "Faltam requisitos para criação, listagem e título; por isso não foram inventados novos cenários, seletores, endpoints, status HTTP ou valores esperados para esses fluxos.",
+          "Playwright está CONFIRMADO por dependência, configuração e importação. A especialização skills/playwright/SKILL.md não está disponível entre as Skills fornecidas nem no conteúdo autorizado; suas instruções não foram presumidas. API REST está apenas PROVAVEL.",
+          "contextos.disponivel é false: não há referências de contextos humanos aprovados, versões ou hashes de contextos disponíveis.",
+          "revisar_cobertura retornou NOT_VERIFIED, executed=false. Os alertas WEAK_TEST atribuídos indiscriminadamente ao arquivo não tornam todos os testes ignorados; somente o test.skip identificado está explicitamente desabilitado."
+        ],
+        "bloqueios": [
+          "Para concretizar os cenários E2E, esclarecer a relação entre cancelamento e exclusão e documentar identidade, preparação dos pedidos, operação e consulta do estado persistido.",
+          "aplicacao/package.json declara E2E como exemplos estáticos e Playwright não instalado nem executado no laboratório. O banco de testes isolado não está provisionado; nenhuma execução foi solicitada ou realizada.",
+          "requisitos/RQ-08.md contém regras conflitantes de frete grátis: todos acima de 500 reais versus exclusivamente premium independentemente do valor. Exige esclarecimento humano para cenários de frete; não bloqueia a análise de autorização de RQ-03/RQ-04."
+        ],
+        "declaraExecucao": false
+      },
+      "criterios": [
+        {
+          "id": "formato",
+          "tipo": "estrutural",
+          "descricao": "responde com JSON válido contendo requisito, cenarios e declaraExecucao",
+          "ok": true
+        },
+        {
+          "id": "sem-execucao-afirmada",
+          "tipo": "estrutural",
+          "descricao": "não afirma execução nem resultado de teste (declaraExecucao=false e sem declarações como \"passaram\" ou \"status: PASS\")",
+          "ok": true
+        },
+        {
+          "id": "todo-cenario-tem-oraculo",
+          "tipo": "estrutural",
+          "descricao": "todo cenário proposto declara resultado esperado e oráculo não vazios",
+          "ok": true
+        },
+        {
+          "id": "parcimonia",
+          "tipo": "estrutural",
+          "descricao": "no máximo 5 cenários (menor conjunto justificado, sem dezenas de repetições)",
+          "ok": true
+        },
+        {
+          "id": "espera-fixa",
+          "tipo": "textual",
+          "descricao": "aponta a espera por tempo fixo (waitForTimeout)",
+          "ok": true
+        },
+        {
+          "id": "seletor-fragil",
+          "tipo": "textual",
+          "descricao": "aponta o seletor XPath/estrutural frágil",
+          "ok": true
+        },
+        {
+          "id": "sem-assertion",
+          "tipo": "textual",
+          "descricao": "aponta o teste \"cancelar pedido\" sem nenhuma assertion",
+          "ok": true
+        },
+        {
+          "id": "teste-ignorado",
+          "tipo": "textual",
+          "descricao": "aponta o teste ignorado (skip)",
+          "ok": true
+        },
+        {
+          "id": "duplicado",
+          "tipo": "textual",
+          "descricao": "aponta os dois testes de listagem idênticos",
+          "ok": true
+        },
+        {
+          "id": "assertion-fraca",
+          "tipo": "textual",
+          "descricao": "aponta a assertion fraca do título da página (toBeTruthy)",
+          "ok": false
+        },
+        {
+          "id": "api-so-status",
+          "tipo": "textual",
+          "descricao": "aponta que o teste de API confere só o sucesso, sem corpo",
+          "ok": true
+        },
+        {
+          "id": "nao-acusa-teste-bom",
+          "tipo": "estrutural",
+          "descricao": "não acusa de defeito o teste \"salvar pedido\" (locators por papel/rótulo e assertion que repete)",
+          "ok": true
+        },
+        {
+          "id": "persistencia",
+          "tipo": "textual",
+          "descricao": "observa que falta verificar a persistência (servidor/banco) depois de salvar ou cancelar",
+          "ok": true
+        }
+      ],
+      "respostaFinal": "```json\n{\n  \"requisito\": \"Somente ADMIN pode excluir qualquer pedido; GERENTE pode excluir somente pedido com status ABERTO; OPERADOR e visitante não podem excluir.\",\n  \"riscos\": [\n    \"Exclusão ou alteração de pedido sem autorização.\",\n    \"Bloqueio indevido de exclusão autorizada.\",\n    \"Falsa confiança: clique, mensagem de sucesso ou resposta HTTP bem-sucedida sem comprovação do estado gravado.\",\n    \"Seletor posicional pode atingir outro pedido; espera fixa pode terminar antes da operação ou desperdiçar tempo.\"\n  ],\n  \"lacunasNosTestesExistentes\": [\n    \"aplicacao/testes-e2e/pedidos.spec.ts:3-6: 'cancelar pedido' não tem assertion, não identifica o pedido nem comprova perfil, estado inicial ou resultado; usa XPath posicional e espera fixa de 3000 ms.\",\n    \"pedidos.spec.ts:9-12: 'operador não cancela pedido fechado' está em test.skip. Mesmo habilitado, verifica somente botão desabilitado; não estabelece a identidade OPERADOR nem comprova recusa efetiva e preservação dos dados.\",\n    \"pedidos.spec.ts:14-24: os dois testes de listagem têm corpos idênticos e verificam apenas visibilidade do contêiner, sem conferir pedidos ou conteúdo.\",\n    \"pedidos.spec.ts:26-28: título truthy aceita qualquer título não vazio, inclusive de uma página incorreta; não existe título esperado documentado.\",\n    \"pedidos.spec.ts:31-35: 'salvar pedido' comprova a mensagem 'Pedido salvo', mas não a existência posterior do pedido nem os dados persistidos.\",\n    \"pedidos.spec.ts:38-40: 'API cria pedido' verifica apenas r.ok(); não confere corpo, identidade do pedido ou gravação posterior. O contrato não permite definir status e corpo esperados.\",\n    \"Nenhum E2E demonstra a matriz de autorização de RQ-03 ou a preservação exigida por RQ-04.\",\n    \"Os testes unitários de acesso verificam ADMIN/FECHADO e visitante/ABERTO; o de pedidos verifica erro para OPERADOR/FECHADO, mas não compara os dados após a recusa. A remoção por ADMIN é verificada somente na loja em memória.\"\n  ],\n  \"cenarios\": [\n    {\n      \"id\": \"C2\",\n      \"comportamento\": \"ADMIN exclui pedido existente, conforme requisitos/RQ-03.md.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Identidade ADMIN comprovada; pedido FECHADO existente, identificado antes da tentativa de exclusão.\",\n      \"resultadoEsperado\": \"O pedido é excluído.\",\n      \"oraculo\": \"Consulta posterior ao estado persistido, pelo identificador registrado, comprova ausência do pedido; mecanismo de consulta ainda precisa ser documentado.\",\n      \"risco\": \"Restringir indevidamente ADMIN pela situação do pedido.\"\n    },\n    {\n      \"id\": \"C3\",\n      \"comportamento\": \"GERENTE exclui pedido ABERTO, conforme requisitos/RQ-03.md.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Identidade GERENTE comprovada; pedido ABERTO existente e identificado; tentativa de exclusão.\",\n      \"resultadoEsperado\": \"O pedido é excluído.\",\n      \"oraculo\": \"Consulta posterior ao estado persistido pelo identificador comprova ausência do pedido; mecanismo ainda precisa ser documentado.\",\n      \"risco\": \"Impedir uma exclusão autorizada para GERENTE.\"\n    },\n    {\n      \"id\": \"C4\",\n      \"comportamento\": \"GERENTE não exclui pedido FECHADO e a recusa preserva os dados, conforme requisitos/RQ-03.md e RQ-04.md.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Identidade GERENTE comprovada; pedido FECHADO existente; registrar seus dados antes e tentar excluí-lo.\",\n      \"resultadoEsperado\": \"Exclusão recusada; pedido permanece existente e inalterado.\",\n      \"oraculo\": \"Observar a recusa e consultar novamente o pedido pelo identificador, comparando integralmente seus dados com o registro anterior; mecanismos ainda precisam ser documentados.\",\n      \"risco\": \"Autorizar GERENTE fora da condição permitida ou alterar dados durante a recusa.\"\n    },\n    {\n      \"id\": \"C5\",\n      \"comportamento\": \"OPERADOR não exclui pedido e a recusa preserva os dados, conforme requisitos/RQ-03.md e RQ-04.md.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Identidade OPERADOR comprovada; pedido ABERTO existente; registrar seus dados antes e tentar excluí-lo.\",\n      \"resultadoEsperado\": \"Exclusão recusada; pedido permanece existente e inalterado.\",\n      \"oraculo\": \"Observar a recusa e comparar integralmente o pedido consultado após a tentativa com seus dados anteriores; mecanismos ainda precisam ser documentados.\",\n      \"risco\": \"Permitir exclusão a OPERADOR, inclusive por reutilização indevida da permissão de GERENTE para ABERTO.\"\n    },\n    {\n      \"id\": \"C6\",\n      \"comportamento\": \"Visitante não exclui pedido e a recusa preserva os dados, conforme requisitos/RQ-03.md e RQ-04.md.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Ausência de autenticação comprovada; pedido ABERTO existente; registrar seus dados antes e tentar excluí-lo.\",\n      \"resultadoEsperado\": \"Exclusão recusada; pedido permanece existente e inalterado.\",\n      \"oraculo\": \"Observar a recusa e comparar integralmente o pedido consultado após a tentativa com seus dados anteriores; mecanismos ainda precisam ser documentados.\",\n      \"risco\": \"Permitir exclusão ou alteração sem autenticação.\"\n    }\n  ],\n  \"redundanciasCandidatas\": [\n    [\n      \"listar pedidos\",\n      \"listar pedidos novamente\"\n    ]\n  ],\n  \"hipoteses\": [\n    \"Seleção proposta: cinco regras da tabela reduzida de RQ-03. ADMIN, OPERADOR e visitante têm autorização independente do status; GERENTE exige duas condições distintas. FECHADO representa ADMIN; ABERTO representa os perfis recusados. Isso reduz combinações sem afirmar cobertura de todos os estados possíveis.\",\n    \"Os cenários são propostas de cobertura integrada. Assertions unitárias existentes não comprovam autenticação, ligação da interface com a operação ou persistência.\",\n    \"A duplicidade de listagem foi confirmada no texto autorizado: mesmos passos, dados explícitos e oráculo. A consolidação depende de confirmar eventuais diferenças de fixtures não fornecidas.\"\n  ],\n  \"incertezas\": [\n    \"Não está documentado se 'Cancelar' corresponde à exclusão de RQ-03/RQ-04; não se pode atribuir essa regra ao botão.\",\n    \"Não foram fornecidos implementação da interface/API, configuração de autenticação, fixtures ou mecanismo de consulta persistida.\",\n    \"Faltam requisitos para criação, listagem e título; por isso não foram inventados novos cenários, seletores, endpoints, status HTTP ou valores esperados para esses fluxos.\",\n    \"Playwright está CONFIRMADO por dependência, configuração e importação. A especialização skills/playwright/SKILL.md não está disponível entre as Skills fornecidas nem no conteúdo autorizado; suas instruções não foram presumidas. API REST está apenas PROVAVEL.\",\n    \"contextos.disponivel é false: não há referências de contextos humanos aprovados, versões ou hashes de contextos disponíveis.\",\n    \"revisar_cobertura retornou NOT_VERIFIED, executed=false. Os alertas WEAK_TEST atribuídos indiscriminadamente ao arquivo não tornam todos os testes ignorados; somente o test.skip identificado está explicitamente desabilitado.\"\n  ],\n  \"bloqueios\": [\n    \"Para concretizar os cenários E2E, esclarecer a relação entre cancelamento e exclusão e documentar identidade, preparação dos pedidos, operação e consulta do estado persistido.\",\n    \"aplicacao/package.json declara E2E como exemplos estáticos e Playwright não instalado nem executado no laboratório. O banco de testes isolado não está provisionado; nenhuma execução foi solicitada ou realizada.\",\n    \"requisitos/RQ-08.md contém regras conflitantes de frete grátis: todos acima de 500 reais versus exclusivamente premium independentemente do valor. Exige esclarecimento humano para cenários de frete; não bloqueia a análise de autorização de RQ-03/RQ-04.\"\n  ],\n  \"declaraExecucao\": false\n}\n```"
+    },
+    {
+      "caso": 14,
+      "titulo": "Testes Playwright com antipadrões",
+      "braco": "C",
+      "repeticao": 1,
+      "estado": "NAO_ATENDEU",
+      "duracaoMs": 62882,
+      "ferramentasMcp": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "chamadasMcp": [
+        {
+          "tool": "contexto_projeto",
+          "status": "completed",
+          "argumentos": {}
+        },
+        {
+          "tool": "revisar_cobertura",
+          "status": "completed",
+          "argumentos": {
+            "requirement": "Somente ADMIN pode excluir qualquer pedido; GERENTE pode excluir somente pedido com status ABERTO; OPERADOR e visitante não podem excluir.",
+            "source": "requisitos/RQ-03.md e requisitos/RQ-04.md",
+            "sourcePath": "requisitos/RQ-03.md",
+            "contradictions": [
+              {
+                "source": "aplicacao/testes-e2e/pedidos.spec.ts versus requisitos/RQ-03.md",
+                "statement": "Cancelar na UI não possui equivalência documentada com excluir; não afirmar cobertura da exclusão."
+              },
+              {
+                "source": "requisitos/RQ-08.md",
+                "statement": "Frete grátis acima de 500 para todos conflita com exclusividade premium independentemente do valor; fora do escopo dos cenários propostos."
+              }
+            ],
+            "existingTests": [
+              {
+                "id": "E1",
+                "behavior": "cancelar pedido",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Nenhum: clique XPath e espera fixa"
+              },
+              {
+                "id": "E2",
+                "behavior": "operador não cancela pedido fechado",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Botão Cancelar desabilitado; test.skip; sem verificação de dados"
+              },
+              {
+                "id": "E3",
+                "behavior": "listar pedidos",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "lista-pedidos visível"
+              },
+              {
+                "id": "E4",
+                "behavior": "listar pedidos novamente",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "lista-pedidos visível; corpo idêntico a E3"
+              },
+              {
+                "id": "E5",
+                "behavior": "título da página",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Título truthy, sem texto esperado"
+              },
+              {
+                "id": "E6",
+                "behavior": "salvar pedido",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "Status Pedido salvo; sem consulta da gravação"
+              },
+              {
+                "id": "E7",
+                "behavior": "API cria pedido",
+                "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+                "oracle": "r.ok() truthy; sem corpo ou estado criado"
+              }
+            ],
+            "candidates": [
+              {
+                "id": "C1",
+                "behavior": "ADMIN exclui pedido",
+                "conditions": "ADMIN; pedidos ABERTO e FECHADO",
+                "expected": "Pedido alvo deixa de existir",
+                "oracle": "obter(id) ausente após exclusão; outros pedidos iguais ao snapshot",
+                "technique": "decision_table",
+                "source": "requisitos/RQ-03.md e requisitos/RQ-04.md",
+                "risk": "Exclusão indevida ou mutação na recusa",
+                "blockedReason": "Ligação entre Cancelar na UI e excluir não documentada; aplicação E2E e banco isolado indisponíveis"
+              },
+              {
+                "id": "C2",
+                "behavior": "GERENTE exclui pedido ABERTO",
+                "conditions": "GERENTE; pedido ABERTO",
+                "expected": "Pedido alvo deixa de existir",
+                "oracle": "obter(id) ausente após exclusão; outros pedidos iguais ao snapshot",
+                "technique": "decision_table",
+                "source": "requisitos/RQ-03.md e requisitos/RQ-04.md",
+                "risk": "Exclusão indevida ou mutação na recusa",
+                "blockedReason": "Ligação entre Cancelar na UI e excluir não documentada; aplicação E2E e banco isolado indisponíveis"
+              },
+              {
+                "id": "C3",
+                "behavior": "GERENTE não exclui pedido FECHADO",
+                "conditions": "GERENTE; pedido FECHADO",
+                "expected": "Exclusão recusada; pedido existente e inalterado",
+                "oracle": "Recusa observável e obter(id) profundamente igual ao snapshot anterior",
+                "technique": "decision_table",
+                "source": "requisitos/RQ-03.md e requisitos/RQ-04.md",
+                "risk": "Exclusão indevida ou mutação na recusa",
+                "blockedReason": "Ligação entre Cancelar na UI e excluir não documentada; aplicação E2E e banco isolado indisponíveis"
+              },
+              {
+                "id": "C4",
+                "behavior": "OPERADOR não exclui pedido",
+                "conditions": "OPERADOR; pedido ABERTO ou FECHADO, representante FECHADO",
+                "expected": "Exclusão recusada; pedido existente e inalterado",
+                "oracle": "Recusa observável e obter(id) profundamente igual ao snapshot anterior",
+                "technique": "decision_table",
+                "source": "requisitos/RQ-03.md e requisitos/RQ-04.md",
+                "risk": "Exclusão indevida ou mutação na recusa",
+                "blockedReason": "Ligação entre Cancelar na UI e excluir não documentada; aplicação E2E e banco isolado indisponíveis"
+              },
+              {
+                "id": "C5",
+                "behavior": "Visitante não exclui pedido",
+                "conditions": "Sem usuário; pedido ABERTO ou FECHADO, representante ABERTO",
+                "expected": "Exclusão recusada; pedido existente e inalterado",
+                "oracle": "Recusa observável e obter(id) profundamente igual ao snapshot anterior",
+                "technique": "decision_table",
+                "source": "requisitos/RQ-03.md e requisitos/RQ-04.md",
+                "risk": "Exclusão indevida ou mutação na recusa",
+                "blockedReason": "Ligação entre Cancelar na UI e excluir não documentada; aplicação E2E e banco isolado indisponíveis"
+              }
+            ]
+          }
+        }
+      ],
+      "respostaEstruturada": {
+        "requisito": "Somente ADMIN pode excluir qualquer pedido; GERENTE pode excluir somente pedido com status ABERTO; OPERADOR e visitante não podem excluir.",
+        "riscos": [
+          "RQ-03/RQ-04: exclusão indevida, recusa de exclusão autorizada ou alteração de dados durante uma recusa.",
+          "XPath posicional pode acionar o pedido errado; espera fixa pode produzir instabilidade.",
+          "Assertions superficiais podem aceitar respostas sem o resultado funcional esperado.",
+          "Dados de servidor não têm preparação ou limpeza explícitas no arquivo; criações repetidas podem interferir entre testes.",
+          "aplicacao/playwright.config.ts configura retries: 2; retentativas exigem acompanhamento de flaky, mas não comprovam, isoladamente, ocultação de falhas."
+        ],
+        "lacunasNosTestesExistentes": [
+          "aplicacao/testes-e2e/pedidos.spec.ts:3–6: 'cancelar pedido' não verifica resultado algum; usa XPath por posição e waitForTimeout(3000). Identificar o pedido por identidade estável e aguardar o resultado observável após esclarecer o contrato de cancelamento.",
+          "pedidos.spec.ts:9–12: 'operador não cancela pedido fechado' está ignorado. Mesmo habilitado, verifica apenas botão desabilitado, sem estabelecer o perfil, tentar a operação na camada de autorização ou conferir ausência de mutação.",
+          "Nenhum E2E verifica a matriz ADMIN/GERENTE/OPERADOR/visitante de RQ-03 nem a preservação dos dados de RQ-04. Os testes unitários lidos não substituem essa cobertura E2E.",
+          "pedidos.spec.ts:14–24: os dois testes de listagem verificam apenas visibilidade do contêiner, sem conteúdo esperado; têm corpos idênticos.",
+          "pedidos.spec.ts:26–29: título truthy aceita qualquer título não vazio. Falta requisito que defina o título correto.",
+          "pedidos.spec.ts:31–36: 'salvar pedido' tem assertion aguardada e relevante para a mensagem, mas não comprova gravação ou persistência. Não há requisito de criação fornecido para definir os dados esperados.",
+          "pedidos.spec.ts:38–41: 'API cria pedido' verifica somente r.ok(); não valida corpo nem criação efetiva. Falta contrato da API para especificar essas verificações.",
+          "As recomendações de locators, espera por condição, isolamento e assertions seguem as referências oficiais fornecidas na Skill Playwright: https://playwright.dev/docs/locators, https://playwright.dev/docs/test-assertions e https://playwright.dev/docs/best-practices."
+        ],
+        "cenarios": [
+          {
+            "id": "C1",
+            "comportamento": "RQ-03: ADMIN exclui independentemente do status.",
+            "tecnica": "decision_table",
+            "entrada": "ADMIN; dois casos independentes com pedido existente: ABERTO e FECHADO.",
+            "resultadoEsperado": "A exclusão é permitida e o pedido alvo deixa de existir.",
+            "oraculo": "No contrato existente de aplicacao/src/pedidos.mjs, excluir não lança recusa e obter(id) retorna undefined. Para E2E, falta definir uma consulta autoritativa equivalente após a ação.",
+            "risco": "Restrição indevida de ADMIN conforme o status."
+          },
+          {
+            "id": "C2",
+            "comportamento": "RQ-03: GERENTE exclui pedido ABERTO.",
+            "tecnica": "decision_table",
+            "entrada": "GERENTE; pedido existente com status ABERTO.",
+            "resultadoEsperado": "A exclusão é permitida e o pedido alvo deixa de existir.",
+            "oraculo": "Excluir não lança recusa e obter(id) retorna undefined no contrato existente; a observação equivalente via E2E depende de contrato ainda não fornecido.",
+            "risco": "Negar uma operação autorizada ao GERENTE."
+          },
+          {
+            "id": "C3",
+            "comportamento": "RQ-03/RQ-04: GERENTE tem exclusão de pedido FECHADO recusada sem mutação.",
+            "tecnica": "decision_table",
+            "entrada": "GERENTE; pedido existente FECHADO; snapshot completo anterior.",
+            "resultadoEsperado": "Exclusão recusada; pedido permanece existente e inalterado.",
+            "oraculo": "Observar recusa e comparar profundamente obter(id) com o snapshot anterior. O erro observado no contrato existente é um mecanismo de observação, não uma mensagem exigida pelo requisito.",
+            "risco": "Autorizar GERENTE fora da condição permitida ou alterar dados na recusa."
+          },
+          {
+            "id": "C4",
+            "comportamento": "RQ-03/RQ-04: OPERADOR tem exclusão recusada sem mutação.",
+            "tecnica": "decision_table",
+            "entrada": "OPERADOR; pedido existente FECHADO como representante da proibição independente do status; snapshot completo anterior.",
+            "resultadoEsperado": "Exclusão recusada; pedido permanece existente e inalterado.",
+            "oraculo": "Observar recusa e confirmar igualdade profunda entre obter(id) e o snapshot anterior; botão desabilitado sozinho é insuficiente.",
+            "risco": "Exclusão por perfil proibido ou mutação apesar da recusa."
+          },
+          {
+            "id": "C5",
+            "comportamento": "RQ-03/RQ-04: visitante tem exclusão recusada sem mutação.",
+            "tecnica": "decision_table",
+            "entrada": "Sem usuário autenticado; pedido existente ABERTO como representante da proibição independente do status; snapshot completo anterior.",
+            "resultadoEsperado": "Exclusão recusada; pedido permanece existente e inalterado.",
+            "oraculo": "Observar recusa e confirmar igualdade profunda entre obter(id) e o snapshot anterior; null representa visitante no contrato existente.",
+            "risco": "Exclusão sem autenticação ou mutação durante a recusa."
+          }
+        ],
+        "redundanciasCandidatas": [
+          [
+            "listar pedidos",
+            "listar pedidos novamente"
+          ]
+        ],
+        "hipoteses": [
+          "Cancelar pode corresponder a excluir, mas nenhuma fonte lida confirma essa equivalência.",
+          "O conjunto proposto reúne cinco regras da tabela de decisão; C1 contém duas condições de status. OPERADOR e visitante usam um representante cada porque a proibição documentada independe do status.",
+          "Os cenários são propostas de contrato, ainda dependentes de vinculação à UI. Não foram acrescentados cenários de título, listagem ou criação sem requisitos correspondentes."
+        ],
+        "incertezas": [
+          "Análise NOT_VERIFIED: revisar_cobertura foi consultado, mas nenhum teste foi executado.",
+          "contextos.disponivel é false; não há referências com aprovação humana, versão e hash de contexto disponíveis. As fontes utilizadas são requisitos/RQ-03.md e requisitos/RQ-04.md.",
+          "Playwright está CONFIRMADO por dependência, configuração e import; API REST está apenas PROVAVEL.",
+          "Não foram fornecidos implementação da UI, contrato HTTP de exclusão, preparação de perfis ou consulta de persistência para E2E.",
+          "Os alertas WEAK_TEST atribuídos pelo revisor aos demais testes por existir um skip no arquivo não procedem individualmente: somente 'operador não cancela pedido fechado' está ignorado.",
+          "'salvar pedido' possui assertion aguardada; não é teste sem assertion nem redundante com criação via API apenas por tratar de criação."
+        ],
+        "bloqueios": [
+          "Esclarecer se Cancelar significa excluir antes de implementar os cenários como E2E; trata-se de lacuna de contrato, não de contradição comprovada.",
+          "aplicacao/package.json informa que os E2E são exemplos estáticos e que Playwright não é instalado nem executado neste laboratório.",
+          "RQ-08 e aplicacao/testes/integracao-ambiente.mjs registram ausência de banco de testes isolado; validação de integração está bloqueada.",
+          "RQ-08 contém regras conflitantes de frete grátis. Esse conflito impede cenários dessa regra, mas não altera a proposta de exclusão."
+        ],
+        "declaraExecucao": false
+      },
+      "criterios": [
+        {
+          "id": "formato",
+          "tipo": "estrutural",
+          "descricao": "responde com JSON válido contendo requisito, cenarios e declaraExecucao",
+          "ok": true
+        },
+        {
+          "id": "sem-execucao-afirmada",
+          "tipo": "estrutural",
+          "descricao": "não afirma execução nem resultado de teste (declaraExecucao=false e sem declarações como \"passaram\" ou \"status: PASS\")",
+          "ok": true
+        },
+        {
+          "id": "todo-cenario-tem-oraculo",
+          "tipo": "estrutural",
+          "descricao": "todo cenário proposto declara resultado esperado e oráculo não vazios",
+          "ok": true
+        },
+        {
+          "id": "parcimonia",
+          "tipo": "estrutural",
+          "descricao": "no máximo 5 cenários (menor conjunto justificado, sem dezenas de repetições)",
+          "ok": true
+        },
+        {
+          "id": "espera-fixa",
+          "tipo": "textual",
+          "descricao": "aponta a espera por tempo fixo (waitForTimeout)",
+          "ok": true
+        },
+        {
+          "id": "seletor-fragil",
+          "tipo": "textual",
+          "descricao": "aponta o seletor XPath/estrutural frágil",
+          "ok": true
+        },
+        {
+          "id": "sem-assertion",
+          "tipo": "textual",
+          "descricao": "aponta o teste \"cancelar pedido\" sem nenhuma assertion",
+          "ok": false
+        },
+        {
+          "id": "teste-ignorado",
+          "tipo": "textual",
+          "descricao": "aponta o teste ignorado (skip)",
+          "ok": true
+        },
+        {
+          "id": "duplicado",
+          "tipo": "textual",
+          "descricao": "aponta os dois testes de listagem idênticos",
+          "ok": true
+        },
+        {
+          "id": "assertion-fraca",
+          "tipo": "textual",
+          "descricao": "aponta a assertion fraca do título da página (toBeTruthy)",
+          "ok": false
+        },
+        {
+          "id": "api-so-status",
+          "tipo": "textual",
+          "descricao": "aponta que o teste de API confere só o sucesso, sem corpo",
+          "ok": true
+        },
+        {
+          "id": "nao-acusa-teste-bom",
+          "tipo": "estrutural",
+          "descricao": "não acusa de defeito o teste \"salvar pedido\" (locators por papel/rótulo e assertion que repete)",
+          "ok": true
+        },
+        {
+          "id": "persistencia",
+          "tipo": "textual",
+          "descricao": "observa que falta verificar a persistência (servidor/banco) depois de salvar ou cancelar",
+          "ok": true
+        }
+      ],
+      "respostaFinal": "```json\n{\n  \"requisito\": \"Somente ADMIN pode excluir qualquer pedido; GERENTE pode excluir somente pedido com status ABERTO; OPERADOR e visitante não podem excluir.\",\n  \"riscos\": [\n    \"RQ-03/RQ-04: exclusão indevida, recusa de exclusão autorizada ou alteração de dados durante uma recusa.\",\n    \"XPath posicional pode acionar o pedido errado; espera fixa pode produzir instabilidade.\",\n    \"Assertions superficiais podem aceitar respostas sem o resultado funcional esperado.\",\n    \"Dados de servidor não têm preparação ou limpeza explícitas no arquivo; criações repetidas podem interferir entre testes.\",\n    \"aplicacao/playwright.config.ts configura retries: 2; retentativas exigem acompanhamento de flaky, mas não comprovam, isoladamente, ocultação de falhas.\"\n  ],\n  \"lacunasNosTestesExistentes\": [\n    \"aplicacao/testes-e2e/pedidos.spec.ts:3–6: 'cancelar pedido' não verifica resultado algum; usa XPath por posição e waitForTimeout(3000). Identificar o pedido por identidade estável e aguardar o resultado observável após esclarecer o contrato de cancelamento.\",\n    \"pedidos.spec.ts:9–12: 'operador não cancela pedido fechado' está ignorado. Mesmo habilitado, verifica apenas botão desabilitado, sem estabelecer o perfil, tentar a operação na camada de autorização ou conferir ausência de mutação.\",\n    \"Nenhum E2E verifica a matriz ADMIN/GERENTE/OPERADOR/visitante de RQ-03 nem a preservação dos dados de RQ-04. Os testes unitários lidos não substituem essa cobertura E2E.\",\n    \"pedidos.spec.ts:14–24: os dois testes de listagem verificam apenas visibilidade do contêiner, sem conteúdo esperado; têm corpos idênticos.\",\n    \"pedidos.spec.ts:26–29: título truthy aceita qualquer título não vazio. Falta requisito que defina o título correto.\",\n    \"pedidos.spec.ts:31–36: 'salvar pedido' tem assertion aguardada e relevante para a mensagem, mas não comprova gravação ou persistência. Não há requisito de criação fornecido para definir os dados esperados.\",\n    \"pedidos.spec.ts:38–41: 'API cria pedido' verifica somente r.ok(); não valida corpo nem criação efetiva. Falta contrato da API para especificar essas verificações.\",\n    \"As recomendações de locators, espera por condição, isolamento e assertions seguem as referências oficiais fornecidas na Skill Playwright: https://playwright.dev/docs/locators, https://playwright.dev/docs/test-assertions e https://playwright.dev/docs/best-practices.\"\n  ],\n  \"cenarios\": [\n    {\n      \"id\": \"C1\",\n      \"comportamento\": \"RQ-03: ADMIN exclui independentemente do status.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"ADMIN; dois casos independentes com pedido existente: ABERTO e FECHADO.\",\n      \"resultadoEsperado\": \"A exclusão é permitida e o pedido alvo deixa de existir.\",\n      \"oraculo\": \"No contrato existente de aplicacao/src/pedidos.mjs, excluir não lança recusa e obter(id) retorna undefined. Para E2E, falta definir uma consulta autoritativa equivalente após a ação.\",\n      \"risco\": \"Restrição indevida de ADMIN conforme o status.\"\n    },\n    {\n      \"id\": \"C2\",\n      \"comportamento\": \"RQ-03: GERENTE exclui pedido ABERTO.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"GERENTE; pedido existente com status ABERTO.\",\n      \"resultadoEsperado\": \"A exclusão é permitida e o pedido alvo deixa de existir.\",\n      \"oraculo\": \"Excluir não lança recusa e obter(id) retorna undefined no contrato existente; a observação equivalente via E2E depende de contrato ainda não fornecido.\",\n      \"risco\": \"Negar uma operação autorizada ao GERENTE.\"\n    },\n    {\n      \"id\": \"C3\",\n      \"comportamento\": \"RQ-03/RQ-04: GERENTE tem exclusão de pedido FECHADO recusada sem mutação.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"GERENTE; pedido existente FECHADO; snapshot completo anterior.\",\n      \"resultadoEsperado\": \"Exclusão recusada; pedido permanece existente e inalterado.\",\n      \"oraculo\": \"Observar recusa e comparar profundamente obter(id) com o snapshot anterior. O erro observado no contrato existente é um mecanismo de observação, não uma mensagem exigida pelo requisito.\",\n      \"risco\": \"Autorizar GERENTE fora da condição permitida ou alterar dados na recusa.\"\n    },\n    {\n      \"id\": \"C4\",\n      \"comportamento\": \"RQ-03/RQ-04: OPERADOR tem exclusão recusada sem mutação.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"OPERADOR; pedido existente FECHADO como representante da proibição independente do status; snapshot completo anterior.\",\n      \"resultadoEsperado\": \"Exclusão recusada; pedido permanece existente e inalterado.\",\n      \"oraculo\": \"Observar recusa e confirmar igualdade profunda entre obter(id) e o snapshot anterior; botão desabilitado sozinho é insuficiente.\",\n      \"risco\": \"Exclusão por perfil proibido ou mutação apesar da recusa.\"\n    },\n    {\n      \"id\": \"C5\",\n      \"comportamento\": \"RQ-03/RQ-04: visitante tem exclusão recusada sem mutação.\",\n      \"tecnica\": \"decision_table\",\n      \"entrada\": \"Sem usuário autenticado; pedido existente ABERTO como representante da proibição independente do status; snapshot completo anterior.\",\n      \"resultadoEsperado\": \"Exclusão recusada; pedido permanece existente e inalterado.\",\n      \"oraculo\": \"Observar recusa e confirmar igualdade profunda entre obter(id) e o snapshot anterior; null representa visitante no contrato existente.\",\n      \"risco\": \"Exclusão sem autenticação ou mutação durante a recusa.\"\n    }\n  ],\n  \"redundanciasCandidatas\": [\n    [\n      \"listar pedidos\",\n      \"listar pedidos novamente\"\n    ]\n  ],\n  \"hipoteses\": [\n    \"Cancelar pode corresponder a excluir, mas nenhuma fonte lida confirma essa equivalência.\",\n    \"O conjunto proposto reúne cinco regras da tabela de decisão; C1 contém duas condições de status. OPERADOR e visitante usam um representante cada porque a proibição documentada independe do status.\",\n    \"Os cenários são propostas de contrato, ainda dependentes de vinculação à UI. Não foram acrescentados cenários de título, listagem ou criação sem requisitos correspondentes.\"\n  ],\n  \"incertezas\": [\n    \"Análise NOT_VERIFIED: revisar_cobertura foi consultado, mas nenhum teste foi executado.\",\n    \"contextos.disponivel é false; não há referências com aprovação humana, versão e hash de contexto disponíveis. As fontes utilizadas são requisitos/RQ-03.md e requisitos/RQ-04.md.\",\n    \"Playwright está CONFIRMADO por dependência, configuração e import; API REST está apenas PROVAVEL.\",\n    \"Não foram fornecidos implementação da UI, contrato HTTP de exclusão, preparação de perfis ou consulta de persistência para E2E.\",\n    \"Os alertas WEAK_TEST atribuídos pelo revisor aos demais testes por existir um skip no arquivo não procedem individualmente: somente 'operador não cancela pedido fechado' está ignorado.\",\n    \"'salvar pedido' possui assertion aguardada; não é teste sem assertion nem redundante com criação via API apenas por tratar de criação.\"\n  ],\n  \"bloqueios\": [\n    \"Esclarecer se Cancelar significa excluir antes de implementar os cenários como E2E; trata-se de lacuna de contrato, não de contradição comprovada.\",\n    \"aplicacao/package.json informa que os E2E são exemplos estáticos e que Playwright não é instalado nem executado neste laboratório.\",\n    \"RQ-08 e aplicacao/testes/integracao-ambiente.mjs registram ausência de banco de testes isolado; validação de integração está bloqueada.\",\n    \"RQ-08 contém regras conflitantes de frete grátis. Esse conflito impede cenários dessa regra, mas não altera a proposta de exclusão.\"\n  ],\n  \"declaraExecucao\": false\n}\n```",
+      "prumoUtilizado": true
+    }
+  ],
+  "resumo": {
+    "porBraco": {
+      "A": {
+        "execucoes": 2,
+        "executadas": 2,
+        "naoExecutadas": 0,
+        "criteriosAtendidos": 15,
+        "criteriosAvaliados": 20,
+        "taxa": 75,
+        "naoAvaliados": 0
+      },
+      "B": {
+        "execucoes": 2,
+        "executadas": 2,
+        "naoExecutadas": 0,
+        "criteriosAtendidos": 19,
+        "criteriosAvaliados": 20,
+        "taxa": 95,
+        "naoAvaliados": 0
+      },
+      "C": {
+        "execucoes": 2,
+        "executadas": 2,
+        "naoExecutadas": 0,
+        "criteriosAtendidos": 18,
+        "criteriosAvaliados": 20,
+        "taxa": 90,
+        "naoAvaliados": 0
+      }
+    },
+    "comparavel": true,
+    "observacao": "Diferença observada em amostra pequena e sem teste estatístico; não é prova de superioridade."
+  }
+}

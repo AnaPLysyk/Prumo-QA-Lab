@@ -15,7 +15,9 @@ import { mutantes } from './mutantes.mjs';
  * NÃO são respostas de IA e NÃO entram em nenhum resultado de avaliação.
  */
 const doc = (n) => (n === 14 ? '' : fs.readFileSync(`requisitos/RQ-0${n}.md`, 'utf8'));
-const req = (n) => doc(n).split('\n').filter((l) => l && !l.startsWith('#'))[0];
+// CRLF: a linha vazia era "\r" e acabava usada como requisito fictício. A rubrica permanece inalterada.
+const primeiraRegra = texto => texto.split(/\r?\n/).map(l=>l.trim()).find(l=>l&&!l.startsWith('#'));
+const req = (n) => primeiraRegra(doc(n));
 const c = (id, entrada, resultadoEsperado, oraculo, extra = {}) => ({ id, comportamento: `cenário ${id}`, tecnica: 'equivalence', entrada, resultadoEsperado, oraculo, risco: 'risco', ...extra });
 const base = (n, cenarios, extra = {}) => ({ requisito: req(n), riscos: ['r'], lacunasNosTestesExistentes: [], cenarios, redundanciasCandidatas: [], hipoteses: [], incertezas: [], bloqueios: [], declaraExecucao: false, ...extra });
 const boas = {
@@ -33,6 +35,10 @@ const falhou = (n, r) => avaliarResposta(n, r, doc(n)).filter((x) => !x.ok).map(
 
 test('rubrica é satisfazível: a resposta sintética correta de cada caso atende a todos os critérios', () => {
   for (const n of Object.keys(casos).map(Number)) assert.deepEqual(falhou(n, boas[n]), [], `caso ${n}`);
+});
+test('fixture do requisito é idêntica em LF e CRLF, sem selecionar linha vazia',()=>{
+  assert.equal(primeiraRegra('# Título\n\nR1: regra válida.'),'R1: regra válida.');
+  assert.equal(primeiraRegra('# Título\r\n\r\nR1: regra válida.'),'R1: regra válida.');
 });
 
 test('rubrica reprova respostas ruins: execução afirmada, requisito inventado, sem oráculo, excesso de cenários e formato inválido', () => {
@@ -100,6 +106,8 @@ test('resumo da comparação: só conta execuções reais e exige o Prumo realme
   const completo = resumir([ok('A'), ok('B', true)]); assert.equal(completo.comparavel, true); assert.equal(completo.porBraco.A.taxa, 50);
   assert.match(completo.observacao, /não é prova de superioridade/);
   assert.equal(resumir([ok('A'), ok('B', false)]).comparavel, false, 'Prumo não usado invalida a comparação');
+  assert.equal(resumir([ok('A'),ok('B',true),ok('C',true)]).comparavel,true);
+  assert.equal(resumir([ok('A'),ok('B',true),ok('C',false)]).comparavel,false,'C também exige uso real');
   const parcial = resumir([ok('A'), { braco: 'B', estado: 'NAO_EXECUTADA', motivo: 'limite' }]);
   assert.equal(parcial.comparavel, false); assert.equal(parcial.porBraco.B.taxa, null); assert.equal(parcial.porBraco.B.naoExecutadas, 1);
 });

@@ -38,6 +38,8 @@ export const promptA = (n) => `${tarefa(n)}\n\nArquivos autorizados do projeto (
 const skillArq = path.resolve(path.dirname(mcpJs), '..', 'skills', 'qa', 'SKILL.md');
 const skill = fs.existsSync(skillArq) ? fs.readFileSync(skillArq, 'utf8') : '';
 export const promptB = (n) => `${tarefa(n)}\n\nUse SOMENTE as ferramentas MCP do Prumo (servidor "prumo-lab"): chame contexto_projeto para ler os arquivos autorizados e, depois de formular os cenários, chame revisar_cobertura. Não use shell nem leia arquivos de outra forma. Aplique a metodologia da Skill abaixo.\n\n${instrucaoDeFormato}\n\n--- Skill de QA (SKILL.md) ---\n${skill}`;
+const especializadas=['skills/qa/references/engenharia.md','skills/playwright/SKILL.md','skills/acessibilidade/SKILL.md'];
+export const promptC = n => promptB(n)+'\n\n--- Conhecimento especializado fornecido explicitamente; aplique somente o pertinente ---\n'+especializadas.map(f=>fs.readFileSync(path.resolve(path.dirname(mcpJs),'..',f),'utf8')).join('\n\n');
 
 function localizarCodex() {
   if (arg('--codex')) return arg('--codex');
@@ -52,8 +54,8 @@ function executar(codex, braco, n) {
     const neutro = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo lab neutro ')); const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo lab dados '));
     // A pasta neutra é vazia de propósito (nenhum gabarito visível) e não é repositório Git: o Codex exige --skip-git-repo-check.
     const base = ['exec', '--ephemeral', '--ignore-user-config', '--skip-git-repo-check', '--json', '-s', 'read-only', '-C', neutro, ...(modelo ? ['-m', modelo] : [])];
-    const mcp = braco === 'B' ? ['-c', 'mcp_servers.prumo-lab.command="node"', '-c', `mcp_servers.prumo-lab.args=["${fwd(mcpJs)}","${fwd(lab)}"]`, '-c', `mcp_servers.prumo-lab.env={PRUMO_DATA_DIR="${fwd(dados)}"}`] : [];
-    const filho = spawn(codex, [...base, ...mcp, braco === 'A' ? promptA(n) : promptB(n)], { windowsHide: true, shell: false, stdio: ['ignore', 'pipe', 'pipe'] });
+    const mcp = braco !== 'A' ? ['-c', 'mcp_servers.prumo-lab.command="node"', '-c', `mcp_servers.prumo-lab.args=["${fwd(mcpJs)}","${fwd(lab)}"]`, '-c', `mcp_servers.prumo-lab.env={PRUMO_DATA_DIR="${fwd(dados)}"}`] : [];
+    const filho = spawn(codex, [...base, ...mcp, braco === 'A' ? promptA(n) : braco==='C'?promptC(n):promptB(n)], { windowsHide: true, shell: false, stdio: ['ignore', 'pipe', 'pipe'] });
     let saida = ''; let erroSaida = ''; let expirou = false; const t0 = Date.now();
     const timer = setTimeout(() => { expirou = true; filho.kill(); }, limite);
     filho.stdout.on('data', (b) => { saida += b; }); filho.stderr.on('data', (b) => { erroSaida = (erroSaida + b).slice(-1500); });
@@ -65,14 +67,15 @@ function executar(codex, braco, n) {
 /** Combina as execuções dos dois braços em números comparáveis. Só conta execuções realmente feitas. */
 export function resumir(registros) {
   const porBraco = {};
-  for (const b of ['A', 'B']) {
+  const braços=[...new Set(['A','B',...registros.map(r=>r.braco)])];
+  for (const b of braços) {
     const rs = registros.filter((r) => r.braco === b); const feitos = rs.filter((r) => r.estado !== 'NAO_EXECUTADA');
     const crit = feitos.flatMap((r) => r.criterios);
     porBraco[b] = { execucoes: rs.length, executadas: feitos.length, naoExecutadas: rs.length - feitos.length, criteriosAtendidos: crit.filter((c) => c.ok).length, criteriosAvaliados: crit.length,
       taxa: crit.length ? Math.round((crit.filter((c) => c.ok).length / crit.length) * 1000) / 10 : null, naoAvaliados: rs.length - feitos.length };
   }
-  const completo = ['A', 'B'].every((b) => porBraco[b].executadas > 0 && porBraco[b].naoExecutadas === 0);
-  const prumoUsado = registros.filter((r) => r.braco === 'B' && r.estado !== 'NAO_EXECUTADA').every((r) => r.prumoUtilizado);
+  const completo = braços.every((b) => porBraco[b].executadas > 0 && porBraco[b].naoExecutadas === 0);
+  const prumoUsado = registros.filter((r) => r.braco !== 'A' && r.estado !== 'NAO_EXECUTADA').every((r) => r.prumoUtilizado);
   return { porBraco, comparavel: completo && prumoUsado, observacao: !completo ? 'INSUFICIENTE: há execuções NAO_EXECUTADA; nenhuma conclusão sobre o efeito do Prumo.' : !prumoUsado ? 'O braço B não usou as ferramentas do Prumo em todas as execuções; comparação inválida.' : 'Diferença observada em amostra pequena e sem teste estatístico; não é prova de superioridade.' };
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -86,8 +89,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const resposta = extrairJson(final); const doc = n === 14 ? '' : fs.readFileSync(path.join(lab, 'requisitos', `RQ-0${n}.md`), 'utf8');
     const criterios = avaliarResposta(n, resposta, doc);
     const ferramentas = chamadas.map((c) => c.tool);
-    const prumoUtilizado = braco === 'B' ? ferramentas.includes('contexto_projeto') && ferramentas.includes('revisar_cobertura') : false;
-    registros.push({ ...base, estado: criterios.every((c) => c.ok) ? 'ATENDEU' : 'NAO_ATENDEU', duracaoMs: r.ms, ferramentasMcp: ferramentas, chamadasMcp: chamadas.map((c) => ({ tool: c.tool, status: c.status, argumentos: c.tool === 'contexto_projeto' ? {} : c.argumentos })), prumoUtilizado: braco === 'B' ? prumoUtilizado : undefined, respostaEstruturada: resposta, criterios, respostaFinal: final });
+    const prumoUtilizado = braco !== 'A' ? ferramentas.includes('contexto_projeto') && ferramentas.includes('revisar_cobertura') : false;
+    registros.push({ ...base, estado: criterios.every((c) => c.ok) ? 'ATENDEU' : 'NAO_ATENDEU', duracaoMs: r.ms, ferramentasMcp: ferramentas, chamadasMcp: chamadas.map((c) => ({ tool: c.tool, status: c.status, argumentos: c.tool === 'contexto_projeto' ? {} : c.argumentos })), prumoUtilizado: braco !== 'A' ? prumoUtilizado : undefined, respostaEstruturada: resposta, criterios, respostaFinal: final });
     console.log(`${registros.at(-1).estado} caso ${n} braço ${braco}#${rep}: ${criterios.filter((c) => c.ok).length}/${criterios.length}${braco === 'B' && !prumoUtilizado ? ' (Prumo NÃO foi usado)' : ''}`);
   }
   const resultado = { tipo: 'comparacao-com-e-sem-prumo', geradoEm: new Date().toISOString(), prumo: { versao: JSON.parse(fs.readFileSync(path.resolve(path.dirname(mcpJs), '..', 'package.json'), 'utf8')).version, skillSha256: skill ? createHash('sha256').update(skill).digest('hex') : null }, cliente, rubricaSha256: rubricaHash, repeticoes, registros, resumo: resumir(registros) };

@@ -1,5 +1,9 @@
 # Prumo QA Lab
 
+## Evolução avaliada na 2.6
+
+Veja [docs/AVALIACAO-2.6.md](docs/AVALIACAO-2.6.md): 14 casos determinísticos, avaliação real em três braços A/B/C e cenário RQ-015 de engenharia/controles legítimos. O braço C fornece explicitamente as especializações; isso não comprova carregamento automático no cliente. `avaliacoes/engenharia.mjs` avalia o novo cenário estático sem executar seu código ou seus testes. Critérios em `rubrica-engenharia.mjs`, fora do contexto MCP.
+
 Laboratório **independente** para avaliar a qualidade do [Prumo QA](https://github.com/AnaPLysyk/Prumo-Qa). É um sistema fictício e controlado, com defeitos e lacunas de teste conhecidos, usado para repetir a mesma avaliação a cada versão do Prumo e responder, com evidência, **onde o Prumo acerta, onde falha e o que realmente o melhora**.
 
 Não é um agente, não é um modelo de IA, não treina nada e usa somente dados sintéticos. As avaliações com IA apenas **observam** um agente usando a Skill e as ferramentas MCP reais do Prumo; elas não alteram pesos de nenhum modelo. Este repositório **não faz parte** da distribuição do aplicativo Prumo QA.
