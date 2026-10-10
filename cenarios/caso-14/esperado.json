@@ -1,0 +1,62 @@
+{
+  "caso": 14,
+  "titulo": "Testes Playwright com antipadrões",
+  "exigeRecurso": "frameworks",
+  "obrigatorios": [
+    {
+      "type": "PW_ESPERA_FIXA",
+      "scenario": "E2E"
+    },
+    {
+      "type": "PW_SELETOR_FRAGIL",
+      "scenario": "E2E"
+    },
+    {
+      "type": "PW_SEM_ASSERTION",
+      "scenario": "E2E"
+    },
+    {
+      "type": "PW_TESTE_IGNORADO",
+      "scenario": "E2E"
+    },
+    {
+      "type": "PW_TESTE_DUPLICADO",
+      "scenario": "E2E"
+    },
+    {
+      "type": "PW_ASSERTION_FRACA",
+      "scenario": "E2E"
+    },
+    {
+      "type": "PW_API_SO_STATUS",
+      "scenario": "E2E"
+    }
+  ],
+  "proibidos": [
+    {
+      "type": "PW_TEST_ONLY"
+    },
+    {
+      "type": "PW_FORCE"
+    },
+    {
+      "type": "PW_ASSERTION_SEM_AWAIT"
+    }
+  ],
+  "proibidosTrecho": [
+    "getByRole",
+    "getByLabel",
+    "getByTestId",
+    "toHaveText"
+  ],
+  "frameworkConfirmado": "playwright",
+  "fatos": [
+    {
+      "kind": "test_read",
+      "id": "E2E"
+    }
+  ],
+  "limitesConhecidos": [
+    "O Prumo não consegue, só pelo texto, saber que \"salvar pedido\" não verifica a persistência nem que faltam cenários negativos de permissão: isso é julgamento da IA com base no requisito aprovado."
+  ]
+}

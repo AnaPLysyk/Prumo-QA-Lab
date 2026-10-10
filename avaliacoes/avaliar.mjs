@@ -10,6 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { avaliarRevisao, avaliarExecucao, resumir } from './criterios.mjs';
+import { carregarPrumo, semear } from './semear.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (n) => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : undefined; };
@@ -37,6 +38,11 @@ try {
   gerais.push({ criterio: 'contexto lista requisitos, testes e código autorizados', ok: ['requisitos/RQ-01.md', 'aplicacao/testes/frete.test.mjs', 'aplicacao/src/frete.mjs'].every((p) => ctx.sources?.some((s) => s.path.replaceAll('\\', '/') === p)), detalhe: `${ctx.sources?.length} fontes` });
   gerais.push({ criterio: 'contexto é NOT_VERIFIED e declara informações ausentes', ok: ctx.state === 'NOT_VERIFIED' && ctx.missing?.length > 0, detalhe: `state=${ctx.state}` });
   gerais.push({ criterio: 'contexto não expõe cenários, esperados nem avaliações do laboratório', ok: !JSON.stringify(ctx).match(/esperado\.json|obrigatorios|cenarios\/caso/), detalhe: 'varredura do contexto retornado' });
+  // Recursos que só existem a partir do 2.4 (contextos persistentes e Playwright): versões antigas ficam NAO_APLICAVEL, nunca reprovadas.
+  const props = (await client.listTools()).tools.find((t) => t.name === 'revisar_cobertura')?.inputSchema?.properties ?? {};
+  const recursos = { contextoId: 'contextoId' in props, frameworks: Array.isArray(ctx.frameworks) };
+  if (recursos.frameworks) gerais.push({ criterio: 'contexto detecta Playwright como CONFIRMADO por evidência real (dependência + configuração)', ok: ctx.frameworks.some((f) => f.id === 'playwright' && f.estado === 'CONFIRMADO' && f.evidencias.length >= 2), detalhe: JSON.stringify(ctx.frameworks.map((f) => [f.id, f.estado])) });
+  if (recursos.contextoId) gerais.push({ criterio: 'sem habilitação da pessoa, contexto_projeto não entrega contextos ao agente (padrão seguro)', ok: ctx.contextos?.disponivel === false && ctx.contextos?.referencias?.length === 0, detalhe: JSON.stringify(ctx.contextos?.disponivel) });
   const evid = await chamar('consultar_evidencias', {});
   const resultadosIniciais = evid.results ?? [];
   gerais.push({ criterio: 'evidências existentes (rodadas anteriores) não contêm PASS nem execução real sem aprovação humana', ok: resultadosIniciais.every((e) => e.status !== 'PASS' && e.executed === false) && (resultadosIniciais.length > 0 || evid.status === 'NOT_RUN'), detalhe: `${resultadosIniciais.length} evidência(s); status=${evid.status ?? 'com resultados'}` });
@@ -51,6 +57,25 @@ try {
     for (const c of esperado.capacidades ?? []) checks = checks.concat(avaliarExecucao(c.capability, await chamar('executar_validacao', { capability: c.capability }), c.estadoEsperado));
     casos.push({ caso: n, titulo: esperado.titulo, ...resumir(checks), checks, achados: (resposta.findings ?? []).map((f) => ({ type: f.type, scenario: f.scenario ?? null, severity: f.severity })), seleçãoSugerida: resposta.suggestedSelection ?? [], limitesConhecidos: esperado.limitesConhecidos ?? [] });
   }
+  // Casos 9 a 14: contextos persistentes (semeados no armazenamento isolado) e testes Playwright.
+  const prumo = await carregarPrumo(mcpJs);
+  for (let n = 9; n <= 14; n++) {
+    const dir = path.join(lab, 'cenarios', `caso-${n}`);
+    const esperado = JSON.parse(fs.readFileSync(path.join(dir, 'esperado.json'), 'utf8')); const plano = JSON.parse(fs.readFileSync(path.join(dir, 'plano.json'), 'utf8'));
+    if (!recursos[esperado.exigeRecurso] || (esperado.semente && !prumo)) { casos.push({ caso: n, titulo: esperado.titulo, estado: 'NAO_APLICAVEL', motivo: `esta versão do Prumo não possui o recurso "${esperado.exigeRecurso}"`, aprovado: null, total: 0, ok: 0, falhas: [], checks: [], achados: [], limitesConhecidos: esperado.limitesConhecidos ?? [] }); continue; }
+    const semeado = esperado.semente ? await semear(prumo, lab, dados, esperado) : null;
+    try {
+      const entrada = { ...plano }; if (semeado) { entrada.contextoId = semeado.ids[plano.contextoRef]; delete entrada.contextoRef; }
+      const resposta = await chamar('revisar_cobertura', entrada); let checks = avaliarRevisao(esperado, resposta);
+      if (esperado.contextoProjeto) {
+        const c = await chamar('contexto_projeto', {}); const refs = c.contextos?.referencias ?? [];
+        for (const [ref, estadoEsperado] of Object.entries(esperado.contextoProjeto.estados ?? {})) { const r = refs.find((x) => x.id === semeado.ids[ref]); checks.push({ criterio: `contexto_projeto entrega o contexto "${ref}" com estado ${estadoEsperado}, versão, hash e origem`, ok: !!r && r.estado === estadoEsperado && r.versao >= 1 && /^[a-f0-9]{64}$/.test(r.hash) && !!r.origem, detalhe: r ? `estado=${r.estado}` : 'ausente' }); }
+        for (const ref of esperado.contextoProjeto.ausentes ?? []) checks.push({ criterio: `contexto_projeto NÃO entrega o contexto "${ref}" de outro projeto (isolamento)`, ok: !refs.some((x) => x.id === semeado.ids[ref]) && !JSON.stringify(c).includes(semeado.ids[ref]), detalhe: `${refs.length} referência(s)` });
+      }
+      if (esperado.frameworkConfirmado) checks.push({ criterio: `framework "${esperado.frameworkConfirmado}" confirmado por evidência antes da análise`, ok: ctx.frameworks?.some((f) => f.id === esperado.frameworkConfirmado && f.estado === 'CONFIRMADO'), detalhe: 'contexto_projeto.frameworks' });
+      casos.push({ caso: n, titulo: esperado.titulo, ...resumir(checks), checks, achados: (resposta.findings ?? []).map((f) => ({ type: f.type, scenario: f.scenario ?? null, severity: f.severity })), seleçãoSugerida: resposta.suggestedSelection ?? [], limitesConhecidos: esperado.limitesConhecidos ?? [] });
+    } finally { semeado?.limpar(); }
+  }
   const unit = await chamar('executar_validacao', { capability: 'unit' });
   gerais.push(...avaliarExecucao('unit', unit, 'BLOCKED'));
   const evidDepois = await chamar('consultar_evidencias', {});
@@ -58,8 +83,8 @@ try {
 
   const resultado = { tipo: 'avaliacao-deterministica', geradoEm: new Date().toISOString(), prumo: { versao: versaoPrumo, commit, mcp: path.relative(lab, mcpJs).startsWith('..') ? 'externo' : mcpJs, skillSha256: skillSha }, node: process.version,
     ferramentas, gerais: { ...resumir(gerais), checks: gerais }, casos,
-    resumo: { casosAprovados: casos.filter((c) => c.aprovado).length, casos: casos.length, verificacoes: casos.reduce((n, c) => n + c.total, 0) + gerais.length, verificacoesOk: casos.reduce((n, c) => n + c.ok, 0) + gerais.filter((g) => g.ok).length },
-    aprovado: casos.every((c) => c.aprovado) && gerais.every((g) => g.ok),
+    resumo: { casosAprovados: casos.filter((c) => c.aprovado).length, casos: casos.filter((c) => c.estado !== 'NAO_APLICAVEL').length, naoAplicaveis: casos.filter((c) => c.estado === 'NAO_APLICAVEL').length, verificacoes: casos.reduce((n, c) => n + c.total, 0) + gerais.length, verificacoesOk: casos.reduce((n, c) => n + c.ok, 0) + gerais.filter((g) => g.ok).length },
+    aprovado: casos.filter((c) => c.estado !== 'NAO_APLICAVEL').every((c) => c.aprovado) && gerais.every((g) => g.ok),
     observacao: 'Aprovado significa que o comportamento estrutural do Prumo atendeu aos critérios. Julgamento semântico não é avaliado aqui (veja semantica.mjs).' };
   if (!process.argv.includes('--sem-gravar')) {
     const nome = `${resultado.geradoEm.slice(0, 10)}-prumo-${versaoPrumo}${commit ? '-' + commit : ''}-deterministico.json`;
@@ -67,7 +92,7 @@ try {
     fs.writeFileSync(path.join(lab, 'avaliacoes', 'resultados', nome), JSON.stringify(resultado, null, 2) + '\n');
     console.log('Resultado gravado em avaliacoes/resultados/' + nome);
   }
-  for (const c of casos) console.log(`${c.aprovado ? 'OK    ' : 'FALHOU'} caso ${c.caso} — ${c.titulo}: ${c.ok}/${c.total}${c.falhas.length ? ' · ' + c.falhas.join(' | ') : ''}`);
+  for (const c of casos) console.log(`${c.estado === 'NAO_APLICAVEL' ? 'N/A   ' : c.aprovado ? 'OK    ' : 'FALHOU'} caso ${c.caso} — ${c.titulo}: ${c.estado === 'NAO_APLICAVEL' ? c.motivo : `${c.ok}/${c.total}${c.falhas.length ? ' · ' + c.falhas.join(' | ') : ''}`}`);
   console.log(`${gerais.every((g) => g.ok) ? 'OK    ' : 'FALHOU'} gerais: ${gerais.filter((g) => g.ok).length}/${gerais.length}${gerais.filter((g) => !g.ok).map((g) => ' · ' + g.criterio).join('')}`);
   console.log(`Prumo ${versaoPrumo}${commit ? ' @' + commit : ''}: ${resultado.resumo.casosAprovados}/${resultado.resumo.casos} casos, ${resultado.resumo.verificacoesOk}/${resultado.resumo.verificacoes} verificações.`);
   process.exitCode = resultado.aprovado ? 0 : 1;

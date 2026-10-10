@@ -1,0 +1,13 @@
+{
+  "requirement": "O cancelamento de pedido deve ser verificado pela interface e pela API.",
+  "source": "requisito informado pela pessoa",
+  "existingTests": [
+    {
+      "id": "E2E",
+      "behavior": "testes de pedidos em Playwright",
+      "testPath": "aplicacao/testes-e2e/pedidos.spec.ts",
+      "technique": "experience"
+    }
+  ],
+  "candidates": []
+}

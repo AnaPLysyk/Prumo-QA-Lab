@@ -11,7 +11,13 @@ export function avaliarRevisao(esperado, resposta) {
   const v = (criterio, ok, detalhe) => checks.push({ criterio, ok: Boolean(ok), detalhe });
   v('análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)', resposta?.state === 'NOT_VERIFIED' && resposta?.executed === false, `state=${resposta?.state} executed=${resposta?.executed}`);
   v('nenhum PASS inventado na resposta', !/\bPASS\b/.test(JSON.stringify(resposta ?? {})), 'busca por PASS no JSON da resposta');
-  v('requisito encontrado literalmente na fonte autorizada (nada inventado)', (resposta?.facts ?? []).some((f) => f.kind === 'source_read' && f.requirementFoundVerbatim === true), 'fato source_read com requirementFoundVerbatim');
+  const fatos = Array.isArray(resposta?.facts) ? resposta.facts : [];
+  // Casos de contexto e de Playwright não dependem de documento-fonte: usam fatos próprios (esperado.fatos).
+  if (!esperado.fatos) v('requisito encontrado literalmente na fonte autorizada (nada inventado)', fatos.some((f) => f.kind === 'source_read' && f.requirementFoundVerbatim === true), 'fato source_read com requirementFoundVerbatim');
+  for (const ft of esperado.fatos ?? []) { const ok = fatos.some((f) => Object.entries(ft).every(([k, val]) => f[k] === val)); v(`fato ${JSON.stringify(ft)}`, ok, ok ? 'presente' : 'ausente'); }
+  for (const k of esperado.semFatos ?? []) { const presentes = fatos.filter((f) => f.kind === k).length; v(`nenhum fato "${k}" (o recurso não pode ser usado)`, presentes === 0, `${presentes} fato(s)`); }
+  for (const pre of esperado.naoApontaPrefixo ?? []) { const indevidos = achados.filter((f) => f.type.startsWith(pre)).map((f) => f.type); v(`não aponta achados ${pre}*`, indevidos.length === 0, indevidos.join(',') || 'nenhum'); }
+  for (const tr of esperado.proibidosTrecho ?? []) { const atingidos = achados.filter((f) => JSON.stringify(f.evidence ?? []).includes(tr)); v(`nenhum achado atinge trechos com "${tr}" (precisão)`, atingidos.length === 0, atingidos.map((f) => f.type).join(',') || 'nenhum'); }
   for (const o of esperado.obrigatorios ?? []) v(`aponta ${rotulo(o)}`, tem(achados, o), tem(achados, o) ? 'presente' : 'ausente');
   for (const p of esperado.proibidos ?? []) v(`não aponta ${rotulo(p)}`, !tem(achados, p), tem(achados, p) ? 'achado indevido presente' : 'ausente, como esperado');
   for (const id of esperado.selecao?.inclui ?? []) v(`mantém ${id} na seleção sugerida`, selecao.includes(id), `selecao=${selecao.join(',')}`);

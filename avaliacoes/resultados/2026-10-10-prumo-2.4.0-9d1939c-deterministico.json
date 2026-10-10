@@ -1,0 +1,1183 @@
+{
+  "tipo": "avaliacao-deterministica",
+  "geradoEm": "2026-10-10T19:51:19.421Z",
+  "prumo": {
+    "versao": "2.4.0",
+    "commit": "9d1939c",
+    "mcp": "externo",
+    "skillSha256": "ce095078b91d5833c6960bf50340f2bf60f22f3e14d4c0916ca5b2636352dbc8"
+  },
+  "node": "v24.20.0",
+  "ferramentas": [
+    "consultar_evidencias",
+    "contexto_projeto",
+    "executar_validacao",
+    "revisar_cobertura"
+  ],
+  "gerais": {
+    "total": 12,
+    "ok": 12,
+    "falhas": [],
+    "aprovado": true,
+    "checks": [
+      {
+        "criterio": "servidor expõe exatamente as quatro ferramentas",
+        "ok": true,
+        "detalhe": "consultar_evidencias,contexto_projeto,executar_validacao,revisar_cobertura"
+      },
+      {
+        "criterio": "contexto identifica projeto de automação com node:test",
+        "ok": true,
+        "detalhe": "tipo=automacao stack=node:test,TypeScript,@playwright/test"
+      },
+      {
+        "criterio": "contexto lista requisitos, testes e código autorizados",
+        "ok": true,
+        "detalhe": "22 fontes"
+      },
+      {
+        "criterio": "contexto é NOT_VERIFIED e declara informações ausentes",
+        "ok": true,
+        "detalhe": "state=NOT_VERIFIED"
+      },
+      {
+        "criterio": "contexto não expõe cenários, esperados nem avaliações do laboratório",
+        "ok": true,
+        "detalhe": "varredura do contexto retornado"
+      },
+      {
+        "criterio": "contexto detecta Playwright como CONFIRMADO por evidência real (dependência + configuração)",
+        "ok": true,
+        "detalhe": "[[\"playwright\",\"CONFIRMADO\"],[\"api-rest\",\"PROVAVEL\"]]"
+      },
+      {
+        "criterio": "sem habilitação da pessoa, contexto_projeto não entrega contextos ao agente (padrão seguro)",
+        "ok": true,
+        "detalhe": "false"
+      },
+      {
+        "criterio": "evidências existentes (rodadas anteriores) não contêm PASS nem execução real sem aprovação humana",
+        "ok": true,
+        "detalhe": "24 evidência(s); status=com resultados"
+      },
+      {
+        "criterio": "unit: estado BLOCKED",
+        "ok": true,
+        "detalhe": "status=BLOCKED"
+      },
+      {
+        "criterio": "unit: nada foi executado",
+        "ok": true,
+        "detalhe": "executed=false"
+      },
+      {
+        "criterio": "unit: sem PASS",
+        "ok": true,
+        "detalhe": "HUMAN_APPROVAL_REQUIRED"
+      },
+      {
+        "criterio": "a tentativa bloqueada gerou evidência BLOCKED, sem PASS",
+        "ok": true,
+        "detalhe": "24 → 26 evidências"
+      }
+    ]
+  },
+  "casos": [
+    {
+      "caso": 1,
+      "titulo": "Valores-limite",
+      "total": 17,
+      "ok": 17,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta MISSING_BOUNDARY em c5",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta MISSING_ORACLE",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta WEAK_TEST",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta UNVERIFIED_SOURCE",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_BOUNDARY em c1",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_BOUNDARY em c2",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_BOUNDARY em c3",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_BOUNDARY em c4",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "mantém c1 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c2 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c3 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c4 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c6 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        }
+      ],
+      "achados": [
+        {
+          "type": "MISSING_BOUNDARY",
+          "scenario": "c5",
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+        "c6"
+      ],
+      "limitesConhecidos": [
+        "O Prumo confere que o limite foi declarado; não decide se 17, 18, 65 e 66 são os valores certos nem se o conjunto basta (julgamento semântico da IA)."
+      ]
+    },
+    {
+      "caso": 2,
+      "titulo": "Classes de equivalência",
+      "total": 14,
+      "ok": 14,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta POTENTIAL_REDUNDANCY em c-sudeste",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY em c-sul",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY em c-nordeste",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY em c-centro-oeste",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY em c-invalida",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_ORACLE",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "mantém c-sul na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c-sul,c-nordeste,c-centro-oeste,c-invalida"
+        },
+        {
+          "criterio": "mantém c-nordeste na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c-sul,c-nordeste,c-centro-oeste,c-invalida"
+        },
+        {
+          "criterio": "mantém c-centro-oeste na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c-sul,c-nordeste,c-centro-oeste,c-invalida"
+        },
+        {
+          "criterio": "mantém c-invalida na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c-sul,c-nordeste,c-centro-oeste,c-invalida"
+        },
+        {
+          "criterio": "marca c-sudeste como redundante candidato (fora da seleção)",
+          "ok": true,
+          "detalhe": "selecao=c-sul,c-nordeste,c-centro-oeste,c-invalida"
+        }
+      ],
+      "achados": [
+        {
+          "type": "POTENTIAL_REDUNDANCY",
+          "scenario": "c-sudeste",
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c-sul",
+        "c-nordeste",
+        "c-centro-oeste",
+        "c-invalida"
+      ],
+      "limitesConhecidos": [
+        "Equivalência semântica entre SUL e SUDESTE é decisão da IA; o Prumo só aponta assinatura estrutural idêntica como candidata."
+      ]
+    },
+    {
+      "caso": 3,
+      "titulo": "Permissões",
+      "total": 16,
+      "ok": 16,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta MISSING_CONDITIONS em c6",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta MISSING_CONDITIONS em c1",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_CONDITIONS em c2",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_CONDITIONS em c3",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_CONDITIONS em c4",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_CONDITIONS em c5",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_ORACLE",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "mantém c1 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c2 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c3 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c4 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        },
+        {
+          "criterio": "mantém c5 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2,c3,c4,c5,c6"
+        }
+      ],
+      "achados": [
+        {
+          "type": "MISSING_CONDITIONS",
+          "scenario": "c6",
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+        "c6"
+      ],
+      "limitesConhecidos": [
+        "O Prumo não sabe que GERENTE e OPERADOR não têm teste existente; só a leitura semântica da IA compara a tabela de decisão com o que já existe."
+      ]
+    },
+    {
+      "caso": 4,
+      "titulo": "Persistência após operação recusada",
+      "total": 8,
+      "ok": 8,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta MISSING_ORACLE em c2",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta MISSING_ORACLE em c1",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_CONDITIONS",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "mantém c1 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2"
+        }
+      ],
+      "achados": [
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "c2",
+          "severity": "medium"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "c2",
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c1",
+        "c2"
+      ],
+      "limitesConhecidos": [
+        "O Prumo não consegue dizer que \"lançar erro\" não prova persistência no teste existente T1; isso é demonstrado pela análise de mutantes do laboratório e pelo julgamento da IA."
+      ]
+    },
+    {
+      "caso": 5,
+      "titulo": "Redundância",
+      "total": 10,
+      "ok": 10,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta POTENTIAL_REDUNDANCY em c1",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY em c2",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY em c3",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta MISSING_ORACLE",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "mantém c2 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c2,c3"
+        },
+        {
+          "criterio": "mantém c3 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c2,c3"
+        },
+        {
+          "criterio": "marca c1 como redundante candidato (fora da seleção)",
+          "ok": true,
+          "detalhe": "selecao=c2,c3"
+        }
+      ],
+      "achados": [
+        {
+          "type": "POTENTIAL_REDUNDANCY",
+          "scenario": "c1",
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c2",
+        "c3"
+      ],
+      "limitesConhecidos": [
+        "c3 só difere por condição; o Prumo não elimina cobertura necessária e deixa a decisão final à IA."
+      ]
+    },
+    {
+      "caso": 6,
+      "titulo": "Falta de oráculo",
+      "total": 8,
+      "ok": 8,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta MISSING_ORACLE em c2",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta MISSING_ORACLE em c1",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "mantém c1 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2"
+        },
+        {
+          "criterio": "mantém c2 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1,c2"
+        }
+      ],
+      "achados": [
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "c2",
+          "severity": "medium"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "c2",
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c1",
+        "c2"
+      ],
+      "limitesConhecidos": [
+        "O Prumo aponta a ausência de oráculo; escolher o resultado esperado correto depende de requisito, não de inferência."
+      ]
+    },
+    {
+      "caso": 7,
+      "titulo": "Falso positivo",
+      "total": 10,
+      "ok": 10,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta WEAK_TEST em T1",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta WEAK_TEST em T1 (severidade medium)",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta WEAK_TEST em T2 (severidade low)",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta MISSING_ORACLE",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta UNVERIFIED_TEST",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "mantém c1 na seleção sugerida",
+          "ok": true,
+          "detalhe": "selecao=c1"
+        }
+      ],
+      "achados": [
+        {
+          "type": "WEAK_TEST",
+          "scenario": "T1",
+          "severity": "medium"
+        },
+        {
+          "type": "WEAK_TEST",
+          "scenario": "T2",
+          "severity": "low"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c1"
+      ],
+      "limitesConhecidos": [
+        "A detecção de teste ignorado é por arquivo. Critérios de severidade (T1 associado = medium; T2 apenas no mesmo arquivo = low) foram ACRESCENTADOS depois que o defeito de atribuição foi identificado na validação final; versões anteriores (2.2.0 e a release 2.3.0) não os atendem por construção.",
+        "O Prumo não avalia o conteúdo das assertions: \"retorna um número\" não é reconhecido como superficial; isso é demonstrado pelos mutantes."
+      ]
+    },
+    {
+      "caso": 8,
+      "titulo": "Requisito contraditório e ambiente bloqueado",
+      "total": 9,
+      "ok": 9,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "requisito encontrado literalmente na fonte autorizada (nada inventado)",
+          "ok": true,
+          "detalhe": "fato source_read com requirementFoundVerbatim"
+        },
+        {
+          "criterio": "aponta CONTRADICTORY_REQUIREMENT",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta BLOCKING_CONDITION em c2",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta POTENTIAL_REDUNDANCY",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "integracao: estado BLOCKED",
+          "ok": true,
+          "detalhe": "status=BLOCKED"
+        },
+        {
+          "criterio": "integracao: nada foi executado",
+          "ok": true,
+          "detalhe": "executed=false"
+        },
+        {
+          "criterio": "integracao: sem PASS",
+          "ok": true,
+          "detalhe": "POLICY_BLOCKED"
+        }
+      ],
+      "achados": [
+        {
+          "type": "CONTRADICTORY_REQUIREMENT",
+          "scenario": null,
+          "severity": "high"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "c2",
+          "severity": "high"
+        }
+      ],
+      "seleçãoSugerida": [
+        "c1",
+        "c2"
+      ],
+      "limitesConhecidos": [
+        "O Prumo registra a contradição informada e o bloqueio; não resolve o conflito nem inventa a regra de frete."
+      ]
+    },
+    {
+      "caso": 9,
+      "titulo": "Contexto aprovado",
+      "total": 5,
+      "ok": 5,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "fato {\"kind\":\"context_used\",\"estado\":\"APROVADO\",\"requirementFoundInContext\":true}",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta achados CONTEXT_*",
+          "ok": true,
+          "detalhe": "nenhum"
+        },
+        {
+          "criterio": "contexto_projeto entrega o contexto \"a\" com estado APROVADO, versão, hash e origem",
+          "ok": true,
+          "detalhe": "estado=APROVADO"
+        }
+      ],
+      "achados": [],
+      "seleçãoSugerida": [
+        "C1"
+      ],
+      "limitesConhecidos": [
+        "O Prumo comprova a origem, a versão, o hash e a aprovação humana do contexto; não decide se o requisito está correto nem se os cenários bastam."
+      ]
+    },
+    {
+      "caso": 10,
+      "titulo": "Contextos contraditórios",
+      "total": 6,
+      "ok": 6,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "fato {\"kind\":\"context_used\",\"estado\":\"CONFLITANTE\"}",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta CONTEXT_CONFLICT (severidade high)",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "contexto_projeto entrega o contexto \"a\" com estado CONFLITANTE, versão, hash e origem",
+          "ok": true,
+          "detalhe": "estado=CONFLITANTE"
+        },
+        {
+          "criterio": "contexto_projeto entrega o contexto \"b\" com estado CONFLITANTE, versão, hash e origem",
+          "ok": true,
+          "detalhe": "estado=CONFLITANTE"
+        }
+      ],
+      "achados": [
+        {
+          "type": "CONTEXT_CONFLICT",
+          "scenario": null,
+          "severity": "high"
+        }
+      ],
+      "seleçãoSugerida": [
+        "C1"
+      ],
+      "limitesConhecidos": [
+        "O Prumo aponta o conflito e os contextos envolvidos; não escolhe um lado nem resolve o conflito."
+      ]
+    },
+    {
+      "caso": 11,
+      "titulo": "Contexto desatualizado",
+      "total": 5,
+      "ok": 5,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "fato {\"kind\":\"context_used\",\"estado\":\"DESATUALIZADO\"}",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta CONTEXT_OUTDATED (severidade high)",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "contexto_projeto entrega o contexto \"a\" com estado DESATUALIZADO, versão, hash e origem",
+          "ok": true,
+          "detalhe": "estado=DESATUALIZADO"
+        }
+      ],
+      "achados": [
+        {
+          "type": "CONTEXT_OUTDATED",
+          "scenario": null,
+          "severity": "high"
+        }
+      ],
+      "seleçãoSugerida": [
+        "C1"
+      ],
+      "limitesConhecidos": [
+        "O Prumo informa que a versão não vale mais; localizar a versão substituta é decisão da pessoa."
+      ]
+    },
+    {
+      "caso": 12,
+      "titulo": "Origem documental ausente",
+      "total": 6,
+      "ok": 6,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "fato {\"kind\":\"context_used\",\"estado\":\"RASCUNHO\"}",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta CONTEXT_SOURCE_MISSING",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta CONTEXT_NOT_APPROVED",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "contexto_projeto entrega o contexto \"a\" com estado RASCUNHO, versão, hash e origem",
+          "ok": true,
+          "detalhe": "estado=RASCUNHO"
+        }
+      ],
+      "achados": [
+        {
+          "type": "CONTEXT_NOT_APPROVED",
+          "scenario": null,
+          "severity": "medium"
+        },
+        {
+          "type": "CONTEXT_SOURCE_MISSING",
+          "scenario": null,
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [
+        "C1"
+      ],
+      "limitesConhecidos": [
+        "Sem origem o contexto não pode ser aprovado; o Prumo registra a lacuna e não a preenche."
+      ]
+    },
+    {
+      "caso": 13,
+      "titulo": "Isolamento entre projetos",
+      "total": 6,
+      "ok": 6,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "nenhum fato \"context_used\" (o recurso não pode ser usado)",
+          "ok": true,
+          "detalhe": "0 fato(s)"
+        },
+        {
+          "criterio": "aponta CONTEXT_UNAVAILABLE (severidade high)",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta CONTEXT_NOT_APPROVED",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "contexto_projeto NÃO entrega o contexto \"a\" de outro projeto (isolamento)",
+          "ok": true,
+          "detalhe": "0 referência(s)"
+        }
+      ],
+      "achados": [
+        {
+          "type": "CONTEXT_UNAVAILABLE",
+          "scenario": null,
+          "severity": "high"
+        }
+      ],
+      "seleçãoSugerida": [
+        "C1"
+      ],
+      "limitesConhecidos": [
+        "O contexto aprovado de outro projeto não é visível: nem listado, nem lido por id."
+      ]
+    },
+    {
+      "caso": 14,
+      "titulo": "Testes Playwright com antipadrões",
+      "total": 18,
+      "ok": 18,
+      "falhas": [],
+      "aprovado": true,
+      "checks": [
+        {
+          "criterio": "análise estrutural não afirma execução (state=NOT_VERIFIED e executed=false)",
+          "ok": true,
+          "detalhe": "state=NOT_VERIFIED executed=false"
+        },
+        {
+          "criterio": "nenhum PASS inventado na resposta",
+          "ok": true,
+          "detalhe": "busca por PASS no JSON da resposta"
+        },
+        {
+          "criterio": "fato {\"kind\":\"test_read\",\"id\":\"E2E\"}",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "nenhum achado atinge trechos com \"getByRole\" (precisão)",
+          "ok": true,
+          "detalhe": "nenhum"
+        },
+        {
+          "criterio": "nenhum achado atinge trechos com \"getByLabel\" (precisão)",
+          "ok": true,
+          "detalhe": "nenhum"
+        },
+        {
+          "criterio": "nenhum achado atinge trechos com \"getByTestId\" (precisão)",
+          "ok": true,
+          "detalhe": "nenhum"
+        },
+        {
+          "criterio": "nenhum achado atinge trechos com \"toHaveText\" (precisão)",
+          "ok": true,
+          "detalhe": "nenhum"
+        },
+        {
+          "criterio": "aponta PW_ESPERA_FIXA em E2E",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta PW_SELETOR_FRAGIL em E2E",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta PW_SEM_ASSERTION em E2E",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta PW_TESTE_IGNORADO em E2E",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta PW_TESTE_DUPLICADO em E2E",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta PW_ASSERTION_FRACA em E2E",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "aponta PW_API_SO_STATUS em E2E",
+          "ok": true,
+          "detalhe": "presente"
+        },
+        {
+          "criterio": "não aponta PW_TEST_ONLY",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta PW_FORCE",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "não aponta PW_ASSERTION_SEM_AWAIT",
+          "ok": true,
+          "detalhe": "ausente, como esperado"
+        },
+        {
+          "criterio": "framework \"playwright\" confirmado por evidência antes da análise",
+          "ok": true,
+          "detalhe": "contexto_projeto.frameworks"
+        }
+      ],
+      "achados": [
+        {
+          "type": "PW_SEM_ASSERTION",
+          "scenario": "E2E",
+          "severity": "medium"
+        },
+        {
+          "type": "PW_SELETOR_FRAGIL",
+          "scenario": "E2E",
+          "severity": "medium"
+        },
+        {
+          "type": "PW_ESPERA_FIXA",
+          "scenario": "E2E",
+          "severity": "medium"
+        },
+        {
+          "type": "PW_TESTE_IGNORADO",
+          "scenario": "E2E",
+          "severity": "medium"
+        },
+        {
+          "type": "PW_TESTE_DUPLICADO",
+          "scenario": "E2E",
+          "severity": "medium"
+        },
+        {
+          "type": "PW_ASSERTION_FRACA",
+          "scenario": "E2E",
+          "severity": "medium"
+        },
+        {
+          "type": "PW_API_SO_STATUS",
+          "scenario": "E2E",
+          "severity": "low"
+        },
+        {
+          "type": "WEAK_TEST",
+          "scenario": "E2E",
+          "severity": "low"
+        },
+        {
+          "type": "COVERAGE_GAP",
+          "scenario": null,
+          "severity": "medium"
+        }
+      ],
+      "seleçãoSugerida": [],
+      "limitesConhecidos": [
+        "O Prumo não consegue, só pelo texto, saber que \"salvar pedido\" não verifica a persistência nem que faltam cenários negativos de permissão: isso é julgamento da IA com base no requisito aprovado."
+      ]
+    }
+  ],
+  "resumo": {
+    "casosAprovados": 14,
+    "casos": 14,
+    "naoAplicaveis": 0,
+    "verificacoes": 150,
+    "verificacoesOk": 150
+  },
+  "aprovado": true,
+  "observacao": "Aprovado significa que o comportamento estrutural do Prumo atendeu aos critérios. Julgamento semântico não é avaliado aqui (veja semantica.mjs)."
+}

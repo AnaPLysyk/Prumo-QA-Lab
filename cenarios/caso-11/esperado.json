@@ -1,0 +1,46 @@
+{
+  "caso": 11,
+  "titulo": "Contexto desatualizado",
+  "exigeRecurso": "contextoId",
+  "semente": [
+    {
+      "ref": "a",
+      "conteudo": {
+        "tipo": "requisito",
+        "titulo": "Requisito RQ-11",
+        "texto": "RQ-11: O cupom vale 30 dias.",
+        "chave": "RQ-11",
+        "origem": {
+          "tipo": "documento",
+          "referencia": "requisitos/RQ-03.md"
+        }
+      },
+      "acoes": [
+        "aprovar",
+        "desatualizar"
+      ]
+    }
+  ],
+  "mcpHabilitado": true,
+  "obrigatorios": [
+    {
+      "type": "CONTEXT_OUTDATED",
+      "severity": "high"
+    }
+  ],
+  "fatos": [
+    {
+      "kind": "context_used",
+      "estado": "DESATUALIZADO"
+    }
+  ],
+  "contextoProjeto": {
+    "estados": {
+      "a": "DESATUALIZADO"
+    }
+  },
+  "proibidos": [],
+  "limitesConhecidos": [
+    "O Prumo informa que a versão não vale mais; localizar a versão substituta é decisão da pessoa."
+  ]
+}

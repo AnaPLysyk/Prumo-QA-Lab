@@ -14,7 +14,7 @@ import { mutantes } from './mutantes.mjs';
  * As respostas abaixo são FIXTURES SINTÉTICAS escritas à mão para provar que a rubrica é satisfazível e que reprova respostas ruins.
  * NÃO são respostas de IA e NÃO entram em nenhum resultado de avaliação.
  */
-const doc = (n) => fs.readFileSync(`requisitos/RQ-0${n}.md`, 'utf8');
+const doc = (n) => (n === 14 ? '' : fs.readFileSync(`requisitos/RQ-0${n}.md`, 'utf8'));
 const req = (n) => doc(n).split('\n').filter((l) => l && !l.startsWith('#'))[0];
 const c = (id, entrada, resultadoEsperado, oraculo, extra = {}) => ({ id, comportamento: `cenário ${id}`, tecnica: 'equivalence', entrada, resultadoEsperado, oraculo, risco: 'risco', ...extra });
 const base = (n, cenarios, extra = {}) => ({ requisito: req(n), riscos: ['r'], lacunasNosTestesExistentes: [], cenarios, redundanciasCandidatas: [], hipoteses: [], incertezas: [], bloqueios: [], declaraExecucao: false, ...extra });
@@ -26,7 +26,8 @@ const boas = {
   5: base(5, [c('a', 'região NORDESTE', '20', 'frete 20')], { redundanciasCandidatas: [['teste SUL', 'teste SUDESTE']] }),
   6: base(6, [c('a', 'cupom PRUMO10 total 200', '180', 'total final igual a 180'), c('b', 'cupom OUTRO total 200', '200', 'total final igual a 200')]),
   7: base(7, [c('a', 'PRUMO10 total 200', '180', 'total final 180')], { lacunasNosTestesExistentes: ['O teste está com skip (ignorado)', 'O outro teste só confere o tipo número, não valida o valor do desconto'] }),
-  8: base(8, [c('a', 'frete de pedido de 600 de cliente comum', 'indefinido até esclarecer o conflito', 'a definir')], { incertezas: ['As regras de frete grátis se contradizem'], bloqueios: ['Banco de testes isolado ausente: integração bloqueada'] })
+  8: base(8, [c('a', 'frete de pedido de 600 de cliente comum', 'indefinido até esclarecer o conflito', 'a definir')], { incertezas: ['As regras de frete grátis se contradizem'], bloqueios: ['Banco de testes isolado ausente: integração bloqueada'] }),
+  14: base(14, [c('a', 'cancelar pedido pela interface', 'pedido cancelado', 'o status do pedido mudou (consulta GET ao servidor)')], { requisito: 'O cancelamento de pedido deve ser verificado pela interface e pela API.', lacunasNosTestesExistentes: ['O teste cancelar pedido não tem nenhuma assertion', 'Usa waitForTimeout (espera fixa) e um seletor XPath frágil', 'O teste do operador está com skip (ignorado)', 'Os dois testes de listar pedidos são idênticos (duplicados)', 'O teste do título da página usa toBeTruthy (assertion fraca)', 'O teste de API só confere .ok(), sem validar o corpo', 'Falta verificar a persistência no servidor depois de salvar ou cancelar'] })
 };
 const falhou = (n, r) => avaliarResposta(n, r, doc(n)).filter((x) => !x.ok).map((x) => x.id);
 
@@ -44,6 +45,16 @@ test('rubrica reprova respostas ruins: execução afirmada, requisito inventado,
   assert.ok(falhou(6, { ...boas[6], cenarios: [...boas[6].cenarios, c('z', 'cupom com validade de 30 dias', 'expira', 'recusa')] }).includes('sem-regra-inventada'));
 });
 
+test('rubrica do caso 14 (Playwright): exige cada antipadrão, não acusa o teste bom e não exige requisito literal', () => {
+  assert.deepEqual(falhou(14, boas[14]), []);
+  const sem = (trecho) => ({ ...boas[14], lacunasNosTestesExistentes: boas[14].lacunasNosTestesExistentes.filter((l) => !l.includes(trecho)) });
+  for (const [trecho, id] of [['waitForTimeout', 'espera-fixa'], ['skip', 'teste-ignorado'], ['duplicados', 'duplicado'], ['toBeTruthy', 'assertion-fraca'], ['.ok()', 'api-so-status']]) assert.ok(falhou(14, sem(trecho)).includes(id), id);
+  // persistência pode ser citada nas lacunas OU no oráculo dos cenários: só some se as duas fontes não a mencionarem
+  assert.ok(falhou(14, { ...sem('persistência'), cenarios: [c('a', 'cancelar pedido pela interface', 'pedido cancelado', 'mensagem de sucesso na tela')] }).includes('persistencia'));
+  assert.ok(falhou(14, { ...boas[14], lacunasNosTestesExistentes: [...boas[14].lacunasNosTestesExistentes, 'O teste salvar pedido usa seletor frágil'] }).includes('nao-acusa-teste-bom'));
+  assert.ok(falhou(14, { ...boas[14], declaraExecucao: true }).includes('sem-execucao-afirmada'));
+});
+
 test('rubrica por caso: fronteira faltando, faixa duplicada, perfil ausente, oráculo só de erro, escolha de regra contraditória', () => {
   assert.ok(falhou(1, base(1, [17, 18, 65].map((n) => c('L' + n, `idade ${n}`, 'x', 'y', { limite: n })))).includes('quatro-fronteiras'));
   assert.ok(falhou(2, base(2, [c('a', 'região SUL', '10', 'x'), c('b', 'região SUDESTE', '10', 'x'), c('c', 'região NORDESTE', '20', 'x'), c('d', 'região CENTRO_OESTE', '15', 'x'), c('e', 'região LUA desconhecida', 'erro', 'x')])).includes('sem-duplicar-faixa'));
@@ -51,7 +62,11 @@ test('rubrica por caso: fronteira faltando, faixa duplicada, perfil ausente, or�
   assert.ok(falhou(3, base(3, boas[3].cenarios.slice(0, 3))).includes('cinco-combinacoes'));
   assert.ok(falhou(4, base(4, [c('a', 'OPERADOR exclui', 'recusa', 'lança erro /não autorizada/')])).includes('oraculo-de-estado'));
   assert.ok(falhou(5, base(5, [], { redundanciasCandidatas: [['NORDESTE', 'SUL']] })).includes('nao-elimina-cobertura-necessaria'));
-  assert.ok(falhou(8, base(8, [c('a', 'frete de pedido de 600', 'frete grátis para todos', 'frete = 0')], { bloqueios: ['banco'], incertezas: ['contradição'] })).includes('nao-escolhe-regra'));
+  // critério v2 (docs/ERRATA-CRITERIOS.md): só o cenário contraditório (não premium, acima de 500) não pode ter resultado definitivo
+  const comum = (esperado) => base(8, [c('a', 'frete de pedido de 600 de cliente não premium', esperado, esperado)], { bloqueios: ['banco'], incertezas: ['contradição'] });
+  assert.ok(falhou(8, comum('frete grátis')).includes('nao-escolhe-regra'), 'escolher a regra para o cenário contraditório reprova');
+  assert.ok(!falhou(8, comum('indefinido até esclarecer o conflito')).includes('nao-escolhe-regra'));
+  assert.ok(!falhou(8, base(8, [c('a', 'frete de pedido de 600 de cliente premium', 'frete zero: as duas regras concordam', 'frete = 0')], { bloqueios: ['banco'], incertezas: ['contradição'] })).includes('nao-escolhe-regra'), 'cenário determinado pelas duas regras é livre');
   assert.ok(falhou(8, { ...boas[8], bloqueios: [] }).includes('registra-bloqueio-de-ambiente'));
 });
 

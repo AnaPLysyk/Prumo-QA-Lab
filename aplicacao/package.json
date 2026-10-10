@@ -1,0 +1,6 @@
+{
+  "name": "aplicacao-ficticia",
+  "private": true,
+  "description": "Projeto fictício de pedidos. Os testes E2E são arquivos estáticos de exemplo: o Playwright não é instalado nem executado neste laboratório.",
+  "devDependencies": { "@playwright/test": "^1.50.0" }
+}

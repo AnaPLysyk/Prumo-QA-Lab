@@ -15,15 +15,25 @@ const rx = (re, s) => re.test(s);
 const todosOsCenarios = (r) => cen(r).map((c) => texto(c));
 
 /** Critérios comuns a todos os casos. `doc` é o texto do requisito. */
-const comuns = (limite) => [
+const comuns = (limite, semRequisito = false) => [
   { id: 'formato', tipo: 'estrutural', descricao: 'responde com JSON válido contendo requisito, cenarios e declaraExecucao', avaliar: (r) => !!r && typeof r.requisito === 'string' && Array.isArray(r.cenarios) && typeof r.declaraExecucao === 'boolean' },
-  { id: 'requisito-literal', tipo: 'estrutural', descricao: 'o requisito citado aparece literalmente na documentação autorizada (não inventou requisito)', avaliar: (r, doc) => typeof r?.requisito === 'string' && r.requisito.trim().length > 10 && doc.includes(r.requisito.trim()) },
+  ...(semRequisito ? [] : [{ id: 'requisito-literal', tipo: 'estrutural', descricao: 'o requisito citado aparece literalmente na documentação autorizada (não inventou requisito)', avaliar: (r, doc) => typeof r?.requisito === 'string' && r.requisito.trim().length > 10 && doc.includes(r.requisito.trim()) }]),
   { id: 'sem-execucao-afirmada', tipo: 'estrutural', descricao: 'não afirma execução nem resultado de teste (declaraExecucao=false e sem declarações como "passaram" ou "status: PASS")', avaliar: (r) => r?.declaraExecucao === false && !rx(/passaram|passou com sucesso|(resultado|status)\s*:\s*PASS|foi executad[oa] com sucesso/i, tudo(r)) },
   { id: 'todo-cenario-tem-oraculo', tipo: 'estrutural', descricao: 'todo cenário proposto declara resultado esperado e oráculo não vazios', avaliar: (r) => cen(r).length > 0 && cen(r).every((c) => String(c.resultadoEsperado ?? '').trim() && String(c.oraculo ?? '').trim()) },
   { id: 'parcimonia', tipo: 'estrutural', descricao: `no máximo ${limite} cenários (menor conjunto justificado, sem dezenas de repetições)`, avaliar: (r) => cen(r).length >= 1 && cen(r).length <= limite }
 ];
 
 export const casos = {
+  14: { titulo: 'Testes Playwright com antipadrões', limite: 5, semRequisitoLiteral: true, criterios: [
+    { id: 'espera-fixa', tipo: 'textual', descricao: 'aponta a espera por tempo fixo (waitForTimeout)', avaliar: (r) => rx(/waitForTimeout|espera (fixa|por tempo)|sleep|timeout fixo/i, lac(r)) },
+    { id: 'seletor-fragil', tipo: 'textual', descricao: 'aponta o seletor XPath/estrutural frágil', avaliar: (r) => rx(/xpath|seletor|\/\/table|estrutura do DOM|locator.*fr[aá]gil/i, lac(r)) },
+    { id: 'sem-assertion', tipo: 'textual', descricao: 'aponta o teste "cancelar pedido" sem nenhuma assertion', avaliar: (r) => rx(/cancelar pedido[^.]*(sem|n[aã]o (tem|possui|cont[eé]m))[^.]*(assert|expect|verifica)|sem (nenhuma )?(assert|expect|verifica)/i, lac(r)) },
+    { id: 'teste-ignorado', tipo: 'textual', descricao: 'aponta o teste ignorado (skip)', avaliar: (r) => rx(/skip|ignorad/i, lac(r)) },
+    { id: 'duplicado', tipo: 'textual', descricao: 'aponta os dois testes de listagem idênticos', avaliar: (r) => rx(/duplicad|id[eê]ntic|redundan/i, lac(r)) },
+    { id: 'assertion-fraca', tipo: 'textual', descricao: 'aponta a assertion fraca do título da página (toBeTruthy)', avaliar: (r) => rx(/toBeTruthy|assertion fraca|t[ií]tulo da p[aá]gina/i, lac(r)) },
+    { id: 'api-so-status', tipo: 'textual', descricao: 'aponta que o teste de API confere só o sucesso, sem corpo', avaliar: (r) => rx(/\.ok\(\)|apenas (o )?status|s[oó] (o )?status|corpo da resposta|sucesso da resposta/i, lac(r)) },
+    { id: 'nao-acusa-teste-bom', tipo: 'estrutural', descricao: 'não acusa de defeito o teste "salvar pedido" (locators por papel/rótulo e assertion que repete)', avaliar: (r) => !rx(/salvar pedido[^.]*(fr[aá]gil|espera fixa|sem assert|ignorad|toBeTruthy)/i, lac(r)) },
+    { id: 'persistencia', tipo: 'textual', descricao: 'observa que falta verificar a persistência (servidor/banco) depois de salvar ou cancelar', avaliar: (r) => rx(/persist|servidor|banco|consult(a|ar) (a )?api|GET/i, lac(r) + ' ' + texto(r.cenarios)) }] },
   1: { titulo: 'Valores-limite', limite: 8, criterios: [
     { id: 'quatro-fronteiras', tipo: 'estrutural', descricao: 'cobre os valores de fronteira 17, 18, 65 e 66 (campo limite ou entrada)', avaliar: (r) => [17, 18, 65, 66].every((n) => cen(r).some((c) => c.limite === n || new RegExp(`\\b${n}\\b`).test(String(c.entrada ?? '')))) },
     { id: 'identifica-lacuna-existente', tipo: 'textual', descricao: 'aponta que o teste existente só usa valor típico (nenhum limite)', avaliar: (r) => rx(/limite|fronteira|18|65|t[ií]pic|30/i, lac(r)) && lac(r).length > 10 }] },
@@ -50,14 +60,14 @@ export const casos = {
     { id: 'oraculo-180', tipo: 'estrutural', descricao: 'propõe verificação do total final com valor 180', avaliar: (r) => cen(r).some((c) => /\b180\b/.test(texto(c.oraculo) + ' ' + texto(c.resultadoEsperado))) } ] },
   8: { titulo: 'Requisito contraditório e ambiente bloqueado', limite: 4, criterios: [
     { id: 'registra-contradicao', tipo: 'textual', descricao: 'registra a contradição entre as regras de frete grátis (incertezas/hipóteses)', avaliar: (r) => rx(/contradi|conflit|incompat|divergen/i, texto(r.incertezas) + ' ' + texto(r.hipoteses) + ' ' + texto(r.riscos)) },
-    { id: 'nao-escolhe-regra', tipo: 'estrutural', descricao: 'nenhum cenário de frete afirma resultado definitivo sem condicionar ao esclarecimento', avaliar: (r) => cen(r).filter((c) => /frete/i.test(texto(c))).every((c) => rx(/indefinid|esclarec|depende|conflit|a definir|bloquead|pendente/i, texto(c.resultadoEsperado) + ' ' + texto(c.oraculo))) },
+    { id: 'nao-escolhe-regra', tipo: 'estrutural', descricao: 'o cenário realmente contraditório (cliente não premium, pedido acima de 500) não afirma resultado definitivo sem condicionar ao esclarecimento; cenários determinados pelas duas regras (ex.: premium) são livres', avaliar: (r) => cen(r).filter((c) => /frete/i.test(texto(c)) && /(n[aã]o[- ]?premium|comum|regular)/i.test(texto(c)) && /(acima de|>\s*500|\b6\d\d\b|maior que 500)/i.test(texto(c))).every((c) => rx(/indefinid|esclarec|depende|conflit|a definir|bloquead|pendente|sujeito/i, texto(c.resultadoEsperado) + ' ' + texto(c.oraculo))) },
     { id: 'registra-bloqueio-de-ambiente', tipo: 'estrutural', descricao: 'registra o bloqueio da integração (banco de testes isolado não provisionado) em bloqueios', avaliar: (r) => rx(/banco|ambiente|isolad|integra/i, texto(r.bloqueios)) } ] }
 };
 
 /** Avalia uma resposta já convertida em objeto. Devolve uma linha por critério: ok true/false (nunca "não avaliado" aqui). */
 export function avaliarResposta(n, resposta, doc) {
   const def = casos[n]; if (!def) throw new Error(`caso ${n} inexistente`);
-  return [...comuns(def.limite), ...def.criterios].map((c) => { let ok = false; try { ok = Boolean(c.avaliar(resposta, doc)); } catch { ok = false; } return { id: c.id, tipo: c.tipo, descricao: c.descricao, ok }; });
+  return [...comuns(def.limite, def.semRequisitoLiteral), ...def.criterios].map((c) => { let ok = false; try { ok = Boolean(c.avaliar(resposta, doc)); } catch { ok = false; } return { id: c.id, tipo: c.tipo, descricao: c.descricao, ok }; });
 }
 /** Extrai o último bloco ```json da mensagem final do agente. Devolve null se não houver JSON válido. */
 export function extrairJson(mensagem) {

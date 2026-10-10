@@ -4,8 +4,8 @@
   "name": "Prumo QA Lab — laboratório de avaliação",
   "context": {
     "documentation": ["requisitos/"],
-    "tests": ["aplicacao/testes/"],
-    "code": ["aplicacao/src/"]
+    "tests": ["aplicacao/testes/", "aplicacao/testes-e2e/"],
+    "code": ["aplicacao/src/", "aplicacao/package.json", "aplicacao/playwright.config.ts"]
   },
   "commands": {
     "unit": {

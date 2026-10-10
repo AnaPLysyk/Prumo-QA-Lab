@@ -1,0 +1,59 @@
+{
+  "caso": 10,
+  "titulo": "Contextos contraditórios",
+  "exigeRecurso": "contextoId",
+  "semente": [
+    {
+      "ref": "a",
+      "conteudo": {
+        "tipo": "requisito",
+        "titulo": "Requisito RQ-10",
+        "texto": "RQ-10: Frete grátis acima de 500 para todos.",
+        "chave": "RQ-10",
+        "origem": {
+          "tipo": "documento",
+          "referencia": "requisitos/RQ-03.md"
+        }
+      },
+      "acoes": [
+        "aprovar"
+      ]
+    },
+    {
+      "ref": "b",
+      "conteudo": {
+        "tipo": "requisito",
+        "titulo": "Requisito RQ-10",
+        "texto": "RQ-10: Frete grátis exclusivo de clientes premium.",
+        "chave": "RQ-10",
+        "origem": {
+          "tipo": "documento",
+          "referencia": "requisitos/RQ-03.md"
+        }
+      }
+    }
+  ],
+  "mcpHabilitado": true,
+  "obrigatorios": [
+    {
+      "type": "CONTEXT_CONFLICT",
+      "severity": "high"
+    }
+  ],
+  "fatos": [
+    {
+      "kind": "context_used",
+      "estado": "CONFLITANTE"
+    }
+  ],
+  "contextoProjeto": {
+    "estados": {
+      "a": "CONFLITANTE",
+      "b": "CONFLITANTE"
+    }
+  },
+  "proibidos": [],
+  "limitesConhecidos": [
+    "O Prumo aponta o conflito e os contextos envolvidos; não escolhe um lado nem resolve o conflito."
+  ]
+}

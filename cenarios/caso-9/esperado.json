@@ -1,0 +1,44 @@
+{
+  "caso": 9,
+  "titulo": "Contexto aprovado",
+  "exigeRecurso": "contextoId",
+  "semente": [
+    {
+      "ref": "a",
+      "conteudo": {
+        "tipo": "requisito",
+        "titulo": "Requisito RQ-09",
+        "texto": "RQ-09: Somente ADMIN cancela pedidos fechados.",
+        "chave": "RQ-09",
+        "origem": {
+          "tipo": "documento",
+          "referencia": "requisitos/RQ-03.md"
+        }
+      },
+      "acoes": [
+        "aprovar"
+      ]
+    }
+  ],
+  "mcpHabilitado": true,
+  "fatos": [
+    {
+      "kind": "context_used",
+      "estado": "APROVADO",
+      "requirementFoundInContext": true
+    }
+  ],
+  "naoApontaPrefixo": [
+    "CONTEXT_"
+  ],
+  "contextoProjeto": {
+    "estados": {
+      "a": "APROVADO"
+    }
+  },
+  "obrigatorios": [],
+  "proibidos": [],
+  "limitesConhecidos": [
+    "O Prumo comprova a origem, a versão, o hash e a aprovação humana do contexto; não decide se o requisito está correto nem se os cenários bastam."
+  ]
+}

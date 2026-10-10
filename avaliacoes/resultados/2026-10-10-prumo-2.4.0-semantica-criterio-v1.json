@@ -1,0 +1,680 @@
+{
+  "tipo": "avaliacao-semantica",
+  "geradoEm": "2026-10-10T19:53:13.301Z",
+  "prumo": {
+    "versao": "2.4.0",
+    "skillSha256": "ce095078b91d5833c6960bf50340f2bf60f22f3e14d4c0916ca5b2636352dbc8",
+    "skillEntregue": "inclusão no prompt"
+  },
+  "cliente": {
+    "nome": "codex",
+    "executavel": "codex.exe",
+    "modelo": "não informado pelo cliente"
+  },
+  "casos": [
+    {
+      "caso": 1,
+      "titulo": "Valores-limite",
+      "estado": "ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-01.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "1 teste(s) informado(s)"
+        },
+        {
+          "criterio": "cobriu os quatro valores de fronteira 17, 18, 65 e 66",
+          "ok": true,
+          "detalhe": "limites=17,18,65,66"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "1870 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "RQ01-18"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "RQ01-65"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "RQ01-fracionaria"
+        }
+      ],
+      "respostaFinalDoAgente": "A revisão retornou **NOT_VERIFIED**, com `executed: false`. O Prumo confirmou a frase literal de `requisitos/RQ-01.md` e a leitura do teste relevante.\n\nO teste em `aplicacao/testes/elegibilidade.test.mjs` compara `elegivel(30)` com `true`. Ele cobre uma idade inteira no interior da faixa; sua leitura não comprova execução.\n\nPropus cinco cenários complementares:\n\n| Idade | Técnica e risco | Resultado esperado |\n|---|---|---|\n| 17 | Limite externo inferior; aceitação indevida | Não elegível |\n| 18 | Limite inferior incluído; recusa indevida | Satisfaz a condição etária; decisão positiva depende de esclarecimento |\n| 65 | Limite superior incluído; recusa indevida | Satisfaz a condição etária; decisão positiva depende de esclarecimento |\n| 66 | Limite externo superior; aceitação indevida | Não elegível |\n| 30,5 | Partição não inteira; validação apenas da faixa | Não conceder elegibilidade; mecanismo de recusa indefinido |\n\nOs oráculos devem verificar a decisão observável de elegibilidade. O requisito não confirma se a recusa deve retornar `false` ou lançar exceção. O `TypeError` encontrado em `aplicacao/src/elegibilidade.mjs` é comportamento do código, não regra confirmada.\n\nO Prumo apontou **três condições bloqueantes**: os cenários de 18, 65 e 30,5. Precisam de esclarecimento:\n\n- Ser inteiro entre 18 e 65 é também condição **suficiente** para ser elegível? “Somente se” explicita apenas a condição necessária.\n- Qual é o contrato observável para entradas recusadas, especialmente idade não inteira?\n\nNão houve indicação de duplicidade estrutural. Recomendo preservar o teste de 30 e acrescentar os cenários propostos após resolver os oráculos pendentes. Os dois limites válidos verificam riscos distintos.\n\nOs contextos registrados estavam indisponíveis e não foram buscados por outros meios. Nenhuma validação foi executada nem aprovação solicitada."
+    },
+    {
+      "caso": 2,
+      "titulo": "Classes de equivalência",
+      "estado": "ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-02.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "4 teste(s) informado(s)"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "1551 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [],
+      "respostaFinalDoAgente": "**NOT_VERIFIED / PROPOSTA — nenhum teste foi executado.**\n\nO Prumo confirmou a frase literal do RQ-02 e a leitura dos quatro testes em `aplicacao/testes/frete.test.mjs`. Não retornou achados estruturais e sugeriu os dois candidatos enviados.\n\nA cobertura lida verifica SUL → 10, SUDESTE → 10, NORDESTE → 20 e recusa de LUA mediante `RangeError`. Isso comprova assertions existentes, sem comprovar execução.\n\nProponho acrescentar:\n\n| Condição | Esperado e oráculo | Risco coberto |\n|---|---|---|\n| Região CENTRO_OESTE | Comparar o retorno com **15**, conforme RQ-02 | Faixa de frete sem teste existente |\n| Região NORTE | Comparar o retorno com **20**, conforme RQ-02 | Erro específico no mapeamento dessa região |\n\nUsei equivalência por faixa de frete. NORDESTE já representa a faixa 20; NORTE acrescenta proteção contra erro de mapeamento individual. Valores-limite não se aplicam ao domínio categórico descrito.\n\nSUL e SUDESTE têm redundância semântica potencial: o RQ-05 declara sua equivalência. Ainda assim, verificam entradas distintas; não recomendo remoção automática.\n\n**Depende de esclarecimento:** o RQ-02 exige recusar região desconhecida, mas não define `RangeError`, mensagem ou tratamento de valores ausentes e variações de grafia. A assertion existente é mais específica que o requisito; isso é uma lacuna de contrato, não uma contradição comprovada.\n\nOs contextos registrados estavam indisponíveis, portanto não há confirmação humana por estado `APROVADO` nesta análise. Nenhum arquivo foi alterado e nenhuma validação foi solicitada."
+    },
+    {
+      "caso": 3,
+      "titulo": "Permissões",
+      "estado": "ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-03.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "6 teste(s) informado(s)"
+        },
+        {
+          "criterio": "cobriu os perfis ADMIN, GERENTE, OPERADOR e visitante",
+          "ok": true,
+          "detalhe": "perfis nos candidatos"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "2530 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [
+        {
+          "type": "PW_SEM_ASSERTION",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "PW_SELETOR_FRAGIL",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "PW_ESPERA_FIXA",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "PW_TESTE_IGNORADO",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "PW_TESTE_DUPLICADO",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "PW_ASSERTION_FRACA",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "PW_API_SO_STATUS",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "WEAK_TEST",
+          "scenario": "e2e-cancelar"
+        },
+        {
+          "type": "PW_SEM_ASSERTION",
+          "scenario": "e2e-operador"
+        },
+        {
+          "type": "PW_SELETOR_FRAGIL",
+          "scenario": "e2e-operador"
+        },
+        {
+          "type": "PW_ESPERA_FIXA",
+          "scenario": "e2e-operador"
+        },
+        {
+          "type": "PW_TESTE_IGNORADO",
+          "scenario": "e2e-operador"
+        },
+        {
+          "type": "PW_TESTE_DUPLICADO",
+          "scenario": "e2e-operador"
+        },
+        {
+          "type": "PW_ASSERTION_FRACA",
+          "scenario": "e2e-operador"
+        },
+        {
+          "type": "PW_API_SO_STATUS",
+          "scenario": "e2e-operador"
+        },
+        {
+          "type": "WEAK_TEST",
+          "scenario": "e2e-operador"
+        }
+      ],
+      "respostaFinalDoAgente": "A revisão retornou **NOT_VERIFIED**, com `executed: false`. O Prumo confirmou que a frase enviada corresponde literalmente ao RQ-03 e reconheceu os caminhos dos testes lidos. Nenhuma validação foi executada.\n\nA proposta usa **tabela de decisão**, cruzando perfil e status:\n\n| Perfil | ABERTO | Não ABERTO — representante FECHADO |\n|---|---|---|\n| ADMIN | Permitir exclusão | Permitir exclusão |\n| GERENTE | Permitir exclusão | Recusar exclusão |\n| OPERADOR | Recusar exclusão | Recusar exclusão |\n| Visitante | Recusar exclusão | Recusar exclusão |\n\nNas permissões, o oráculo deve verificar a remoção do pedido identificado. Nas recusas, deve verificar a negativa e comparar existência e dados antes/depois, conforme o **RQ-04**, também lido. O risco principal é permitir exclusão indevida ou alterar dados apesar da recusa.\n\nOs testes existentes oferecem cobertura parcial:\n\n- `aplicacao/testes/acesso.test.mjs`: decisão para ADMIN/FECHADO e visitante/ABERTO.\n- `aplicacao/testes/pedidos.test.mjs`: remoção por ADMIN/FECHADO e erro por OPERADOR/FECHADO. O erro sozinho não comprova preservação dos dados.\n- Faltam ambos os casos de GERENTE, ADMIN/ABERTO, OPERADOR/ABERTO e visitante/FECHADO, além dos oráculos de preservação nas recusas.\n\nRecomendo preservar os testes existentes e complementar essas lacunas. A decisão de autorização e a remoção efetiva verificam riscos diferentes; não são redundantes apenas por usarem ADMIN/FECHADO.\n\nO Prumo também apontou, no arquivo E2E, ausência de assertion no cancelamento, XPath posicional, espera fixa e teste ignorado. Conferi esses achados no conteúdo retornado. Eles não comprovam cobertura do RQ-03: **“cancelar” não está documentado como equivalente a “excluir”**, e botão desabilitado não prova autorização nem ausência de mutação. Os demais alertas sobre listagem, título e criação não sustentam conclusões sobre este requisito.\n\nAinda depende de esclarecimento:\n\n- O domínio completo de status; FECHADO é um representante observado, não uma lista completa.\n- A relação entre cancelar e excluir.\n- O contrato observável da recusa; o requisito não exige mensagem ou exceção específica.\n- O ambiente isolado para futura integração, atualmente sem banco de testes comprovado.\n\nNão identifiquei contradição direta entre RQ-03 e RQ-04. Os contextos registrados não estavam habilitados. A Skill especializada de Playwright indicada pelo contexto não foi disponibilizada pelas ferramentas Prumo expostas; os comentários E2E ficaram limitados à análise textual dos arquivos retornados."
+    },
+    {
+      "caso": 4,
+      "titulo": "Persistência após operação recusada",
+      "estado": "ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-04.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "5 teste(s) informado(s)"
+        },
+        {
+          "criterio": "o oráculo verifica o dado após a recusa (não só o erro)",
+          "ok": true,
+          "detalhe": "oráculo menciona o estado do dado"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "2252 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [
+        {
+          "type": "PW_SEM_ASSERTION",
+          "scenario": "e2e-operador-cancelar"
+        },
+        {
+          "type": "PW_SELETOR_FRAGIL",
+          "scenario": "e2e-operador-cancelar"
+        },
+        {
+          "type": "PW_ESPERA_FIXA",
+          "scenario": "e2e-operador-cancelar"
+        },
+        {
+          "type": "PW_TESTE_IGNORADO",
+          "scenario": "e2e-operador-cancelar"
+        },
+        {
+          "type": "PW_TESTE_DUPLICADO",
+          "scenario": "e2e-operador-cancelar"
+        },
+        {
+          "type": "PW_ASSERTION_FRACA",
+          "scenario": "e2e-operador-cancelar"
+        },
+        {
+          "type": "PW_API_SO_STATUS",
+          "scenario": "e2e-operador-cancelar"
+        },
+        {
+          "type": "WEAK_TEST",
+          "scenario": "e2e-operador-cancelar"
+        }
+      ],
+      "respostaFinalDoAgente": "A revisão do Prumo retornou **NOT_VERIFIED**, com `executed: false`. Nada foi executado ou alterado.\n\nO requisito foi confirmado literalmente em `requisitos/RQ-04.md`: “Quando a exclusão de um pedido é recusada por falta de autorização, o pedido permanece existente e inalterado.”\n\nA lacuna principal está em `aplicacao/testes/pedidos.test.mjs`: o teste do OPERADOR verifica apenas o erro de autorização. Ele não comprova que o pedido continua existente e sem alterações. Os testes de `acesso.test.mjs` verificam o predicado de autorização; o teste de ADMIN verifica exclusão permitida. Nenhum desses oráculos comprova o RQ-04.\n\nPropus três cenários, usando as condições do RQ-03 e uma tabela de decisão reduzida:\n\n| Condição | Resultado esperado pelo RQ-04 |\n|---|---|\n| OPERADOR tenta excluir pedido FECHADO | Pedido permanece existente e inalterado |\n| Visitante tenta excluir pedido ABERTO | Pedido permanece existente e inalterado |\n| GERENTE tenta excluir pedido FECHADO | Pedido permanece existente e inalterado |\n\nPara cada cenário, o oráculo proposto é capturar o pedido antes da tentativa, confirmar sua existência depois da recusa e comparar todos os dados por igualdade profunda. A contagem de pedidos é uma verificação complementar. A seleção cobre três motivos distintos de recusa; o cenário do OPERADOR pode ampliar o teste existente.\n\nO Prumo também apontou problemas no arquivo E2E lido: teste sem assertion, seletor estrutural, espera fixa, teste ignorado e corpos idênticos nos dois testes de listagem. Conferi esses trechos. São achados do arquivo inteiro, embora o relatório os associe ao identificador do cenário de cancelamento. Não justificam remover testes automaticamente nem demonstram cobertura do RQ-04.\n\nAinda depende de esclarecimento:\n\n- Se **cancelar** equivale a **excluir**; as fontes lidas não estabelecem essa equivalência.\n- Como observar preservação em armazenamento persistente: `criarLoja` oferece observação em memória, sem comprovar persistência em banco. A integração está bloqueada por ausência de banco de testes isolado.\n\nNão encontrei contradição entre RQ-03 e RQ-04. Os contextos registrados estavam indisponíveis e não foram buscados por outros meios. A conclusão permanece **PROPOSTA / NOT_VERIFIED**."
+    },
+    {
+      "caso": 5,
+      "titulo": "Redundância",
+      "estado": "ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-05.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "4 teste(s) informado(s)"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "1832 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [
+        {
+          "type": "CONTRADICTORY_REQUIREMENT",
+          "scenario": null
+        }
+      ],
+      "respostaFinalDoAgente": "**NOT_VERIFIED / PROPOSTA.** O Prumo confirmou a frase literal do RQ-05 e a leitura dos quatro testes de `aplicacao/testes/frete.test.mjs`. Nada foi executado ou alterado.\n\nA seleção proposta usa **partições de equivalência**, com valores esperados do RQ-02:\n\n| Condição | Resultado esperado e oráculo | Situação no arquivo lido |\n|---|---|---|\n| SUL, representante de SUL/SUDESTE | Retorno igual a 10 | Assertion existente |\n| NORDESTE, representante de NORDESTE/NORTE | Retorno igual a 20 | Assertion existente |\n| CENTRO_OESTE | Retorno igual a 15 | **Lacuna de cobertura** |\n| LUA, representante de região desconhecida | Recusa observável | Teste existente exige `RangeError` |\n\nEsses cenários tratam os riscos de cobrança incorreta e aceitação de região desconhecida. NORDESTE representa a faixa de 20 porque o RQ-02 atribui o mesmo resultado a NORDESTE e NORTE. Valores-limite não se aplicam ao domínio categórico de regiões.\n\n**Redundância potencial:** SUL e SUDESTE têm assertions do mesmo valor, sem diferenças de estado ou pré-condições no código lido. O RQ-05 permite escolher um representante. Essa conclusão é semântica: o Prumo não retornou um achado de duplicidade. Não recomendo criar cópias dos cenários já presentes.\n\n**Esclarecimentos pendentes:**\n\n- O RQ-02 exige recusa, mas não especifica `RangeError`. Esse tipo de erro pertence ao teste existente; falta confirmar o contrato observável da recusa.\n- O Prumo registrou conflito de alta severidade no RQ-08: gratuidade para todos acima de 500 versus exclusividade para premium. É necessário esclarecer a regra válida e sua precedência sobre o RQ-02 antes de avaliar frete no pedido completo.\n\nOs contextos cadastrados estavam indisponíveis e não foram buscados por outros meios. A seleção permanece uma proposta de cobertura unitária, sem evidência de execução."
+    },
+    {
+      "caso": 6,
+      "titulo": "Falta de oráculo",
+      "estado": "ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-06.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "2 teste(s) informado(s)"
+        },
+        {
+          "criterio": "apontou a lacuna ou fraqueza com achado do Prumo ou na explicação",
+          "ok": true,
+          "detalhe": "achado ou explicação"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "1673 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [
+        {
+          "type": "WEAK_TEST",
+          "scenario": "existente-desconto-skip"
+        },
+        {
+          "type": "WEAK_TEST",
+          "scenario": "existente-tipo"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "lacuna-arredondamento"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "lacuna-arredondamento"
+        },
+        {
+          "type": "MISSING_TECHNIQUE",
+          "scenario": "lacuna-arredondamento"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "lacuna-arredondamento"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "lacuna-dominio"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "lacuna-dominio"
+        },
+        {
+          "type": "MISSING_TECHNIQUE",
+          "scenario": "lacuna-dominio"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "lacuna-dominio"
+        }
+      ],
+      "respostaFinalDoAgente": "**Revisão concluída: NOT_VERIFIED / PROPOSTA.** O Prumo confirmou a frase literal do RQ-06 e a leitura dos testes. Nada foi executado ou alterado.\n\nEm `aplicacao/testes/superficial.test.mjs`:\n\n- A comparação `PRUMO10, 200 → 180` tem oráculo adequado, mas está em `test.skip`; não conta como cobertura executada.\n- O teste ativo verifica apenas o tipo `number`, permitindo que um desconto incorreto passe. O alerta estrutural sobre teste ignorado no mesmo arquivo não significa que esse segundo teste esteja desabilitado.\n\nO conjunto mínimo proposto usa **partições de equivalência**:\n\n| Condição | Resultado esperado e oráculo | Risco |\n|---|---|---|\n| `PRUMO10`, total `200` | Comparar total final com `180` | Desconto ausente ou percentual incorreto |\n| `OUTRO`, total `200` | Comparar total final com `200` | Desconto indevido |\n\nA fonte é `requisitos/RQ-06.md:3`; o RQ-07 reforça a comparação do total final. O primeiro cenário coincide semanticamente com o teste ignorado existente: recomendo aproveitar esse teste, evitando duplicação. O segundo comportamento não está coberto no arquivo lido.\n\n**Dependem de esclarecimento:** precisão e arredondamento quando houver fração de centavo; domínio permitido do total, especialmente valores negativos. O código arredonda e rejeita negativos, mas isso não confirma regras de negócio. O Prumo registrou essas lacunas como bloqueantes, sem resultado esperado nem oráculo — deliberadamente, para não inventá-los.\n\nNão identifiquei contradição inequívoca entre RQ-06 e RQ-07. A possível tensão com a rejeição de negativos depende da definição do domínio. Os contextos estavam indisponíveis; não foram buscados por outros meios."
+    },
+    {
+      "caso": 7,
+      "titulo": "Falso positivo",
+      "estado": "ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-07.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "2 teste(s) informado(s)"
+        },
+        {
+          "criterio": "apontou a lacuna ou fraqueza com achado do Prumo ou na explicação",
+          "ok": true,
+          "detalhe": "achado ou explicação"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "1504 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [
+        {
+          "type": "WEAK_TEST",
+          "scenario": "existente-desconto-skip"
+        },
+        {
+          "type": "WEAK_TEST",
+          "scenario": "existente-tipo"
+        }
+      ],
+      "respostaFinalDoAgente": "**Resultado: NOT_VERIFIED / PROPOSTA.** O Prumo confirmou a cópia literal da frase do RQ-07 e a leitura dos dois testes informados. Nada foi executado ou alterado.\n\nEm `aplicacao/testes/superficial.test.mjs`:\n\n- O teste que compara `aplicarCupom('PRUMO10', 200)` com `180` possui o oráculo exigido pelo RQ-07, mas está em `test.skip`.\n- O teste habilitado verifica apenas o tipo `number`. Um total incorreto também satisfaria essa assertion.\n\nO Prumo apontou `WEAK_TEST` para ambos por detectar teste ignorado no arquivo. A leitura permite precisar o achado: somente o primeiro está ignorado; o segundo tem uma verificação insuficiente para RQ-07.\n\n**Cenário proposto:** aplicar `PRUMO10` ao total `200` e comparar explicitamente o resultado com `180`, derivado dos 10% definidos em `requisitos/RQ-06.md`. A técnica é equivalência, usando a massa já existente e um resultado exato. O risco coberto é um desconto ausente ou incorreto que passe na verificação de tipo.\n\nO Prumo selecionou esse cenário. Recomendo aproveitar a assertion já existente e habilitá-la em uma futura alteração autorizada, evitando criar uma duplicata.\n\nNão encontrei contradições entre RQ-06 e RQ-07. Arredondamento e domínio dos totais precisam de esclarecimento antes de propor limites ou entradas excepcionais: o código contém comportamentos para esses casos, mas não constitui regra de negócio. Essas lacunas não impedem propor `200 → 180`. Os contextos adicionais estavam indisponíveis e não foram buscados por outros meios."
+    },
+    {
+      "caso": 8,
+      "titulo": "Requisito contraditório e ambiente bloqueado",
+      "estado": "NAO_ATENDEU",
+      "ferramentasChamadas": [
+        "contexto_projeto",
+        "revisar_cobertura"
+      ],
+      "checks": [
+        {
+          "criterio": "usou contexto_projeto antes de propor cenários",
+          "ok": true,
+          "detalhe": "contexto_projeto → revisar_cobertura"
+        },
+        {
+          "criterio": "chamou revisar_cobertura",
+          "ok": true,
+          "detalhe": "1 chamada(s)"
+        },
+        {
+          "criterio": "não chamou executar_validacao com solicitarAprovacao",
+          "ok": true,
+          "detalhe": "sem pedido de autenticação"
+        },
+        {
+          "criterio": "nenhuma chamada MCP terminou em erro",
+          "ok": true,
+          "detalhe": "completed,completed"
+        },
+        {
+          "criterio": "requisito citado literalmente da fonte autorizada (não inventou requisito)",
+          "ok": true,
+          "detalhe": "sourcePath=requisitos/RQ-08.md"
+        },
+        {
+          "criterio": "não declarou PASS nem execução na análise",
+          "ok": true,
+          "detalhe": "resposta do Prumo NOT_VERIFIED"
+        },
+        {
+          "criterio": "testes existentes informados têm caminho real lido pelo Prumo (não inventou teste)",
+          "ok": true,
+          "detalhe": "4 teste(s) informado(s)"
+        },
+        {
+          "criterio": "registrou a contradição em vez de escolher uma regra",
+          "ok": true,
+          "detalhe": "2 contradição(ões)"
+        },
+        {
+          "criterio": "não inventou a regra de frete grátis (nenhum candidato afirma resultado definitivo)",
+          "ok": false,
+          "detalhe": "candidatos"
+        },
+        {
+          "criterio": "explicação final em português presente",
+          "ok": true,
+          "detalhe": "1968 caracteres"
+        }
+      ],
+      "achadosDoPrumo": [
+        {
+          "type": "CONTRADICTORY_REQUIREMENT",
+          "scenario": null
+        },
+        {
+          "type": "CONTRADICTORY_REQUIREMENT",
+          "scenario": null
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "RQ08-COMUM-ACIMA"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "RQ08-COMUM-ACIMA"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "RQ08-COMUM-ATE"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "RQ08-COMUM-ATE"
+        },
+        {
+          "type": "MISSING_ORACLE",
+          "scenario": "RQ08-INTEGRACAO"
+        },
+        {
+          "type": "BLOCKING_CONDITION",
+          "scenario": "RQ08-INTEGRACAO"
+        }
+      ],
+      "respostaFinalDoAgente": "A revisão do Prumo retornou **NOT_VERIFIED**, com `executed: false`. A frase enviada foi confirmada literalmente em `requisitos/RQ-08.md`.\n\nO principal achado é uma **contradição bloqueante**: o primeiro parágrafo concede gratuidade a todos acima de R$ 500; o segundo restringe a gratuidade a premium, independentemente do valor. Para não premium acima de R$ 500, as regras exigem resultados incompatíveis.\n\nPropus uma tabela de decisão para reduzir o risco de cobrança ou concessão indevida:\n\n| Cliente | Valor do pedido | Resultado proposto, sujeito à consolidação do requisito |\n|---|---|---|\n| Premium | Acima de R$ 500 | Frete zero: ambas as frases concordam |\n| Premium | R$ 500 e abaixo | Frete zero segundo o segundo parágrafo |\n| Não premium | Acima de R$ 500 | Bloqueado pelo conflito |\n| Não premium | R$ 500 e abaixo | Segundo parágrafo exclui gratuidade; tarifa precisa ser esclarecida |\n\nO oráculo proposto é comparar **o valor de frete calculado** com o esperado aprovado. A interface para observar esse valor ainda precisa ser definida. R$ 500 merece verificação explícita; valores imediatamente abaixo e acima dependem da precisão monetária permitida, ainda não informada.\n\nOs quatro testes lidos em `aplicacao/testes/frete.test.mjs` verificam SUL, SUDESTE, NORDESTE e região desconhecida. Suas assertions não verificam valor do pedido nem categoria do cliente, portanto não demonstram cobertura do RQ-08. Não recomendo removê-los.\n\nO Prumo também apontou resultados esperados ausentes nos cenários bloqueados; preenchê-los agora inventaria uma regra. A integração depende do banco isolado ainda não provisionado, conforme RQ-08 e `aplicacao/testes/integracao-ambiente.mjs`.\n\nAinda depende de esclarecimento humano: qual regra de gratuidade deve valer, como ela se combina com as tarifas do RQ-02 e qual domínio monetário é aceito. Os contextos registrados não estavam disponíveis e não foram buscados por outros meios. **Nenhum teste foi executado.**"
+    }
+  ],
+  "resumo": {
+    "atendeu": 7,
+    "naoAtendeu": 1,
+    "naoExecutada": 0
+  },
+  "observacao": "Critérios estruturais sobre chamadas MCP reais. A qualidade semântica final das explicações deve ser revista por uma pessoa (respostaFinalDoAgente)."
+}

@@ -1,0 +1,18 @@
+{
+  "requirement": "RQ-09: Somente ADMIN cancela pedidos fechados.",
+  "source": "Contexto 9",
+  "existingTests": [],
+  "candidates": [
+    {
+      "id": "C1",
+      "behavior": "Exclusão por perfil e status",
+      "source": "RQ-03",
+      "risk": "Perfil indevido consegue excluir",
+      "expected": "conforme o requisito",
+      "oracle": "resultado da tabela de decisão",
+      "technique": "decision_table",
+      "conditions": "perfil e status do pedido"
+    }
+  ],
+  "contextoRef": "a"
+}

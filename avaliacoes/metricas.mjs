@@ -18,7 +18,7 @@ export function calcular() {
   m.deterministica = ultimos('-deterministico.json').map((n) => {
     const r = ler(n); const crit = [...r.casos.flatMap((c) => c.checks), ...r.gerais.checks];
     const falhas = crit.filter((c) => !c.ok).map((c) => c.criterio);
-    return { arquivo: n, prumo: `${r.prumo.versao}${r.prumo.commit ? '@' + r.prumo.commit : ''}`, casosAprovados: `${r.casos.filter((c) => c.aprovado).length}/${r.casos.length}`,
+    return { arquivo: n, prumo: `${r.prumo.versao}${r.prumo.commit ? '@' + r.prumo.commit : ''}`, casosAprovados: `${r.casos.filter((c) => c.aprovado).length}/${r.casos.filter((c) => c.estado !== 'NAO_APLICAVEL').length}`, casosNaoAplicaveis: r.casos.filter((c) => c.estado === 'NAO_APLICAVEL').length,
       criteriosAtendidos: crit.filter((c) => c.ok).length, criteriosNaoAtendidos: falhas.length, criteriosNaoAvaliados: 0,
       achadosObrigatoriosApontados: `${crit.filter((c) => c.ok && /^aponta /.test(c.criterio)).length}/${crit.filter((c) => /^aponta /.test(c.criterio)).length}`,
       falsosPositivos: crit.filter((c) => !c.ok && /^não aponta /.test(c.criterio)).length,

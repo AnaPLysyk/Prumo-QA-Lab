@@ -1,0 +1,44 @@
+{
+  "caso": 12,
+  "titulo": "Origem documental ausente",
+  "exigeRecurso": "contextoId",
+  "semente": [
+    {
+      "ref": "a",
+      "conteudo": {
+        "tipo": "requisito",
+        "titulo": "Requisito RQ-12",
+        "texto": "RQ-12: Pedidos acima de 1000 exigem aprovação.",
+        "chave": "RQ-12",
+        "origem": {
+          "tipo": "pessoa",
+          "referencia": ""
+        }
+      }
+    }
+  ],
+  "mcpHabilitado": true,
+  "obrigatorios": [
+    {
+      "type": "CONTEXT_SOURCE_MISSING"
+    },
+    {
+      "type": "CONTEXT_NOT_APPROVED"
+    }
+  ],
+  "fatos": [
+    {
+      "kind": "context_used",
+      "estado": "RASCUNHO"
+    }
+  ],
+  "contextoProjeto": {
+    "estados": {
+      "a": "RASCUNHO"
+    }
+  },
+  "proibidos": [],
+  "limitesConhecidos": [
+    "Sem origem o contexto não pode ser aprovado; o Prumo registra a lacuna e não a preenche."
+  ]
+}

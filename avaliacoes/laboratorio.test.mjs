@@ -29,7 +29,8 @@ test('o contexto autorizado do contrato não inclui cenários nem respostas espe
   const caminhos = [...m.context.documentation, ...m.context.tests, ...m.context.code];
   for (const c of caminhos) assert.ok(!/cenarios|avaliacoes/.test(c), c);
   assert.equal(m.execution.requireApproval, true); assert.deepEqual(m.execution.blockedByDefault, ['integracao']);
-  const lido = caminhos.flatMap((c) => fs.readdirSync(c, { recursive: true }).filter((f) => fs.statSync(path.join(c, f)).isFile()).map((f) => fs.readFileSync(path.join(c, f), 'utf8'))).join('\n');
+  const arquivosDe = (c) => (fs.statSync(c).isDirectory() ? fs.readdirSync(c, { recursive: true }).map((f) => path.join(c, f)).filter((f) => fs.statSync(f).isFile()) : [c]);
+  const lido = caminhos.flatMap((c) => arquivosDe(c).map((f) => fs.readFileSync(f, 'utf8'))).join('\n');
   assert.doesNotMatch(lido, /intencional|lacuna proposital|esperado\.json|mutante/i, 'o código e os testes não entregam a resposta ao agente');
 });
 
@@ -101,5 +102,5 @@ test('mutantes: os testes da aplicação íntegra passam e cada mutação é apl
 test('avaliação determinística contra o Prumo real por MCP (requer o Prumo compilado ao lado ou PRUMO_MCP)', { skip: !fs.existsSync(mcpJs) && 'Prumo não encontrado: defina PRUMO_MCP' }, () => {
   const r = spawnSync(process.execPath, ['avaliacoes/avaliar.mjs', '--sem-gravar', '--prumo', mcpJs], { encoding: 'utf8', env: { ...process.env, ELECTRON_RUN_AS_NODE: '' } });
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.match(r.stdout, /8\/8 casos/);
+  assert.match(r.stdout, /(\d+)\/\1 casos/); assert.ok(Number(/(\d+)\/\d+ casos/.exec(r.stdout)[1]) >= 8);
 });

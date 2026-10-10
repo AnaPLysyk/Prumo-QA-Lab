@@ -1,0 +1,49 @@
+{
+  "caso": 13,
+  "titulo": "Isolamento entre projetos",
+  "exigeRecurso": "contextoId",
+  "semente": [
+    {
+      "ref": "a",
+      "projeto": "outro",
+      "conteudo": {
+        "tipo": "requisito",
+        "titulo": "Requisito RQ-13",
+        "texto": "RQ-13: Regra de outro projeto.",
+        "chave": "RQ-13",
+        "origem": {
+          "tipo": "documento",
+          "referencia": "requisitos/RQ-03.md"
+        }
+      },
+      "acoes": [
+        "aprovar"
+      ]
+    }
+  ],
+  "mcpHabilitado": true,
+  "obrigatorios": [
+    {
+      "type": "CONTEXT_UNAVAILABLE",
+      "severity": "high"
+    }
+  ],
+  "contextoProjeto": {
+    "ausentes": [
+      "a"
+    ]
+  },
+  "proibidos": [
+    {
+      "type": "CONTEXT_NOT_APPROVED"
+    }
+  ],
+  "proibidosTrecho": [],
+  "limitesConhecidos": [
+    "O contexto aprovado de outro projeto não é visível: nem listado, nem lido por id."
+  ],
+  "fatos": [],
+  "semFatos": [
+    "context_used"
+  ]
+}

@@ -63,7 +63,7 @@ else for (const n of casos) {
   const { chamadas, final, modelo } = extrair(r.saida);
   const checks = criterios(n, esperado, chamadas, final);
   resultado.cliente.modelo = modelo ?? resultado.cliente.modelo ?? 'não informado pelo cliente';
-  resultado.casos.push({ caso: n, titulo: esperado.titulo, estado: checks.every((c) => c.ok) ? 'ATENDEU' : 'NAO_ATENDEU', ferramentasChamadas: chamadas.map((c) => c.tool), checks, achadosDoPrumo: (chamadas.filter((c) => c.tool === 'revisar_cobertura').at(-1)?.resposta?.findings ?? []).map((f) => ({ type: f.type, scenario: f.scenario ?? null })), respostaFinalDoAgente: final });
+  resultado.casos.push({ caso: n, titulo: esperado.titulo, estado: checks.every((c) => c.ok) ? 'ATENDEU' : 'NAO_ATENDEU', ferramentasChamadas: chamadas.map((c) => c.tool), chamadasMcp: chamadas.map((c) => ({ tool: c.tool, status: c.status, argumentos: c.tool === 'contexto_projeto' ? {} : c.argumentos })), checks, achadosDoPrumo: (chamadas.filter((c) => c.tool === 'revisar_cobertura').at(-1)?.resposta?.findings ?? []).map((f) => ({ type: f.type, scenario: f.scenario ?? null })), respostaFinalDoAgente: final });
   console.log(`${resultado.casos.at(-1).estado} caso ${n} — ${esperado.titulo}: ${checks.filter((c) => c.ok).length}/${checks.length}${checks.some((c) => !c.ok) ? ' · ' + checks.filter((c) => !c.ok).map((c) => c.criterio).join(' | ') : ''}`);
 }
 resultado.resumo = { atendeu: resultado.casos.filter((c) => c.estado === 'ATENDEU').length, naoAtendeu: resultado.casos.filter((c) => c.estado === 'NAO_ATENDEU').length, naoExecutada: resultado.casos.filter((c) => c.estado === 'NAO_EXECUTADA').length };

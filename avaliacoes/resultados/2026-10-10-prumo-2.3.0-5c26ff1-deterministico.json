@@ -1,6 +1,6 @@
 {
   "tipo": "avaliacao-deterministica",
-  "geradoEm": "2026-10-10T18:23:37.142Z",
+  "geradoEm": "2026-10-10T19:51:16.710Z",
   "prumo": {
     "versao": "2.3.0",
     "commit": "5c26ff1",
@@ -28,12 +28,12 @@
       {
         "criterio": "contexto identifica projeto de automação com node:test",
         "ok": true,
-        "detalhe": "tipo=automacao stack=node:test"
+        "detalhe": "tipo=automacao stack=node:test,TypeScript,@playwright/test"
       },
       {
         "criterio": "contexto lista requisitos, testes e código autorizados",
         "ok": true,
-        "detalhe": "19 fontes"
+        "detalhe": "22 fontes"
       },
       {
         "criterio": "contexto é NOT_VERIFIED e declara informações ausentes",
@@ -48,7 +48,7 @@
       {
         "criterio": "evidências existentes (rodadas anteriores) não contêm PASS nem execução real sem aprovação humana",
         "ok": true,
-        "detalhe": "0 evidência(s); status=NOT_RUN"
+        "detalhe": "20 evidência(s); status=com resultados"
       },
       {
         "criterio": "unit: estado BLOCKED",
@@ -68,7 +68,7 @@
       {
         "criterio": "a tentativa bloqueada gerou evidência BLOCKED, sem PASS",
         "ok": true,
-        "detalhe": "0 → 2 evidências"
+        "detalhe": "20 → 22 evidências"
       }
     ]
   },
@@ -756,11 +756,102 @@
       "limitesConhecidos": [
         "O Prumo registra a contradição informada e o bloqueio; não resolve o conflito nem inventa a regra de frete."
       ]
+    },
+    {
+      "caso": 9,
+      "titulo": "Contexto aprovado",
+      "estado": "NAO_APLICAVEL",
+      "motivo": "esta versão do Prumo não possui o recurso \"contextoId\"",
+      "aprovado": null,
+      "total": 0,
+      "ok": 0,
+      "falhas": [],
+      "checks": [],
+      "achados": [],
+      "limitesConhecidos": [
+        "O Prumo comprova a origem, a versão, o hash e a aprovação humana do contexto; não decide se o requisito está correto nem se os cenários bastam."
+      ]
+    },
+    {
+      "caso": 10,
+      "titulo": "Contextos contraditórios",
+      "estado": "NAO_APLICAVEL",
+      "motivo": "esta versão do Prumo não possui o recurso \"contextoId\"",
+      "aprovado": null,
+      "total": 0,
+      "ok": 0,
+      "falhas": [],
+      "checks": [],
+      "achados": [],
+      "limitesConhecidos": [
+        "O Prumo aponta o conflito e os contextos envolvidos; não escolhe um lado nem resolve o conflito."
+      ]
+    },
+    {
+      "caso": 11,
+      "titulo": "Contexto desatualizado",
+      "estado": "NAO_APLICAVEL",
+      "motivo": "esta versão do Prumo não possui o recurso \"contextoId\"",
+      "aprovado": null,
+      "total": 0,
+      "ok": 0,
+      "falhas": [],
+      "checks": [],
+      "achados": [],
+      "limitesConhecidos": [
+        "O Prumo informa que a versão não vale mais; localizar a versão substituta é decisão da pessoa."
+      ]
+    },
+    {
+      "caso": 12,
+      "titulo": "Origem documental ausente",
+      "estado": "NAO_APLICAVEL",
+      "motivo": "esta versão do Prumo não possui o recurso \"contextoId\"",
+      "aprovado": null,
+      "total": 0,
+      "ok": 0,
+      "falhas": [],
+      "checks": [],
+      "achados": [],
+      "limitesConhecidos": [
+        "Sem origem o contexto não pode ser aprovado; o Prumo registra a lacuna e não a preenche."
+      ]
+    },
+    {
+      "caso": 13,
+      "titulo": "Isolamento entre projetos",
+      "estado": "NAO_APLICAVEL",
+      "motivo": "esta versão do Prumo não possui o recurso \"contextoId\"",
+      "aprovado": null,
+      "total": 0,
+      "ok": 0,
+      "falhas": [],
+      "checks": [],
+      "achados": [],
+      "limitesConhecidos": [
+        "O contexto aprovado de outro projeto não é visível: nem listado, nem lido por id."
+      ]
+    },
+    {
+      "caso": 14,
+      "titulo": "Testes Playwright com antipadrões",
+      "estado": "NAO_APLICAVEL",
+      "motivo": "esta versão do Prumo não possui o recurso \"frameworks\"",
+      "aprovado": null,
+      "total": 0,
+      "ok": 0,
+      "falhas": [],
+      "checks": [],
+      "achados": [],
+      "limitesConhecidos": [
+        "O Prumo não consegue, só pelo texto, saber que \"salvar pedido\" não verifica a persistência nem que faltam cenários negativos de permissão: isso é julgamento da IA com base no requisito aprovado."
+      ]
     }
   ],
   "resumo": {
     "casosAprovados": 7,
     "casos": 8,
+    "naoAplicaveis": 6,
     "verificacoes": 102,
     "verificacoesOk": 101
   },

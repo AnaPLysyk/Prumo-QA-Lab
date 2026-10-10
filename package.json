@@ -15,7 +15,7 @@
     "deteccao": "node avaliacoes/deteccao.mjs",
     "comparacao": "node avaliacoes/comparacao.mjs",
     "metricas": "node avaliacoes/metricas.mjs",
-    "check": "node --test avaliacoes/laboratorio.test.mjs avaliacoes/rubrica-comparacao.test.mjs"
+    "check": "node --test avaliacoes/laboratorio.test.mjs avaliacoes/rubrica-comparacao.test.mjs avaliacoes/casos-contexto.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1"
