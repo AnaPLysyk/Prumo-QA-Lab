@@ -1,10 +1,10 @@
 // Substitui a persistência por memória: nenhum teste abre SQLite ou dados da pessoa.
 import { randomUUID } from 'node:crypto';
 import { semAcentos } from '../../../dist/compartilhado/texto/semAcentos.js';
-import { normalizarNome } from '../../../dist/agentes/regras/normalizarNome.js';
+import { normalizarNome } from '../../../dist/agentes/regras/textosDoConhecimento.js';
 import { normalizarFoco } from '../../../dist/agentes/regras/normalizarFoco.js';
 import { experiencias, papeis } from '../../../dist/agentes/tipos/persona.js';
-import { termosDaFrase } from '../../../dist/agentes/regras/termosDaFrase.js';
+import { termosDaFrase } from '../../../dist/agentes/regras/textosDoConhecimento.js';
 import { sementeDasSkills } from '../../../dist/agentes/banco/sementeDasSkills.js';
 import { validarEspecializacao } from '../../../dist/agentes/regras/validarEspecializacao.js';
 import { mascarar } from '../../../dist/compartilhado/seguranca/mascarar.js';
