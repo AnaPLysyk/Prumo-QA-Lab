@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { montarRecursosUnitarios } from './montar-recursos.mjs';
 
 const origem = path.dirname(fileURLToPath(import.meta.url));
 const padraoQa = path.resolve(origem, '../../../Prumo-Qa');
@@ -48,13 +49,14 @@ export function executar(argv = process.argv.slice(2)) {
   const qa = path.resolve(op.qa);
   if (!fs.existsSync(path.join(qa, 'testes', 'unitario')) ||
       !fs.existsSync(path.join(qa, 'dist', 'aplicativo.js')) ||
-      !fs.existsSync(path.join(qa, 'testes', 'unitario', 'infra', 'conhecimento-hook.cjs')))
+      !fs.existsSync(path.join(qa, 'testes', 'unitario', 'executar.mjs')))
     throw new Error('LAB_PRUMO_NAO_COMPILADO: execute npm run build no Prumo QA');
   if (process.env.PRUMO_DATA_DIR || (!op.empacotado && process.env.PRUMO_APP_EXE))
     throw new Error('LAB_PERFIL_EXTERNO_RECUSADO');
   const lista = selecionar(op);
   if (op.listar) { console.log(JSON.stringify(lista)); return 0; }
   const copiados = [], diretorios = new Set();
+  const limparUnitarios = montarRecursosUnitarios(qa);
   const copiar = (fonte, destino) => {
     if (fs.existsSync(destino)) throw new Error('LAB_DESTINO_OCUPADO: ' + destino);
     const pai = path.dirname(destino);
@@ -89,6 +91,7 @@ export function executar(argv = process.argv.slice(2)) {
     for (const pasta of [...diretorios].sort((a, b) => b.length - a.length)) {
       if (fs.existsSync(pasta) && fs.readdirSync(pasta).length === 0) fs.rmdirSync(pasta);
     }
+    limparUnitarios();
   }
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

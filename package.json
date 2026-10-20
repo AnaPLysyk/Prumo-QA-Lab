@@ -17,7 +17,7 @@
     "deteccao": "node avaliacoes/deteccao.mjs",
     "comparacao": "node avaliacoes/comparacao.mjs",
     "metricas": "node avaliacoes/metricas.mjs",
-    "check": "node --test avaliacoes/laboratorio.test.mjs avaliacoes/rubrica-comparacao.test.mjs avaliacoes/casos-contexto.test.mjs automacao/prumo-qa/executar.test.mjs",
+    "check": "node --test avaliacoes/laboratorio.test.mjs avaliacoes/rubrica-comparacao.test.mjs avaliacoes/casos-contexto.test.mjs automacao/prumo-qa/executar.test.mjs automacao/prumo-qa/montar-recursos.test.mjs",
     "test:prumo:smoke": "node automacao/prumo-qa/executar.mjs --tipo smoke",
     "test:prumo:regressao": "node automacao/prumo-qa/executar.mjs --tipo regressao"
   },

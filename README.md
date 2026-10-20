@@ -104,6 +104,8 @@ O estado dos resultados reais está em [docs/RELATORIO-ENGENHARIA.md](docs/RELAT
 
 A pasta `automacao/prumo-qa/testes/` guarda **81 arquivos de testes** do aplicativo: 2 smoke e 79 regressao (incluindo o pré-voo de homologação transferido). Nao altera a aplicacao ficticia nem suas avaliacoes controladas.
 
+As nove simulações usadas pelos testes unitários ficam exclusivamente em `automacao/prumo-qa/recursos-unitarios/`. O executor oficial do Prumo QA monta as simulações durante os testes e as remove ao final; o CI recebe o Lab em checkout com commit fixado. Assim, o código-fonte de `testes/unitario/` contém somente os casos de teste e seu executor.
+
 O Lab executa esses testes no codigo **compilado** do Prumo QA. Seu executor valida os arquivos, copia temporariamente os testes e os auxiliares exclusivos para a arvore `testes/` do checkout do Prumo QA, executa Node Test Runner e limpa as copias em `finally`. O Lab nao altera arquivos de producao, contas ou instalacoes reais. Se o destino ja contiver os testes, a execucao e recusada (sem sobrescrever nada).
 
 Com os repositorios em pastas irmas e apos `npm ci` e `npm run build` no Prumo QA:
