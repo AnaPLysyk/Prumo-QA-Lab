@@ -37,6 +37,7 @@ export const tarefa = (n) => n === 14 ? 'Você é um agente de engenharia de qua
 export const promptA = (n) => `${tarefa(n)}\n\nArquivos autorizados do projeto (documentação, código e testes), todos os que você pode considerar:\n\n${arquivosAutorizados().map((f) => `=== ${f} ===\n${fs.readFileSync(path.join(lab, f), 'utf8')}`).join('\n')}\n\n${instrucaoDeFormato}`;
 const skillArq = path.resolve(path.dirname(mcpJs), '..', 'skills', 'qa', 'SKILL.md');
 const skill = fs.existsSync(skillArq) ? fs.readFileSync(skillArq, 'utf8') : '';
+const pacotePrumo = path.resolve(path.dirname(mcpJs), '..', 'package.json');
 export const promptB = (n) => `${tarefa(n)}\n\nUse SOMENTE as ferramentas MCP do Prumo (servidor "prumo-lab"): chame contexto_projeto para ler os arquivos autorizados e, depois de formular os cenários, chame revisar_cobertura. Não use shell nem leia arquivos de outra forma. Aplique a metodologia da Skill abaixo.\n\n${instrucaoDeFormato}\n\n--- Skill de QA (SKILL.md) ---\n${skill}`;
 const especializadas=['skills/qa/references/engenharia.md','skills/playwright/SKILL.md','skills/acessibilidade/SKILL.md'];
 export const promptC = n => promptB(n)+'\n\n--- Conhecimento especializado fornecido explicitamente; aplique somente o pertinente ---\n'+especializadas.map(f=>fs.readFileSync(path.resolve(path.dirname(mcpJs),'..',f),'utf8')).join('\n\n');
@@ -93,7 +94,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     registros.push({ ...base, estado: criterios.every((c) => c.ok) ? 'ATENDEU' : 'NAO_ATENDEU', duracaoMs: r.ms, ferramentasMcp: ferramentas, chamadasMcp: chamadas.map((c) => ({ tool: c.tool, status: c.status, argumentos: c.tool === 'contexto_projeto' ? {} : c.argumentos })), prumoUtilizado: braco !== 'A' ? prumoUtilizado : undefined, respostaEstruturada: resposta, criterios, respostaFinal: final });
     console.log(`${registros.at(-1).estado} caso ${n} braço ${braco}#${rep}: ${criterios.filter((c) => c.ok).length}/${criterios.length}${braco === 'B' && !prumoUtilizado ? ' (Prumo NÃO foi usado)' : ''}`);
   }
-  const resultado = { tipo: 'comparacao-com-e-sem-prumo', geradoEm: new Date().toISOString(), prumo: { versao: JSON.parse(fs.readFileSync(path.resolve(path.dirname(mcpJs), '..', 'package.json'), 'utf8')).version, skillSha256: skill ? createHash('sha256').update(skill).digest('hex') : null }, cliente, rubricaSha256: rubricaHash, repeticoes, registros, resumo: resumir(registros) };
+  const resultado = { tipo: 'comparacao-com-e-sem-prumo', geradoEm: new Date().toISOString(), prumo: { versao: fs.existsSync(pacotePrumo) ? JSON.parse(fs.readFileSync(pacotePrumo, 'utf8')).version : null, skillSha256: skill ? createHash('sha256').update(skill).digest('hex') : null }, cliente, rubricaSha256: rubricaHash, repeticoes, registros, resumo: resumir(registros) };
   console.log(JSON.stringify(resultado.resumo));
   if (!process.argv.includes('--sem-gravar')) { fs.mkdirSync(path.join(lab, 'avaliacoes', 'resultados'), { recursive: true }); const nome = `${resultado.geradoEm.slice(0, 10)}-comparacao-prumo-${resultado.prumo.versao}.json`; fs.writeFileSync(path.join(lab, 'avaliacoes', 'resultados', nome), JSON.stringify(resultado, null, 2) + '\n'); console.log('Resultado gravado em avaliacoes/resultados/' + nome); }
 }

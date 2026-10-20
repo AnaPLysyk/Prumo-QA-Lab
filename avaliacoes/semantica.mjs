@@ -26,7 +26,8 @@ function localizarCodex() {
 }
 const skillArq = path.resolve(path.dirname(mcpJs), '..', 'skills', 'qa', 'SKILL.md');
 const skill = fs.existsSync(skillArq) ? fs.readFileSync(skillArq, 'utf8') : '';
-const prumoVersao = JSON.parse(fs.readFileSync(path.resolve(path.dirname(mcpJs), '..', 'package.json'), 'utf8')).version;
+const pacotePrumo = path.resolve(path.dirname(mcpJs), '..', 'package.json');
+const prumoVersao = fs.existsSync(pacotePrumo) ? JSON.parse(fs.readFileSync(pacotePrumo, 'utf8')).version : null;
 const codex = localizarCodex();
 
 const prompt = (n) => `Tarefa de engenharia de qualidade num projeto vinculado ao servidor MCP "prumo-lab". Use SOMENTE as ferramentas MCP do Prumo; não execute shell, não leia nem edite arquivos, não chame outros MCPs.
