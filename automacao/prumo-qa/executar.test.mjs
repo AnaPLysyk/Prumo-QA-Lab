@@ -5,7 +5,7 @@ import { argumentos, selecionar } from './executar.mjs';
 
 test('catalogo externo preserva arquivos smoke e regressao', () => {
   assert.equal(selecionar(argumentos(['--tipo', 'smoke'])).length, 2);
-  assert.equal(selecionar(argumentos(['--tipo', 'regressao'])).length, 78);
+  assert.equal(selecionar(argumentos(['--tipo', 'regressao'])).length, 79);
   assert.deepEqual(selecionar(argumentos(['--tipo', 'smoke',
     '--arquivo', 'frontend/aplicativo/todas-as-telas.test.mjs'])),
     ['frontend/aplicativo/todas-as-telas.test.mjs']);

@@ -2,8 +2,8 @@
 // Os e-mails vão para a caixa dos testes (serviço de envio real em 127.0.0.1, sem Resend); nada sai do computador.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados } from '../../../apoio/janela.mjs';
-import { caixaDeEmail } from '../../../apoio/caixa-de-email.mjs';
+import { abrir, novoDados } from '../../infra/janela.mjs';
+import { caixaDeEmail } from '../../../unitario/infra/caixa-de-email.mjs';
 
 test('instalação nova: criar a conta com e-mail e código; código errado avisa, Corrigir dados não manda outro e-mail, sem tela de código de recuperação', { timeout: 120000 }, async (t) => {
   const caixa = await caixaDeEmail(); const email = 'lia@prumo.test'; const doEmail = () => caixa.mensagens.filter((m) => m.para === email);

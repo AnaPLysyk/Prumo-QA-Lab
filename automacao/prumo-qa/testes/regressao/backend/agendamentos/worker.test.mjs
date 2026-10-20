@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { autorizarEscopo } from '../../../../dist/agendamentos/autorizacoes/autorizarEscopo.js';
 
 import { criarPoliticaPublicacao } from '../../../../dist/agendamentos/autorizacoes/criarPoliticaPublicacao.js';

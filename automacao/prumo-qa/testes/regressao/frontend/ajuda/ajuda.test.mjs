@@ -8,8 +8,8 @@ import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregar
 import { iniciarAtividade } from '../../../../dist/logs/regras/iniciarAtividade.js';
 import { criarEvidenciaInicial } from '../../../../dist/testes/regras/criarEvidenciaInicial.js';
 import { salvarEvidencia } from '../../../../dist/testes/banco/salvarEvidencia.js';
-import { fixture } from '../../../apoio/fixtures.mjs';
-import { versao, exe, novoDados, abrir, ir, escolherPasta, mcp } from '../../../apoio/janela.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
+import { versao, exe, novoDados, abrir, ir, escolherPasta, mcp } from '../../infra/janela.mjs';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 
 /** Ajuda 2.3 na janela real: central, versões, integrações técnicas, atualização, privacidade, exportação, exclusão e diagnóstico. */

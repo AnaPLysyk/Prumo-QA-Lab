@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { criarMundo } from '../../../apoio/mundo-servicos.mjs';
+import { criarMundo } from '../../infra/mundo-servicos.mjs';
 import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
 import { habilitarEscrita } from '../../../../dist/conexoes/escrita/habilitarEscrita.js';
 import { executarOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';

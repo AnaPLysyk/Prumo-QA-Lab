@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { primeiroAcesso, abrir, novoDados, ir } from '../../../apoio/janela.mjs';
+import { primeiroAcesso, abrir, novoDados, ir } from '../../infra/janela.mjs';
 
 const capturas = path.join('tmp', 'evidencias', 'telas');
 const capturar = (page, nome) => { fs.mkdirSync(capturas, { recursive: true }); return page.screenshot({ path: path.join(capturas, nome + '.png') }); };

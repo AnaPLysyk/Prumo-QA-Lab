@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, escolherPasta } from '../../../apoio/janela.mjs';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { abrir, novoDados, ir, escolherPasta } from '../../infra/janela.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 
 // IDE de Testes na janela real: editar, criar e salvar arquivos de teste da pasta vinculada. Pasta e perfil sintéticos;
 // a confirmação nativa do Windows é um double do runner (que também registra se ela foi pedida).

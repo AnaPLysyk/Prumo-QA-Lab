@@ -16,7 +16,7 @@ import { obterEspaco } from '../../../../dist/projetos/banco/obterEspaco.js';
 import { associarEspaco } from '../../../../dist/projetos/regras/associarEspaco.js';
 import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
 import { removerVinculoServico } from '../../../../dist/projetos/regras/removerVinculoServico.js';
-import {respostaFixture,servidorFixture,instalarTransporteControlado} from '../../../apoio/servicos-fixtures.mjs';
+import {respostaFixture,servidorFixture,instalarTransporteControlado} from '../../../../site/scripts/servicos-fixtures.mjs';
 const base=t=>{const b=fs.mkdtempSync(path.join(os.tmpdir(),'prumo-servicos-fixture-'));t.after(()=>fs.rmSync(b,{recursive:true,force:true}));return b;};
 // Double opaco para teste de contrato. Não é criptografia nem substitui safeStorage em produção.
 const protetor=()=>{const mapa=new Map();return {disponivel:()=>true,proteger:s=>{const id=randomUUID();mapa.set(id,s);return Buffer.from(id);},abrir:b=>{if(!mapa.has(b.toString()))throw new Error('fixture');return mapa.get(b.toString());}};};

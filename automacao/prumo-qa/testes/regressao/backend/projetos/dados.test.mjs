@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { resumirDados } from '../../../../dist/ajuda/privacidade/resumirDados.js';
 import { politicaRetencao } from '../../../../dist/ajuda/tipos/privacidade.js';
 import { diretorioDados } from '../../../../dist/compartilhado/banco/diretorioDados.js';

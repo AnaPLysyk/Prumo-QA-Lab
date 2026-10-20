@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture } from '../../../apoio/fixtures.mjs';
-import { abrir,novoDados,ir,escolherPasta } from '../../../apoio/janela.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
+import { abrir,novoDados,ir,escolherPasta } from '../../infra/janela.mjs';
 
 test('janela verifica protocolo real, distingue SDK e preserva evidência após reabrir',async t=>{
   const f=await fixture(t);const dados=novoDados(t);const a=await abrir(t,dados);

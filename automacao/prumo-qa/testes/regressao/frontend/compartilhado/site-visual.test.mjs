@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import fs from 'node:fs';
-import { abrir,novoDados } from '../../../apoio/janela.mjs';
+import { abrir,novoDados } from '../../infra/janela.mjs';
 import { gerarSite } from '../../../../site/gerar.mjs';
 
 test('site no Chromium real: navegação, teclado e resoluções 1280/640/320 sem overflow da página',async t=>{

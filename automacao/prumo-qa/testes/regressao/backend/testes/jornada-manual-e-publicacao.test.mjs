@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { criarMundo } from '../../../apoio/mundo-servicos.mjs';
+import { criarMundo } from '../../infra/mundo-servicos.mjs';
 import { executarOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';
 import { habilitarEscrita } from '../../../../dist/conexoes/escrita/habilitarEscrita.js';
 import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';

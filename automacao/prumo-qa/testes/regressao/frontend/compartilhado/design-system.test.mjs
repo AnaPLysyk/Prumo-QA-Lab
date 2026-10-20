@@ -1,7 +1,7 @@
 /** Verifica teclado e carregamento concorrente das abas em Electron com painéis sintéticos. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados } from '../../../apoio/janela.mjs';
+import { abrir, novoDados } from '../../infra/janela.mjs';
 
 test('fechamento tardio do diálogo preserva o foco escolhido no menu e restaura o acionador no fluxo normal', async t => {
   const { page } = await abrir(t, novoDados(t));

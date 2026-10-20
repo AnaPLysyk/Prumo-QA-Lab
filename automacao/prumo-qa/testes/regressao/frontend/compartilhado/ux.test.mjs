@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
 
 /**
  * Cenários de experiência (2.10.2), registrados no Prumo como casos "ux" do projeto Prumo QA: botões que perdem a cor no

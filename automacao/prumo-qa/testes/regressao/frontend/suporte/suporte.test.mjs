@@ -4,7 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { novoDados, abrir, ir, exe } from '../../../apoio/janela.mjs';
+import { novoDados, abrir, ir, exe } from '../../infra/janela.mjs';
 
 /** Sino/som/preferências e central de Suporte na janela real. Servidor de atualização local (só fora do pacote) e navegador simulado: nada sai da máquina. */
 const chamar = (page, fn, ...args) => page.evaluate(([f, a]) => window.prumo[f](...a), [fn, args]);

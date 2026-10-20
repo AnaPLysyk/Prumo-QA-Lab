@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, mcp } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir, mcp } from '../../infra/janela.mjs';
 
 // Contratos reais em Electron/IPC/MCP, sempre com perfil temporário e projeto
 // sintético criado no próprio perfil. Sem banco, contas ou projetos externos.

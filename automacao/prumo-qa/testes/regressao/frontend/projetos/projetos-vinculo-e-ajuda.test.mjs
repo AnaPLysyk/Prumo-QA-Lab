@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { abrir, novoDados, ir, escolherPasta } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir, escolherPasta } from '../../infra/janela.mjs';
 
 /**
  * Fluxos corrigidos na 2.10.2 a partir do teste do Prumo em produção (issues #3, #4 e #9): vincular qualquer pasta de

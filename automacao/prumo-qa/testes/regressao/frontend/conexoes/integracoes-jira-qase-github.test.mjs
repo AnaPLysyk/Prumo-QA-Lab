@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
-import { servidorFixture } from '../../../apoio/servicos-fixtures.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
+import { servidorFixture } from '../../../../site/scripts/servicos-fixtures.mjs';
 
 // 2.9: telas de integração na janela real. Serviços são um servidor local sintético; nenhum projeto externo é tocado.
 const confirmar = (app, resposta = 1) => app.evaluate(({ dialog }, r) => { dialog.showMessageBox = async () => ({ response: r, checkboxChecked: false }); }, resposta);
@@ -97,7 +97,7 @@ test('Agentes: matriz real, política salva com confirmação e vínculos mostra
 });
 
 test('Testes: sem integração aparecem só os testes do repositório, agrupados por feature e classificados; filtro por tipo funciona', async (t) => {
-  const { fixture } = await import('../../../apoio/fixtures.mjs'); const { escolherPasta } = await import('../../../apoio/janela.mjs');
+  const { fixture } = await import('../../../unitario/infra/fixtures.mjs'); const { escolherPasta } = await import('../../infra/janela.mjs');
   const fs = await import('node:fs/promises'); const path = await import('node:path');
   const f = await fixture(t);
   await fs.mkdir(path.join(f.root, 'tests/e2e'), { recursive: true });

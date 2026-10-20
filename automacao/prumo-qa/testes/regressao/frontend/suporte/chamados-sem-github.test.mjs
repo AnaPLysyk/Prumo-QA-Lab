@@ -6,8 +6,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { abrir, ir, novoDados } from '../../../apoio/janela.mjs';
-import { CHAVE_DE_ADMIN_DOS_TESTES } from '../../../apoio/caixa-de-email.mjs';
+import { abrir, ir, novoDados } from '../../infra/janela.mjs';
+import { CHAVE_DE_ADMIN_DOS_TESTES } from '../../../unitario/infra/caixa-de-email.mjs';
 
 // PNG válido de 1x1 pixel: a tela da Administração precisa conseguir mostrar a imagem.
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');

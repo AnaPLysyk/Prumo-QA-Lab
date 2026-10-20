@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { criarServidor } from '../../../../dist/agentes/mcp/criarServidor.js';
 import { capacidadeEfetiva } from '../../../../dist/agentes/politicas/capacidadeEfetiva.js';
 import { configuracaoDoEspaco } from '../../../../dist/agentes/politicas/configuracaoDoEspaco.js';

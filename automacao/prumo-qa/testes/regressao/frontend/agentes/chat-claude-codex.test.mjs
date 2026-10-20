@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
 
 // Janela real, perfil temporário: Claude Code e Codex aparecem como opção, nascem não autorizados e o chat responde só com dados locais.
 test('chat: Claude Code e Codex listados, não autorizados por padrão; o chat responde localmente e pelo agente escolhido', { timeout: 120000 }, async (t) => {

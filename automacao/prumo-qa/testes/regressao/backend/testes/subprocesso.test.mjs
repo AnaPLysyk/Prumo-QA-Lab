@@ -2,7 +2,7 @@ import test,{mock} from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 mock.module('../../../../dist/testes/aprovacao/solicitarAprovacao.js',{exports:{solicitarAprovacao:async s=>({method:'test-double',scopeHash:s.scopeHash})}});
 mock.module('node:child_process',{exports:{spawn:()=>{

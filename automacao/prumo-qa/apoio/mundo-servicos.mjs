@@ -1,7 +1,7 @@
 // Mundo simulado e com estado de Jira, Qase e GitHub para testes de contrato das escritas. Não é a API real: valida o que o Prumo
 // envia (rotas da lista fechada, corpos e idempotência) e o que ele faz com as respostas, inclusive respostas perdidas.
-import { rotaEscritaPermitida } from '../../dist/conexoes/escrita/rotaEscritaPermitida.js';
-import { ErroServico } from '../../dist/conexoes/integracoes/ErroServico.js';
+import { rotaEscritaPermitida } from '../../../dist/conexoes/escrita/rotaEscritaPermitida.js';
+import { ErroServico } from '../../../dist/conexoes/integracoes/ErroServico.js';
 
 const falta = () => new ErroServico('SERVICE_NOT_FOUND');
 const url = (c) => new URL(c, 'https://x.test');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { versao, novoDados, abrir, ir } from '../../../apoio/janela.mjs';
+import { versao, novoDados, abrir, ir } from '../../infra/janela.mjs';
 
 /** Aplicativo real consultando um servidor de teste em 127.0.0.1: cada falha de consulta é diagnosticada e nunca vira "atualizado". */
 const verificar = async (page) => { await page.click('text=Verificar atualizações'); await page.waitForSelector('#saida-atualizacao .estado', { timeout: 20000 }); await page.waitForTimeout(200); return { selo: (await page.textContent('#saida-atualizacao .estado')).trim(), texto: await page.textContent('#saida-atualizacao') }; };

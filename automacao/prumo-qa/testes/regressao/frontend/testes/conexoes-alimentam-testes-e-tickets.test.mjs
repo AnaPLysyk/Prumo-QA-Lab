@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir, escolherPasta } from '../../../apoio/janela.mjs';
-import { servidorFixture } from '../../../apoio/servicos-fixtures.mjs';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { abrir, novoDados, ir, escolherPasta } from '../../infra/janela.mjs';
+import { servidorFixture } from '../../../../site/scripts/servicos-fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 
 // Qase conectado alimenta Testes (Repositório, Runs e Planos) e Jira alimenta Tickets; sem as conexões as duas abas seguem usáveis com
 // dados locais. Janela real; perfil e serviços sintéticos (servidor local no lugar do Qase e do Jira).

@@ -1,8 +1,8 @@
 /** Jornada pedida: token do Qase → projetos da conta → selecionar → projeto vinculado em Projetos, casos em Testes e defeitos em Tickets. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
-import { servidorFixture } from '../../../apoio/servicos-fixtures.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
+import { servidorFixture } from '../../../../site/scripts/servicos-fixtures.mjs';
 
 // Mesmo desvio de rede da demonstração de dois projetos: api.qase.io responde pelo servidor sintético local.
 const instrumentar = (app, port) => app.evaluate((_, p) => {

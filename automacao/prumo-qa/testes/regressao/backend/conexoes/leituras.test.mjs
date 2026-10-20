@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { criarMundo } from '../../../apoio/mundo-servicos.mjs';
+import { criarMundo } from '../../infra/mundo-servicos.mjs';
 import { lerDetalheDoServico as lerExtra } from '../../../../dist/conexoes/integracoes/lerDetalheDoServico.js';
 import { operacoesServico } from '../../../../dist/conexoes/tipos/adaptador.js';
 import { filtrosSchema, operacoesExtras } from '../../../../dist/conexoes/tipos/leituras.js';

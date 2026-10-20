@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, ativarPelaApi, novoDados } from '../../../apoio/janela.mjs';
+import { abrir, ativarPelaApi, novoDados } from '../../infra/janela.mjs';
 
 // Tela de entrada com o login ligado: o botão do GitHub só existe quando o OAuth App está configurado; ao clicar o Prumo abre a página de
 // autorização do GitHub (o navegador é um double do runner: nada é aberto nem enviado) e Cancelar volta à entrada sem sessão nem conexão.

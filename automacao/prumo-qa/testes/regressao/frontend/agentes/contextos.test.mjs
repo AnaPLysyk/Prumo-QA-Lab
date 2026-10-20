@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import os from 'node:os';
-import { fixture } from '../../../apoio/fixtures.mjs';
-import { novoDados, abrir, ir, escolherPasta, mcp } from '../../../apoio/janela.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
+import { novoDados, abrir, ir, escolherPasta, mcp } from '../../infra/janela.mjs';
 
 /** Contextos na janela real: formulário, aprovação com confirmação nativa, conflito, histórico, MCP e persistência. */
 const dialogos = (app, resposta) => app.evaluate(({ dialog }, r) => { dialog.showMessageBox = async () => ({ response: r, checkboxChecked: false }); }, resposta);

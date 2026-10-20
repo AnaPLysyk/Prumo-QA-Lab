@@ -2,7 +2,7 @@ import test,{mock} from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
 import { consultarEvidencias } from '../../../../dist/testes/banco/consultarEvidencias.js';

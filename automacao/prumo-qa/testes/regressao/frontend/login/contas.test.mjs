@@ -5,8 +5,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, primeiroAcesso } from '../../../apoio/janela.mjs';
-import { caixaDeEmail } from '../../../apoio/caixa-de-email.mjs';
+import { abrir, novoDados, ir, primeiroAcesso } from '../../infra/janela.mjs';
+import { caixaDeEmail } from '../../../unitario/infra/caixa-de-email.mjs';
 
 const capturas = path.join('tmp', 'evidencias', 'telas');
 const capturar = (page, nome) => { fs.mkdirSync(capturas, { recursive: true }); return page.screenshot({ path: path.join(capturas, nome + '.png') }); };

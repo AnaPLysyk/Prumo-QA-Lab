@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
 
 // Um caminho longo e sem ponto de quebra (como o do runner do CI) não pode alargar a página nem em janela pequena nem com zoom.
 const estoura = (page) => page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);

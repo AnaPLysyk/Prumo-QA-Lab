@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 
-import { repo, versao, exe, abas, novoDados, abrir, ir, escolherPasta, mcp } from '../../../apoio/janela.mjs';
+import { repo, versao, exe, abas, novoDados, abrir, ir, escolherPasta, mcp } from '../../infra/janela.mjs';
 
 
 test('janela nativa abre com identidade, versão e as sete seções sem erros', async (t) => {

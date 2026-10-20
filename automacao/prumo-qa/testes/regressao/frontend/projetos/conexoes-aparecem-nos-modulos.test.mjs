@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
-import { servidorFixture } from '../../../apoio/servicos-fixtures.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
+import { servidorFixture } from '../../../../site/scripts/servicos-fixtures.mjs';
 
 // Conecta GitHub e Jira pela tela Conexões e confere que aparecem em Projetos (lista de repositórios e vínculo), Testes (IDE/pipelines
 // do repositório) e Tickets. Janela real; perfil e serviços sintéticos (servidor local no lugar de api.github.com e do Jira).

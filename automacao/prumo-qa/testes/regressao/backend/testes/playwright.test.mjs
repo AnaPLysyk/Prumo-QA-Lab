@@ -45,9 +45,9 @@ test('reporter do Prumo grava o contrato PRUMO_RESULT_FILE, trata retentativas e
 test('segunda instância em OUTRO processo é recusada enquanto o worker está vivo', async (t) => {
   const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo trava ')); t.after(() => fs.rmSync(b, { recursive: true, force: true }));
   const w = new Worker({ base: b, semTemporizador: true }); w.iniciar(); t.after(() => w.parar());
-  const filho = spawnSync(process.execPath, [path.resolve('testes/apoio/_worker-filho.mjs'), b], { encoding: 'utf8' });
+  const filho = spawnSync(process.execPath, [path.resolve('testes/regressao/infra/_worker-filho.mjs'), b], { encoding: 'utf8' });
   assert.match(filho.stdout, /RECUSADO:WORKER_ALREADY_RUNNING/);
   await w.parar();
-  const depois = spawnSync(process.execPath, [path.resolve('testes/apoio/_worker-filho.mjs'), b], { encoding: 'utf8' });
+  const depois = spawnSync(process.execPath, [path.resolve('testes/regressao/infra/_worker-filho.mjs'), b], { encoding: 'utf8' });
   assert.match(depois.stdout, /INICIOU/, 'após encerrar, a trava é liberada');
 });

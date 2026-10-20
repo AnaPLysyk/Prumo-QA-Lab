@@ -5,7 +5,7 @@ import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { caixaDeEmail, emailDa } from './caixa-de-email.mjs';
+import { caixaDeEmail, emailDa } from '../../unitario/infra/caixa-de-email.mjs';
 
 /**
  * Apoio comum aos testes da janela (Playwright sobre o Electron real). Não é um teste.
@@ -56,7 +56,7 @@ export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
   // O envio de e-mail vai sempre para a caixa local dos testes, nunca para o serviço real.
   const env = { ...process.env, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: (await caixaDeEmail()).url, PRUMO_DATA_DIR: dados, ...envExtra }; delete env.ELECTRON_RUN_AS_NODE;
-  const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [path.join(repo, 'testes/apoio/desktop-entry.cjs'), ...extra], env });
+  const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [path.join(repo, 'site/scripts/desktop-entry.cjs'), ...extra], env });
   let fechado = false;
   const fechar = async () => { if (!fechado) { fechado = true; await app.close(); } };
   abertos.get(dados).push(fechar);
@@ -96,7 +96,7 @@ export async function mcp(root, dados, chamadas) {
   // Instalado: o servidor roda no runtime embutido do aplicativo (sem Node.js na máquina), como configura src/conexoes.ts.
   const transport = exe
     ? new StdioClientTransport({ command: exe, args: [path.join(path.dirname(exe), 'resources', 'app', 'dist', 'mcp.js'), root], env: { ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ELECTRON_RUN_AS_NODE: '1' } })
-    : new StdioClientTransport({ command: process.execPath, args: ['--require', path.join(repo, 'testes/apoio/conhecimento-hook.cjs'), path.join(repo, 'dist/mcp.js'), root], env: dados ? { PRUMO_DATA_DIR: dados } : {} });
+    : new StdioClientTransport({ command: process.execPath, args: ['--require', path.join(repo, 'testes/unitario/infra/conhecimento-hook.cjs'), path.join(repo, 'dist/mcp.js'), root], env: dados ? { PRUMO_DATA_DIR: dados } : {} });
   try {
     await client.connect(transport);
     const out = []; for (const [name, args] of chamadas) out.push(await client.callTool({ name, arguments: args }));

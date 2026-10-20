@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { criarServidor } from '../../../../dist/agentes/mcp/criarServidor.js';
 import { camposDe, canaisFrequentes, catalogo, esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 

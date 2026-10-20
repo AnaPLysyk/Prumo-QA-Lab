@@ -102,7 +102,7 @@ O estado dos resultados reais está em [docs/RELATORIO-ENGENHARIA.md](docs/RELAT
 
 ## Automacao externa do Prumo QA
 
-A pasta `automacao/prumo-qa/testes/` guarda **80 arquivos** que antes estavam no aplicativo: 2 smoke e 78 regressao. Nao altera a aplicacao ficticia nem suas avaliacoes controladas.
+A pasta `automacao/prumo-qa/testes/` guarda **81 arquivos de testes** do aplicativo: 2 smoke e 79 regressao (incluindo o pré-voo de homologação transferido). Nao altera a aplicacao ficticia nem suas avaliacoes controladas.
 
 O Lab executa esses testes no codigo **compilado** do Prumo QA. Seu executor valida os arquivos, copia temporariamente os testes e os auxiliares exclusivos para a arvore `testes/` do checkout do Prumo QA, executa Node Test Runner e limpa as copias em `finally`. O Lab nao altera arquivos de producao, contas ou instalacoes reais. Se o destino ja contiver os testes, a execucao e recusada (sem sobrescrever nada).
 

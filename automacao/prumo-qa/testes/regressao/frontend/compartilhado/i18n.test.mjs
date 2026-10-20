@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir, abas, ajustes } from '../../../apoio/janela.mjs';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { abrir, novoDados, ir, abas, ajustes } from '../../infra/janela.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/concluirTrabalho.js';
 import { enfileirar } from '../../../../dist/agendamentos/banco/enfileirar.js';
 import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendamentos/banco/pegarProximoTrabalho.js';

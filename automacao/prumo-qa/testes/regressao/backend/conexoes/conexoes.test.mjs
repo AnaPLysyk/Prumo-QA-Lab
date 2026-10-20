@@ -1,6 +1,6 @@
 import test, { mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 const chamadas=[];let respostaLista={status:0,stdout:'[]'};let respostaEscrita={status:0};
 mock.module('node:child_process',{exports:{spawnSync:(exe,args,opts)=>{chamadas.push({exe,args,opts});return args[1]==='list'?respostaLista:respostaEscrita;}}});

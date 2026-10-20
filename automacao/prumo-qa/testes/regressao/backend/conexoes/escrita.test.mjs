@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { criarMundo } from '../../../apoio/mundo-servicos.mjs';
+import { criarMundo } from '../../infra/mundo-servicos.mjs';
 import { criarPoliticaEscrita } from '../../../../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js';
 import { estadoDaAutorizacao as estadoEscrita } from '../../../../dist/agendamentos/autorizacoes/estadoDaAutorizacao.js';
 import { listarOperacoes } from '../../../../dist/conexoes/banco/listarOperacoes.js';

@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {abrir,novoDados,ir,mcp,exe,dadosDaConta} from '../../../apoio/janela.mjs';
-import {servidorFixture} from '../../../apoio/servicos-fixtures.mjs';
+import {abrir,novoDados,ir,mcp,exe,dadosDaConta} from '../../infra/janela.mjs';
+import {servidorFixture} from '../../../../site/scripts/servicos-fixtures.mjs';
 const confirmar=app=>app.evaluate(({dialog})=>{dialog.showMessageBox=async()=>({response:1});}); // decisões simuladas do runner; não aprova execução protegida
 const instrumentar=(app,port)=>app.evaluate((_,p)=>{
   const https=process.getBuiltinModule('node:https'),http=process.getBuiltinModule('node:http'),dns=process.getBuiltinModule('node:dns');

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import electronPath from 'electron';
-import { repo, exe, abrir, novoDados, ir, ajustes, dadosDaConta } from '../../../apoio/janela.mjs';
+import { repo, exe, abrir, novoDados, ir, ajustes, dadosDaConta } from '../../infra/janela.mjs';
 import { dicaDaBandeja as dicaBandeja } from '../../../../dist/aplicativo/bandeja/dicaDaBandeja.js';
 import { itensDoMenuDaBandeja as modeloMenuBandeja } from '../../../../dist/aplicativo/bandeja/itensDoMenuDaBandeja.js';
 import { resumoDoWorker as resumoEstado } from '../../../../dist/aplicativo/bandeja/resumoDoWorker.js';

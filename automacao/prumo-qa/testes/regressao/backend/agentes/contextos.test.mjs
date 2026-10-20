@@ -5,7 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { contextoCompleto } from '../../../../dist/agentes/mcp/contextoCompleto.js';
 import { criarServidor } from '../../../../dist/agentes/mcp/criarServidor.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';

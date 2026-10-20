@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
 
 test('Administração › Documentação viva: arquivo escolhido mostra o código, a explicação e o caminho tela → canal → API', async (t) => {
   const dados = novoDados(t), a = await abrir(t, dados);

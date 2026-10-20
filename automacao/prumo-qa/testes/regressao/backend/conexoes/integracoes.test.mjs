@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { registrosIntegracao } from '../../../../dist/conexoes/banco/registrosIntegracao.js';
 import { conferirServidores } from '../../../../dist/conexoes/ia/conferirServidores.js';

@@ -6,7 +6,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as esperar } from 'node:timers/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { contextoProjeto } from '../../../../dist/agentes/mcp/contextoProjeto.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
@@ -28,7 +28,7 @@ const dados=()=>mkdtemp(path.join(process.env.PRUMO_DATA_DIR,'histórico '));
 const origem={origin:'MCP',client:'sdk-acceptance'};
 const plano={requirement:'R1: Apenas Editor grava.',source:'README',sourcePath:'README.md',existingTests:[],candidates:[]};
 async function cliente(t,root,base=process.env.PRUMO_DATA_DIR){
-  const transport=new StdioClientTransport({command:process.execPath,args:['--require',path.resolve('testes/apoio/conhecimento-hook.cjs'),path.resolve('dist/mcp.js'),root],env:{PRUMO_DATA_DIR:base},stderr:'pipe'});
+  const transport=new StdioClientTransport({command:process.execPath,args:['--require',path.resolve('testes/unitario/infra/conhecimento-hook.cjs'),path.resolve('dist/mcp.js'),root],env:{PRUMO_DATA_DIR:base},stderr:'pipe'});
   let stderr='';transport.stderr.on('data',b=>stderr+=b);
   const c=new Client({name:'sdk-acceptance',version:'1.0.0'});await c.connect(transport);t.after(()=>c.close());
   return {c,stderr:()=>stderr};

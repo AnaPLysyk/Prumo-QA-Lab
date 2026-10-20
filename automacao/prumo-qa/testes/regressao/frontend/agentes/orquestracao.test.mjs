@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir } from '../../infra/janela.mjs';
 
 test('Agentes › Painel de atividades: orquestração do chat mostra agentes, ordem, estado e tempo de cada etapa', async (t) => {
   const dados = novoDados(t), a = await abrir(t, dados);

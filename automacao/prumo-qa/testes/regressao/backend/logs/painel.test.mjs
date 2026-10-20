@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { lerDocumentosDaAjuda } from '../../../../dist/ajuda/regras/lerDocumentosDaAjuda.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { situacaoDasConexoesDeIa } from '../../../../dist/conexoes/ia/situacaoDasConexoesDeIa.js';

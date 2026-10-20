@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const origem = path.dirname(fileURLToPath(import.meta.url));
 const padraoQa = path.resolve(origem, '../../../Prumo-Qa');
-const auxiliares = ['janela.mjs', 'mundo-servicos.mjs', '_worker-filho.mjs'];
+const auxiliares = ['janela.mjs', 'mundo-servicos.mjs', '_worker-filho.mjs', 'preparar-ambiente.mjs'];
 
 export function argumentos(argv) {
   const opcoes = { qa: padraoQa, tipo: null, arquivo: null, listar: false, empacotado: false };
@@ -48,7 +48,7 @@ export function executar(argv = process.argv.slice(2)) {
   const qa = path.resolve(op.qa);
   if (!fs.existsSync(path.join(qa, 'testes', 'unitario')) ||
       !fs.existsSync(path.join(qa, 'dist', 'aplicativo.js')) ||
-      !fs.existsSync(path.join(qa, 'testes', 'apoio', 'conhecimento-hook.cjs')))
+      !fs.existsSync(path.join(qa, 'testes', 'unitario', 'infra', 'conhecimento-hook.cjs')))
     throw new Error('LAB_PRUMO_NAO_COMPILADO: execute npm run build no Prumo QA');
   if (process.env.PRUMO_DATA_DIR || (!op.empacotado && process.env.PRUMO_APP_EXE))
     throw new Error('LAB_PERFIL_EXTERNO_RECUSADO');
@@ -75,10 +75,10 @@ export function executar(argv = process.argv.slice(2)) {
     }
     for (const a of auxiliares) {
       const arquivo = path.join(origem, 'apoio', a);
-      if (fs.existsSync(arquivo)) copiar(arquivo, path.join(qa, 'testes', 'apoio', a));
+      if (fs.existsSync(arquivo)) copiar(arquivo, path.join(qa, 'testes', op.tipo, 'infra', a));
     }
     const caminhos = lista.map(n => 'testes/' + op.tipo + '/' + n);
-    const cmd = ['--require', './testes/apoio/conhecimento-hook.cjs',
+    const cmd = ['--require', './testes/unitario/infra/conhecimento-hook.cjs',
       '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...caminhos];
     const r = spawnSync(process.execPath, cmd, { cwd: qa, env: { ...process.env, NODE_OPTIONS: '' },
       stdio: 'inherit', windowsHide: true });

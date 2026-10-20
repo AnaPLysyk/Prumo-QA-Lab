@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, primeiroAcesso, CONTA_DE_TESTE } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, primeiroAcesso, CONTA_DE_TESTE } from '../../infra/janela.mjs';
 
 // O Prumo abre direto na tela de entrada e não deixa usar nada sem entrar: primeiro acesso numa instalação nova, login nas seguintes.
 const recusado = (r, codigo) => { assert.equal(r.ok, false); assert.match(String(r.error), new RegExp('^' + codigo)); };
