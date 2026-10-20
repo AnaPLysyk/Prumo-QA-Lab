@@ -22,9 +22,9 @@ export function argumentos(argv) {
       opcoes[a.slice(2)] = valor;
     } else throw new Error('LAB_ARGUMENTO_INVALIDO: ' + a);
   }
-  if (!['smoke', 'regressao'].includes(opcoes.tipo)) throw new Error('LAB_TIPO_INVALIDO');
+  if (!['smoke', 'regressao', 'integracao', 'e2e'].includes(opcoes.tipo)) throw new Error('LAB_TIPO_INVALIDO');
   if (opcoes.arquivo && !/^(backend|frontend)\/[a-z-]+\/[a-z0-9._-]+\.test\.mjs$/.test(opcoes.arquivo)) throw new Error('LAB_ARQUIVO_INVALIDO');
-  if (opcoes.empacotado && (!opcoes.arquivo || opcoes.tipo !== 'smoke')) throw new Error('LAB_EMPACOTADO_INVALIDO');
+  if (opcoes.empacotado && (!opcoes.arquivo || opcoes.tipo !== 'e2e')) throw new Error('LAB_EMPACOTADO_INVALIDO');
   return opcoes;
 }
 

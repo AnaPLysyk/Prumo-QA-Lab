@@ -6,7 +6,7 @@ import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { criarServidor } from '../../../../dist/agentes/mcp/criarServidor.js';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 
-// Fumaça do backend: o build carrega, os canais da janela existem e o servidor MCP responde com as ferramentas. Detalhes ficam na regressão.
+// Nível: integração leve; finalidade: smoke. O build carrega, os canais da janela existem e o servidor MCP responde com as ferramentas. Detalhes ficam na regressão.
 test('backend sobe: canais da janela carregados e servidor MCP lista as ferramentas', async (t) => {
   assert.ok(Object.keys(esquemasIpc).length > 100, 'catálogo de canais carregado');
   const f = await fixture(t); const servidor = await criarServidor(f.root);

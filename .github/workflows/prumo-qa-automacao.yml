@@ -45,3 +45,5 @@ jobs:
         working-directory: prumoqa
       - run: node automacao/prumo-qa/executar.mjs --qa prumoqa --tipo smoke
       - run: node automacao/prumo-qa/executar.mjs --qa prumoqa --tipo regressao
+      - run: node automacao/prumo-qa/executar.mjs --qa prumoqa --tipo integracao
+      - run: node automacao/prumo-qa/executar.mjs --qa prumoqa --tipo e2e

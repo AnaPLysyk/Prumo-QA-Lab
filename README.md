@@ -102,7 +102,7 @@ O estado dos resultados reais está em [docs/RELATORIO-ENGENHARIA.md](docs/RELAT
 
 ## Automacao externa do Prumo QA
 
-A pasta `automacao/prumo-qa/testes/` guarda **81 arquivos de testes** do aplicativo: 2 smoke e 79 regressao (incluindo o pré-voo de homologação transferido). Nao altera a aplicacao ficticia nem suas avaliacoes controladas.
+A pasta `automacao/prumo-qa/testes/` guarda **84 arquivos de testes** do aplicativo: 1 smoke de backend, 1 E2E do Electron, 79 regressão (incluindo o pré-voo de homologação) e 3 de integração HTTP. Os cenários de integração usam somente o servidor local `127.0.0.1`, sem credenciais reais. Nao altera a aplicacao ficticia nem suas avaliacoes controladas.
 
 As nove simulações usadas pelos testes unitários ficam exclusivamente em `automacao/prumo-qa/recursos-unitarios/`. O executor oficial do Prumo QA monta as simulações durante os testes e as remove ao final; o CI recebe o Lab em checkout com commit fixado. Assim, o código-fonte de `testes/unitario/` contém somente os casos de teste e seu executor.
 
@@ -110,9 +110,11 @@ O Lab executa esses testes no codigo **compilado** do Prumo QA. Seu executor val
 
 Com os repositorios em pastas irmas e apos `npm ci` e `npm run build` no Prumo QA:
 
-- `npm run test:prumo:smoke`: smoke da API/MCP e da janela Electron
-- `npm run test:prumo:regressao`: regressao de backend, integracoes simuladas e interfaces
-- `node automacao/prumo-qa/executar.mjs --qa <caminho> --tipo smoke --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado`: smoke do aplicativo empacotado com `PRUMO_APP_EXE` explicitamente definido pelo CI
+- `npm run test:prumo:smoke`: smoke do backend e MCP
+- `npm run test:prumo:e2e`: abre o Electron real e verifica as telas do aplicativo
+- `npm run test:prumo:regressao`: regressão de backend, fluxos simulados e interfaces
+- `npm run test:prumo:integracao`: testes com servidor HTTP local e comunicação entre módulos reais
+- `node automacao/prumo-qa/executar.mjs --qa <caminho> --tipo e2e --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado`: smoke do aplicativo empacotado com `PRUMO_APP_EXE` explicitamente definido pelo CI
 
 O workflow `.github/workflows/prumo-qa-automacao.yml` valida o Lab nos pushes e permite executar as duas suites sob demanda contra uma branch, tag ou SHA do Prumo QA em runner Windows. O CI de release do Prumo QA tambem consulta este projeto em um commit fixado antes de publicar instaladores.
 
