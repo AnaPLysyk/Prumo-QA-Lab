@@ -32,7 +32,7 @@ try {
   const skillSha = fs.existsSync(skill) ? createHash('sha256').update(fs.readFileSync(skill)).digest('hex') : null;
   const ferramentas = (await client.listTools()).tools.map((t) => t.name).sort();
   const gerais = [];
-  gerais.push({ criterio: 'servidor expõe exatamente as quatro ferramentas', ok: JSON.stringify(ferramentas) === JSON.stringify(['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'revisar_cobertura']), detalhe: ferramentas.join(',') });
+  gerais.push({ criterio: 'servidor expõe exatamente as oito ferramentas', ok: JSON.stringify(ferramentas) === JSON.stringify(['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']), detalhe: ferramentas.join(',') });
   const ctx = await chamar('contexto_projeto', {});
   gerais.push({ criterio: 'contexto identifica projeto de automação com node:test', ok: ctx.tipo === 'automacao' && ctx.stack?.includes('node:test'), detalhe: `tipo=${ctx.tipo} stack=${ctx.stack}` });
   gerais.push({ criterio: 'contexto lista requisitos, testes e código autorizados', ok: ['requisitos/RQ-01.md', 'aplicacao/testes/frete.test.mjs', 'aplicacao/src/frete.mjs'].every((p) => ctx.sources?.some((s) => s.path.replaceAll('\\', '/') === p)), detalhe: `${ctx.sources?.length} fontes` });

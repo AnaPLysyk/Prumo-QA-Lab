@@ -5,7 +5,9 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test aplicacao/testes/elegibilidade.test.mjs aplicacao/testes/frete.test.mjs aplicacao/testes/acesso.test.mjs aplicacao/testes/pedidos.test.mjs aplicacao/testes/superficial.test.mjs",
     "avaliar": "node avaliacoes/avaliar.mjs",
@@ -15,7 +17,9 @@
     "deteccao": "node avaliacoes/deteccao.mjs",
     "comparacao": "node avaliacoes/comparacao.mjs",
     "metricas": "node avaliacoes/metricas.mjs",
-    "check": "node --test avaliacoes/laboratorio.test.mjs avaliacoes/rubrica-comparacao.test.mjs avaliacoes/casos-contexto.test.mjs"
+    "check": "node --test avaliacoes/laboratorio.test.mjs avaliacoes/rubrica-comparacao.test.mjs avaliacoes/casos-contexto.test.mjs automacao/prumo-qa/executar.test.mjs",
+    "test:prumo:smoke": "node automacao/prumo-qa/executar.mjs --tipo smoke",
+    "test:prumo:regressao": "node automacao/prumo-qa/executar.mjs --tipo regressao"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1"

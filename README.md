@@ -98,3 +98,20 @@ Cada resultado traz `versao` e `commit` do código avaliado (`-dirty` se houver 
 ## Estado e limites
 
 O estado dos resultados reais está em [docs/RELATORIO-ENGENHARIA.md](docs/RELATORIO-ENGENHARIA.md) (gerado). Oito situações sintéticas não provam que o Prumo encontra bugs em projetos reais. Licença: `UNLICENSED` até decisão da titular.
+
+
+## Automacao externa do Prumo QA
+
+A pasta `automacao/prumo-qa/testes/` guarda **80 arquivos** que antes estavam no aplicativo: 2 smoke e 78 regressao. Nao altera a aplicacao ficticia nem suas avaliacoes controladas.
+
+O Lab executa esses testes no codigo **compilado** do Prumo QA. Seu executor valida os arquivos, copia temporariamente os testes e os auxiliares exclusivos para a arvore `testes/` do checkout do Prumo QA, executa Node Test Runner e limpa as copias em `finally`. O Lab nao altera arquivos de producao, contas ou instalacoes reais. Se o destino ja contiver os testes, a execucao e recusada (sem sobrescrever nada).
+
+Com os repositorios em pastas irmas e apos `npm ci` e `npm run build` no Prumo QA:
+
+- `npm run test:prumo:smoke`: smoke da API/MCP e da janela Electron
+- `npm run test:prumo:regressao`: regressao de backend, integracoes simuladas e interfaces
+- `node automacao/prumo-qa/executar.mjs --qa <caminho> --tipo smoke --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado`: smoke do aplicativo empacotado com `PRUMO_APP_EXE` explicitamente definido pelo CI
+
+O workflow `.github/workflows/prumo-qa-automacao.yml` valida o Lab nos pushes e permite executar as duas suites sob demanda contra uma branch, tag ou SHA do Prumo QA em runner Windows. O CI de release do Prumo QA tambem consulta este projeto em um commit fixado antes de publicar instaladores.
+
+Os testes usam fixtures e dados sinteticos. Homologacao com contas externas reais e uma etapa separada.
