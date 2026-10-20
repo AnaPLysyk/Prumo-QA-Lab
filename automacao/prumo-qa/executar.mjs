@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const origem = path.dirname(fileURLToPath(import.meta.url));
 const padraoQa = path.resolve(origem, '../../../Prumo-Qa');
-const auxiliares = ['janela.mjs', 'mundo-servicos.mjs', 'conhecimento-memoria.mjs', '_worker-filho.mjs'];
+const auxiliares = ['janela.mjs', 'mundo-servicos.mjs', '_worker-filho.mjs'];
 
 export function argumentos(argv) {
   const opcoes = { qa: padraoQa, tipo: null, arquivo: null, listar: false, empacotado: false };
