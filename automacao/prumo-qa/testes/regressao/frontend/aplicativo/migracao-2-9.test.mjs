@@ -10,8 +10,8 @@ import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendament
 import { criarRotina } from '../../../../dist/agendamentos/regras/criarRotina.js';
 
 // Dados no formato da 2.8 (agenda, fila, histórico), sem nenhum dos arquivos novos da 2.9.
-// A 2.9 precisa abrir sobre eles sem perder nada e com a escrita externa desligada.
-test('migração 2.8 → 2.9: agenda e histórico preservados, arquivos novos só no primeiro uso e escrita externa desligada', async (t) => {
+// No modelo atual, a pasta legado permanece intacta, mas nao e atribuida automaticamente a uma conta.
+test('legado 2.8 fica preservado no disco e isolado de nova conta, sem escrita externa', async (t) => {
   const dados = novoDados(t); const a0 = await abrir(t, dados, [], {}, { inicio: true });
   const e = (await a0.page.evaluate(() => window.prumo.espacoCriar({ nome: 'LEGADO-28', descricao: 'dados da 2.8' }))).data; await a0.fechar();
   const rotina = criarRotina({ nome: 'Regressão noturna', espacoId: e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', frequencia: { tipo: 'diario', hora: '02:00' }, fuso: 'America/Sao_Paulo' }, dados);
@@ -22,7 +22,7 @@ test('migração 2.8 → 2.9: agenda e histórico preservados, arquivos novos s�
   const antes = fs.readFileSync(path.join(pasta, 'agenda.json'), 'utf8');
 
   const a = await abrir(t, dados, [], {}, { inicio: true });
-  assert.equal((await a.page.evaluate(() => window.prumo.agendaListar())).data.length, 1, 'rotina da 2.8 preservada');
+  assert.equal((await a.page.evaluate(() => window.prumo.agendaListar())).data.length, 0, 'conta atual nao importa automaticamente dados antigos sem proprietario');
   assert.equal(obterTrabalho(trabalho.id, dados).resultado.status, 'PASS', 'histórico da 2.8 preservado');
   const est = (await a.page.evaluate((id) => window.prumo.escritaEstado(id), e.id)).data; assert.ok(est.servicos.every((s) => s.escrita === false), 'escrita externa desligada por padrão');
   const ag = (await a.page.evaluate((id) => window.prumo.agentesEstado(id), e.id)).data; assert.equal(ag.configuracao.padrao, true, 'agentes partem do padrão');
