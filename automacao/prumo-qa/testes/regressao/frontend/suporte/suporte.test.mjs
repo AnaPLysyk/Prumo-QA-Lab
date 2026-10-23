@@ -4,11 +4,10 @@ import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { novoDados, abrir, ir, exe } from '../../infra/janela.mjs';
+import { novoDados, abrir, ir, exe, atenderConfirmacoes } from '../../infra/janela.mjs';
 
 /** Sino/som/preferências e central de Suporte na janela real. Servidor de atualização local (só fora do pacote) e navegador simulado: nada sai da máquina. */
 const chamar = (page, fn, ...args) => page.evaluate(([f, a]) => window.prumo[f](...a), [fn, args]);
-const dialogos = (app, resposta) => app.evaluate(({ dialog }, r) => { dialog.showMessageBox = async () => ({ response: r, checkboxChecked: false }); }, resposta);
 const servidor = async (t, tag = 'v99.0.0') => {
   let pedidos = 0; const srv = http.createServer((req, res) => {
     pedidos++; res.writeHead(200, { 'content-type': 'application/json' });
@@ -118,9 +117,11 @@ test('Suporte: revisão, bloqueio de segredo, confirmação nativa antes de abri
   await page.check('#sup-consentimento'); await page.click('#sup-revisar'); await page.waitForSelector('#sup-previa');
   const previa = await page.textContent('#sup-previa'); assert.match(previa, /Prumo QA \d+\.\d+\.\d+/); assert.doesNotMatch(previa, /Sistema:|Diagnóstico/);
   // cancelar a confirmação nativa não abre nada
-  await dialogos(app, 0); await page.click('#sup-abrir'); await page.waitForTimeout(400);
+  // 2.20: a confirmação é a caixa do próprio aplicativo (outra página sobre a janela), respondida como a pessoa faria.
+  let resposta = 'cancelar'; const conf = atenderConfirmacoes(app, () => resposta); t.after(() => conf.parar());
+  await page.click('#sup-abrir'); await conf.aguardar(1); assert.match(conf.registro[0].mensagem + conf.registro[0].detalhe, /issue[\s\S]*AnaPLysyk\/Prumo-Qa/);
   assert.deepEqual(await app.evaluate(() => globalThis.__abertas), []);
-  await dialogos(app, 1); await page.click('#sup-abrir'); await page.waitForTimeout(400);
+  resposta = 'confirmar'; await page.click('#sup-abrir'); await conf.aguardar(2);
   const abertas = await app.evaluate(() => globalThis.__abertas); assert.equal(abertas.length, 1);
   const u = new URL(abertas[0]); assert.equal(u.origin + u.pathname, 'https://github.com/AnaPLysyk/Prumo-Qa/issues/new'); assert.equal(u.searchParams.get('template'), 'bug.yml');
   assert.match(u.searchParams.get('descricao'), /nada acontece/); assert.ok(!u.searchParams.get('ambiente').includes('Sistema'), 'sistema não autorizado');

@@ -20,7 +20,7 @@ test('login: primeiro acesso, criar conta com senha temporária, permissão por 
   // 1. Primeiro acesso: sem nenhuma conta o Prumo só mostra a criação do Administrador; criada, a pessoa já está dentro.
   await primeiroAcesso(p, { nome: 'Ana Admin', login: 'ana.admin', senha: 'Prumo-admin-2026' });
   await capturar(p, 'administracao-login-ativado');
-  assert.match(await p.textContent('#conta-botao'), /Ana Admin/);
+  assert.match(await p.getAttribute('#conta-botao', 'aria-label'), /Ana Admin/);
 
   // 2. Nova conta (papel Leitor) com senha temporária mostrada uma vez.
   await ir(p, 'administracao'); await p.waitForSelector('#adm-usuarios');

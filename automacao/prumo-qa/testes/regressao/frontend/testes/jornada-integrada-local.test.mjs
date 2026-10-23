@@ -17,14 +17,14 @@ after(() => { if (anterior === undefined) delete process.env.PRUMO_DATA_DIR; els
   fs.rmSync(base, { recursive: true, force: true }); });
 const A = randomUUID(), B = randomUUID();
 const projetos = new Map([[A, { id: A, vinculos: [] }], [B, { id: B, vinculos: [] }]]);
-mock.module('../../../../dist/projetos/banco/obterEspaco.js', { exports: { obterEspaco: id => {
+mock.module('../../../../dist/projetos/banco/projetos.js', { exports: { ...(await import('../../../../dist/projetos/banco/projetos.js')), obterEspaco: id => {
   if (!projetos.has(id)) throw new Error('WORKSPACE_NOT_FOUND'); return projetos.get(id);
 } } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: { listarPropostas: () => [] } });
+mock.module('../../../../dist/tickets/banco/tickets.js', { exports: { ...(await import('../../../../dist/tickets/banco/tickets.js')), listarPropostas: () => [] } });
 const { esquemasIpc } = await import('../../../../dist/aplicativo/api/catalogoDeContratos.js');
-const { repositorioCaso } = await import('../../../../dist/testes/api/repositorioCaso.js');
-const { repositorioSuite } = await import('../../../../dist/testes/api/repositorioSuite.js');
-const { repositorioListar } = await import('../../../../dist/testes/api/repositorioListar.js');
+const { repositorioCaso } = await import('../../../../dist/testes/controlador.js');
+const { repositorioSuite } = await import('../../../../dist/testes/controlador.js');
+const { repositorioListar } = await import('../../../../dist/testes/controlador.js');
 const { diretorioDados } = await import('../../../../dist/compartilhado/banco/diretorioDados.js');
 const handlers = { 'repositorio:caso': repositorioCaso, 'repositorio:suite': repositorioSuite, 'repositorio:listar': repositorioListar };
 async function canal(nome, bruto) {
@@ -65,7 +65,9 @@ const h = (tag, attrs, ...filhos) => new No(tag, attrs, filhos);
 const campo = (_, attrs) => { const input = h('input', attrs); return { input, no: h('div', {}, input) }; };
 const source = p => fs.readFileSync(path.join(root, p), 'utf8');
 const suitesJS = source('frontend/testes/fluxos-repositorio-local.parte.js');
-const i = suitesJS.indexOf('  function formularioSuiteLocal(e, suites, atual = null) {');
+const i = suitesJS.indexOf('  function formularioSuiteLocal(');
+const botaoJS = source('frontend/design-system/ds.js').split(/\r?\n/).find(l => l.startsWith('const botao = '));
+const propostaJS = source('frontend/testes/propostas.js').split('/** Mostra cada proposta')[0];
 const j = suitesJS.indexOf('  async function telaCasosLocais(e, _mem, corpo) {', i);
 assert.ok(i >= 0 && j > i, 'formulário original de suíte localizado');
 function montarUI() {
@@ -75,11 +77,11 @@ function montarUI() {
     campo: (t, el) => h('label', {}, t, el), rodape: (...xs) => h('footer', {}, xs),
     modal: (_, filhos) => { s.modal = h('div', {}, filhos); },
     fecharModal: () => { s.fechados++; } };
-  const ctx = { h, api, DS, tr: t => t, avisar: t => s.avisos.push(t), mostrar: async () => {},
+  const ctx = { h, api, DS, tr: t => t, textoErro: t => String(t), avisar: t => s.avisos.push(t), mostrar: async () => {},
     campoPlataforma: campo, campoTexto: (_, id, attrs) => campo('', { ...attrs, id }) };
   vm.createContext(ctx);
-  vm.runInContext(source('frontend/compartilhado/criarBotaoAcao.js') + '\n' +
-    source('frontend/testes/formularios/montarFormularioProposta.js') + '\n' +
+  vm.runInContext(botaoJS + '\n' +
+    propostaJS + '\n' +
     suitesJS.slice(i, j) + '\nthis.caso = (p,c,s) => formularioProposta(p,c, () => this.salvou(),s); this.suite = formularioSuiteLocal;',ctx);
   ctx.salvou = () => { s.salvos++; }; return { ctx, s };
 }
@@ -119,7 +121,8 @@ test('schema estrito bloqueia payload adicional e impede gravação', async () =
   assert.equal(res.ok, false); assert.equal(res.error, 'INVALID_ARGUMENTS');
   assert.equal((await api.repositorioLocal(A)).data.casos.length, antes);
 });
-test('isolamento cruzado e Qase vinculado impedem cadastros locais concorrentes', async () => {
+// 2.20: com o Qase vinculado o cadastro local continua permitido (cenário P-n só do Prumo); o isolamento entre projetos segue valendo.
+test('isolamento cruzado impede cadastro em outro projeto e o Qase vinculado não bloqueia o cadastro local', async () => {
   const criada = await api.suiteLocalSalvar({ espacoId: A, titulo: 'Suíte para verificar isolamento' });
   assert.equal(criada.ok, true);
   const suiteId = criada.data.id;
@@ -130,7 +133,7 @@ test('isolamento cruzado e Qase vinculado impedem cadastros locais concorrentes'
   try {
     const c = await api.casoLocalSalvar({ espacoId: A, dados: { titulo: 'Caso remoto' } });
     const s = await api.suiteLocalSalvar({ espacoId: A, titulo: 'Suite remota' });
-    assert.match(c.error, /LOCAL_CASE_QASE_LINKED/); assert.match(s.error, /LOCAL_SUITE_QASE_LINKED/);
+    assert.equal(c.ok, true, 'cenário local permitido com o Qase vinculado'); assert.equal(s.ok, true, 'suíte local permitida com o Qase vinculado');
   } finally { projetos.get(A).vinculos = []; }
 });
 

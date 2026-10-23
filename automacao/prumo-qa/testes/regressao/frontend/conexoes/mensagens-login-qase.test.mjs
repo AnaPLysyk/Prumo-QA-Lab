@@ -8,15 +8,16 @@ import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../');
 const ler = rel => fs.readFileSync(path.join(raiz,rel), 'utf8');
-const qase = ler('frontend/conexoes/mostrarConexoes.js');
+const qase = ler('frontend/projetos/tela-projetos.js');
 const login = ler('frontend/login/entrarNaConta.js');
 const mensagensLogin = ler('frontend/login/mensagensDeEntrada.js');
 
 // Avalia as funções efetivamente utilizadas pelas telas, sem simular aprovação de autenticação.
-const corteQase = qase.indexOf('abas.conexoes=async el=>');
-assert.ok(corteQase > 0, 'a função de mensagens precede a tela');
+const inicioQase = qase.indexOf('function mensagemFalhaQase(erro) {');
+const fimQase = qase.indexOf('\n}', inicioQase) + 2;
+assert.ok(inicioQase >= 0 && fimQase > inicioQase, 'mensagem do Qase pertence à tela Projetos');
 const ctxQase = vm.createContext({});
-vm.runInContext(qase.slice(0, corteQase) + '\nthis.mensagem = mensagemFalhaQase;', ctxQase);
+vm.runInContext(qase.slice(inicioQase, fimQase) + '\nthis.mensagem = mensagemFalhaQase;', ctxQase);
 const mensagemQase = ctxQase.mensagem;
 
 const ctxLogin = vm.createContext({ window: {} });
@@ -25,19 +26,19 @@ const mensagemLogin = ctxLogin.window.PrumoMensagensEntrada.mensagemDaEntrada;
 assert.match(login, /PrumoMensagensEntrada/, 'a tela deve usar o módulo de mensagens, não duplicá-lo');
 
 test('Qase diferencia rede, tempo, limite, credencial e permissão', () => {
-  assert.match(mensagemQase('SERVICE_UNAVAILABLE'), /rede, DNS, proxy/);
+  assert.match(mensagemQase('SERVICE_UNAVAILABLE'), /Confira sua conexão/);
   assert.match(mensagemQase('SERVICE_TIMEOUT'), /demorou/);
-  assert.match(mensagemQase('SERVICE_RATE_LIMIT'), /limitou temporariamente/);
-  assert.match(mensagemQase('CREDENTIAL_INVALID_OR_EXPIRED'), /inválido ou expirado/);
-  assert.match(mensagemQase('SERVICE_PERMISSION'), /permissão/);
-  assert.match(mensagemQase('CREDENTIAL_PROTECTION_UNAVAILABLE'), /cofre de credenciais/);
+  assert.match(mensagemQase('SERVICE_RATE_LIMIT'), /pediu uma pausa/);
+  assert.match(mensagemQase('CREDENTIAL_INVALID_OR_EXPIRED'), /não funcionou/);
+  assert.match(mensagemQase('SERVICE_PERMISSION'), /não pode listar projetos/);
+  assert.match(mensagemQase('CREDENTIAL_PROTECTION_UNAVAILABLE'), /cofre do sistema/);
 });
 test('Qase desconhecido não revela dados ou exceções do backend', () => {
   const secreto = 'INTERNAL_BROKEN: token=segredo-123 caminho=C:\\perfis';
   const resposta = mensagemQase(secreto);
-  assert.match(resposta, /Não foi possível validar/);
+  assert.match(resposta, /Não consegui validar o token/);
   assert.doesNotMatch(resposta, /segredo-123|C:\\perfis|INTERNAL_BROKEN/);
-  assert.match(resposta, /Nenhum token foi salvo/);
+  assert.match(resposta, /Nada foi salvo/);
 });
 test('Login diferencia credenciais, código do e-mail, envio, bloqueio e senha fraca com orientação', () => {
   assert.match(mensagemLogin('LOGIN_INVALID: detalhe técnico'), /E-mail ou senha incorretos/);

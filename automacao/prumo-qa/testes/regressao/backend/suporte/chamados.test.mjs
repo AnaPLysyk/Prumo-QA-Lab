@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { consultarChamado } from '../../../../dist/suporte/integracoes/consultarChamado.js';
-import { prepararRelato as prepararSolicitacao } from '../../../../dist/suporte/regras/prepararRelato.js';
+import { consultarChamado } from '../../../../dist/suporte/servicoRelato.js';
+import { prepararRelato as prepararSolicitacao } from '../../../../dist/suporte/servicoRelato.js';
 
 const issue={number:12,title:'Histórico não atualiza',state:'open',created_at:'2026-10-10T10:00:00Z',updated_at:'2026-10-10T12:00:00Z',user:{login:'autor-sintetico'},assignees:[{login:'responsavel-sintetico'}],labels:[{name:'status: em análise'}]};
 const eventos=[{event:'labeled',created_at:'2026-10-10T11:00:00Z',actor:{login:'responsavel-sintetico'},label:{name:'status: em análise'}}];

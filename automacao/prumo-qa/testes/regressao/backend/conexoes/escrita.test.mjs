@@ -4,18 +4,18 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { criarMundo } from '../../infra/mundo-servicos.mjs';
-import { criarPoliticaEscrita } from '../../../../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js';
-import { estadoDaAutorizacao as estadoEscrita } from '../../../../dist/agendamentos/autorizacoes/estadoDaAutorizacao.js';
-import { listarOperacoes } from '../../../../dist/conexoes/banco/listarOperacoes.js';
+import { criarPoliticaEscrita } from '../../../../dist/agendamentos/autorizacoes/autorizarRotina.js';
+import { estadoDaAutorizacao as estadoEscrita } from '../../../../dist/agendamentos/banco/autorizacoes.js';
+import { listarOperacoes } from '../../../../dist/conexoes/banco/operacoes.js';
 import { catalogoOperacoes } from '../../../../dist/conexoes/escrita/catalogoOperacoes.js';
-import { escritaHabilitada } from '../../../../dist/conexoes/escrita/escritaHabilitada.js';
+import { escritaHabilitada } from '../../../../dist/conexoes/escrita/permissoes.js';
 import { executarOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';
-import { habilitarEscrita } from '../../../../dist/conexoes/escrita/habilitarEscrita.js';
-import { prepararOperacao } from '../../../../dist/conexoes/escrita/prepararOperacao.js';
-import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/rotaEscritaPermitida.js';
+import { habilitarEscrita } from '../../../../dist/conexoes/escrita/permissoes.js';
+import { prepararOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';
+import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/permissoes.js';
 import { caminhoDeTesteValido } from '../../../../dist/conexoes/github/caminhoDeTesteValido.js';
 import { idsDeOperacao } from '../../../../dist/conexoes/tipos/operacoesExternas.js';
-import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
 
 const base = (t) => { const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo escrita ')); t.after(() => fs.rmSync(b, { recursive: true, force: true })); return b; };
 async function montar(t, { escrita = true } = {}) {

@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, escolherPasta, exe, dadosDaConta } from '../../infra/janela.mjs';
+import { abrir, novoDados, ir, escolherPasta, exe, dadosDaConta, atenderConfirmacoes } from '../../infra/janela.mjs';
 import { servidorFixture } from '../../../../site/scripts/servicos-fixtures.mjs';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
-import { autorizarEscopo } from '../../../../dist/agendamentos/autorizacoes/autorizarEscopo.js';
-import { escopoDeCapability } from '../../../../dist/testes/regras/escopoDeCapability.js';
-import { criarRotina } from '../../../../dist/agendamentos/regras/criarRotina.js';
+import { autorizarEscopo } from '../../../../dist/agendamentos/autorizacoes/autorizarRotina.js';
+import { escopoDeCapability } from '../../../../dist/testes/regras/executarValidacao.js';
+import { criarRotina } from '../../../../dist/agendamentos/regras/cicloDaRotina.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 
 /**
@@ -16,7 +16,7 @@ import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregar
  * pelo runner com um solicitador simulado, exatamente como o broker devolveria. O restante (agenda, worker, processo, evidência,
  * histórico, comentário, bandeja e encerramento) é real. O projeto é criado pelo teste; nenhum projeto externo é lido ou executado.
  */
-const confirmar = (app) => app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1 }); });
+// 2.20.0: as confirmações são a caixa do próprio app (não dialog.showMessageBox); o runner as responde com atenderConfirmacoes.
 const instrumentar = (app, port) => app.evaluate((_, p) => {
   const https = process.getBuiltinModule('node:https'), http = process.getBuiltinModule('node:http'), dns = process.getBuiltinModule('node:dns');
   dns.promises.lookup = async () => ({ address: '93.184.216.34', family: 4 });
@@ -47,13 +47,14 @@ for (const [nome, esperado] of [['QA', true], ['', false], ['  ', false], [null,
   test('nome ' + JSON.stringify(nome), () => assert.equal(validarNome(nome), esperado));
 `);
   const lab = laboratorio.root; const outro = await fixture(t);
-  const a = await abrir(t, dados, [], {}, { inicio: true }); await instrumentar(a.app, s.port); await confirmar(a.app);
+  const a = await abrir(t, dados, [], {}, { inicio: true }); await instrumentar(a.app, s.port);
+  const conf = atenderConfirmacoes(a.app, () => 'confirmar'); t.after(() => conf.parar());
   const pastaDaConta = await dadosDaConta(a.page, dados);
   assert.equal(await a.page.getAttribute('[data-aba=inicio]', 'aria-current'), 'page'); passo(1, 'Prumo aberto na tela Início');
   // 2. Projetos do laboratório e outro projeto independente
   const criar = async (nome, pasta) => { const e = (await a.page.evaluate((n) => window.prumo.espacoCriar({ nome: n, descricao: 'demonstração 2.8' }), nome)).data; await escolherPasta(a.app, pasta); const r = await a.page.evaluate((id) => window.prumo.espacoPasta(id), e.id); assert.equal(r.ok, true, JSON.stringify(r)); return e; };
   const eLab = await criar('PRUMO-LAB', lab); const eOutro = await criar('OUTRO-PROJETO', outro.root);
-  await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${eLab.id}"]`).getByRole('button', { name: 'Selecionar projeto', exact: true }).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'PRUMO-LAB');
+  await ir(a.page, 'projetos'); await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${eLab.id}"]`).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'PRUMO-LAB');
   passo(2, 'Projeto Prumo PRUMO-LAB selecionado (projeto sintético criado em temporário)');
   // 3. Jira simulado vinculado
   const conta = (await a.page.evaluate(() => window.prumo.servicoAdicionar({ servico: 'jira', nome: 'Jira simulado', instancia: 'https://lab.atlassian.net', usuario: 'fixture@example.test', token: 'fixture-secret-28' }))).data;
@@ -90,15 +91,15 @@ for (const [nome, esperado] of [['QA', true], ['', false], ['  ', false], [null,
   passo(12, 'Histórico registrado: tentativas e duração', { tentativas: feita.tentativas.length });
   // 13-16. Reabrir a janela e consultar execução, evidência e logs
   await a.app.evaluate(({ app }) => app.emit('second-instance')); await a.page.waitForFunction(() => document.visibilityState === 'visible'); passo(13, 'Janela reaberta pelo caminho da bandeja');
-  await ir(a.page, 'execucoes'); await a.page.locator(`tr[data-exec="${feita.id}"]`).waitFor(); assert.match(await a.page.locator(`tr[data-exec="${feita.id}"]`).textContent(), /PASS/); passo(14, 'Execução visível em Execuções, no projeto selecionado');
-  await a.page.locator(`tr[data-exec="${feita.id}"] td.ds-acao button`).click(); await a.page.locator('#qualidade-dialog[open] [role=tab]', { hasText: 'Evidências' }).click();
+  await ir(a.page, 'execucoes'); await a.page.locator(`[data-exec="${feita.id}"]`).waitFor(); assert.match(await a.page.locator(`[data-exec="${feita.id}"]`).textContent(), /PASS/); passo(14, 'Execução visível em Execuções, no projeto selecionado');
+  await a.page.locator(`[data-exec="${feita.id}"]`).click(); await a.page.locator('#qualidade-dialog[open] [role=tab]', { hasText: 'Evidências' }).click();
   await a.page.waitForFunction((id) => document.querySelector('#qualidade-dialog').textContent.includes(id.slice(0, 8)), feita.evidenciaId); passo(15, 'Evidência consultada na interface (dentro da execução)'); passo(16, 'Log da execução (stdout redigido) disponível na evidência');
   // 17-19. Comentário Jira: publicado pela política aprovada; repetir não duplica
   await esperar(async () => s.comentarios.length === 1, 20000, 'comentário Jira'); assert.match(JSON.stringify(s.comentarios[0].body), /Execução: /); assert.match(JSON.stringify(s.comentarios[0].body), /não altera o status do ticket/);
   const aposRun = (await execs()).find((x) => x.id === feita.id); assert.equal(aposRun.jira.estado, 'PUBLICADO'); passo(17, 'Comentário preparado (política aprovada) com o texto estruturado'); passo(18, 'Publicação no Jira simulado confirmada com id remoto', { comentarioId: aposRun.jira.comentarioId });
   const repetido = await a.page.evaluate((id) => window.prumo.jiraPublicar(id), feita.id); assert.equal(repetido.data.estado, 'PUBLICADO'); assert.equal(s.comentarios.length, 1); passo(19, 'Repetir a publicação não criou comentário duplicado');
   // 20-21. Trocar de projeto: nada do laboratório aparece
-  await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${eOutro.id}"]`).getByRole('button', { name: 'Selecionar projeto', exact: true }).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'OUTRO-PROJETO');
+  await ir(a.page, 'projetos'); await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${eOutro.id}"]`).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'OUTRO-PROJETO');
   await ir(a.page, 'execucoes'); await a.page.locator('#runs-vazio').waitFor(); assert.doesNotMatch(await a.page.textContent('#conteudo'), /Smoke do laboratório/); assert.equal(await a.page.locator('#runs-tabela').count(), 0);
   assert.equal((await a.page.evaluate((id) => window.prumo.metricasExecucoes(id), eOutro.id)).data.execucoes, 0); assert.equal(fs.existsSync(path.join(outro.root, '.prumo', 'evidencias')), false); passo(20, 'Troca para OUTRO-PROJETO'); passo(21, 'Isolamento confirmado: nenhuma execução, evidência ou métrica do laboratório no outro projeto');
   // 22-24. Pausar a agenda: a próxima execução não começa; ao retomar, o horário perdido (tolerância 0) é registrado como PERDIDO

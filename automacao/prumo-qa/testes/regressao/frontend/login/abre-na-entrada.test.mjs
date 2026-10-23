@@ -16,7 +16,7 @@ test('instalação nova: abre no primeiro acesso, nada responde e nenhuma tela a
   assert.equal((await p.evaluate(() => window.prumo.contaSessao())).data.entradaGithub, false);
   await p.selectOption('#entrada-idioma', 'en'); await p.waitForFunction(() => document.querySelector('#entrada-titulo')?.textContent === 'Sign in'); assert.equal(await p.locator('#entrada-github').count(), 0);
   await p.selectOption('#entrada-idioma', 'pt-BR'); await p.waitForFunction(() => document.querySelector('#entrada-titulo')?.textContent === 'Entrar');
-  await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome'); await p.click('#entrada-voltar'); await p.waitForSelector('#entrada-login'); await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome');
+  await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome'); await p.getByRole('navigation', { name: 'Você está em' }).getByRole('button', { name: 'Entrar', exact: true }).click(); await p.waitForSelector('#entrada-login'); await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome');
   assert.equal(await p.isVisible('#nav'), false, 'o menu fica escondido atrás da entrada'); assert.equal(await p.locator('#entrada-fechar').count(), 0);
   await p.keyboard.press('Escape'); assert.equal(await p.locator('dialog#entrada[open]').count(), 1, 'Esc não fecha a entrada');
   const canais = await p.evaluate(async () => [await window.prumo.espacos(), await window.prumo.servicos(), await window.prumo.usuariosListar(), await window.prumo.papeisListar(), await window.prumo.acessoConfiguracao(), await window.prumo.workerEstado()].map((r) => ({ ok: r.ok, error: String(r.error ?? '') })));

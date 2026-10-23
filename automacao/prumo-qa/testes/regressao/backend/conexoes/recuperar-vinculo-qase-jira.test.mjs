@@ -5,8 +5,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { criarMundo } from '../../infra/mundo-servicos.mjs';
-import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
-import { habilitarEscrita } from '../../../../dist/conexoes/escrita/habilitarEscrita.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
+import { habilitarEscrita } from '../../../../dist/conexoes/escrita/permissoes.js';
 import { executarOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';
 
 async function ambiente(t) {

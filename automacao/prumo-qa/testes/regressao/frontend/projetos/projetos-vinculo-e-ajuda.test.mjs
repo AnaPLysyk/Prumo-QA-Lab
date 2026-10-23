@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { abrir, novoDados, ir, escolherPasta } from '../../infra/janela.mjs';
+import { abrir, novoDados, ir, escolherPasta, usarProjeto, atenderConfirmacoes } from '../../infra/janela.mjs';
 
 /**
  * Fluxos corrigidos na 2.10.2 a partir do teste do Prumo em produção (issues #3, #4 e #9): vincular qualquer pasta de
@@ -17,35 +17,41 @@ const pastaTemp = (t, arquivos) => {
   return raiz;
 };
 // Diálogo nativo simulado: guarda o que foi mostrado e responde como a pessoa (1 = confirmar, 0 = cancelar).
-const responder = (app, resposta) => app.evaluate(({ dialog }, r) => { globalThis.__dialogos = []; dialog.showMessageBox = async (_j, o) => { globalThis.__dialogos.push({ message: o.message, detail: o.detail, buttons: o.buttons }); return { response: r, checkboxChecked: false }; }; }, resposta);
-const mostrados = (app) => app.evaluate(() => globalThis.__dialogos);
-const vincularPelaTela = async (page, nome) => { await ir(page, 'projetos'); await page.locator('[data-espaco]', { hasText: nome }).getByRole('button', { name: /Vincular repositório local/ }).click(); };
+// 2.20: a confirmação é a caixa do app (atenderConfirmacoes); `dlg.r` escolhe a resposta das próximas perguntas e `dlg.conf.registro` guarda o que foi mostrado.
+const confirmacoes = (t, app) => { const dlg = { r: 'cancelar' }; dlg.conf = atenderConfirmacoes(app, () => dlg.r); t.after(() => dlg.conf.parar()); return dlg; };
+// 2.19: a pasta entra pela bolha "Pasta local" da bancada do projeto › Escolher pasta (o diálogo de pasta é o de escolherPasta).
+const vincularPelaTela = async (page, nome) => {
+  const id = await page.evaluate((n) => window.prumo.espacos().then((r) => r.data.find((e) => e.nome === n).id), nome);
+  await usarProjeto(page, id);
+  if (await page.locator('#projeto-painel:not([hidden])').count()) await page.getByRole('button', { name: 'Fechar painel e voltar à bancada' }).click();
+  await page.locator('.ds-proj-modulo[data-servico="local"] .ds-proj-modulo-emblema').click();
+  await page.locator('#projeto-painel:not([hidden])').getByRole('button', { name: 'Escolher pasta', exact: true }).click();
+};
 
 test('vincular pasta npm sem qa.project.json: mostra a proposta, cancelar não grava, aprovar cria o contrato e vincula', { timeout: 120000 }, async (t) => {
-  const a = await abrir(t, novoDados(t));
+  const a = await abrir(t, novoDados(t)); const dlg = confirmacoes(t, a.app);
   await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'Loja web', descricao: 'pasta sem contrato' }));
   const raiz = pastaTemp(t, { 'package.json': JSON.stringify({ name: 'loja-web', scripts: { test: 'node --test', 'test:e2e': 'playwright test', start: 'node .' } }), 'src/a.js': '', 'tests/a.test.js': '' });
   await escolherPasta(a.app, raiz);
-  await responder(a.app, 0); await vincularPelaTela(a.page, 'Loja web');
-  for (let i = 0; i < 50 && !(await mostrados(a.app)).length; i++) await new Promise((ok) => setTimeout(ok, 100));
-  const [proposta] = await mostrados(a.app);
-  assert.match(proposta.message, /ainda não tem qa\.project\.json/); assert.deepEqual(proposta.buttons, ['Cancelar', 'Criar contrato e vincular']);
-  assert.match(proposta.detail, /Node\.js \(npm\)/); assert.match(proposta.detail, /test = npm run test/); assert.match(proposta.detail, /Bloqueados até revisão.*test-e2e/);
+  dlg.r = 'cancelar'; await vincularPelaTela(a.page, 'Loja web'); await dlg.conf.aguardar(1);
+  const proposta = dlg.conf.registro[0]; assert.equal(proposta.resposta, 'cancelar');
+  assert.match(proposta.mensagem, /ainda não tem qa\.project\.json/); assert.deepEqual(proposta.botoes, ['Cancelar', 'Criar contrato e vincular']);
+  assert.match(proposta.detalhe, /Node\.js \(npm\)/); assert.match(proposta.detalhe, /test = npm run test/); assert.match(proposta.detalhe, /Bloqueados até revisão.*test-e2e/);
   assert.ok(!fs.existsSync(path.join(raiz, 'qa.project.json')), 'cancelar não grava nada');
-  await responder(a.app, 1); await vincularPelaTela(a.page, 'Loja web');
-  await a.page.locator('[data-espaco]', { hasText: 'Loja web' }).getByText('Pasta vinculada').waitFor();
+  dlg.r = 'confirmar'; await vincularPelaTela(a.page, 'Loja web'); await dlg.conf.aguardar(2);
+  await a.page.locator('.ds-proj-modulo[data-servico="local"][data-vinculado="sim"]').waitFor();
   const contrato = JSON.parse(fs.readFileSync(path.join(raiz, 'qa.project.json'), 'utf8'));
   assert.deepEqual(Object.keys(contrato.commands).sort(), ['test', 'test-e2e']); assert.deepEqual(contrato.execution.blockedByDefault, ['test-e2e']);
   assert.deepEqual(a.erros, []);
 });
 
 test('pasta Python sem contrato vira somente leitura; contrato inválido mostra explicação antes do código', { timeout: 120000 }, async (t) => {
-  const a = await abrir(t, novoDados(t));
+  const a = await abrir(t, novoDados(t)); const dlg = confirmacoes(t, a.app);
   await a.page.evaluate(async () => { await window.prumo.espacoCriar({ nome: 'API Python', descricao: 'x' }); await window.prumo.espacoCriar({ nome: 'Quebrado', descricao: 'x' }); });
   const py = pastaTemp(t, { 'pyproject.toml': '[project]\nname = "api"', 'tests/test_a.py': '', 'app/main.py': '' });
-  await escolherPasta(a.app, py); await responder(a.app, 1); await vincularPelaTela(a.page, 'API Python');
-  await a.page.locator('[data-espaco]', { hasText: 'API Python' }).getByText('Pasta vinculada').waitFor();
-  const [proposta] = await mostrados(a.app); assert.match(proposta.detail, /Python/); assert.match(proposta.detail, /somente leitura/); assert.match(proposta.detail, /pytest.*2\.11/);
+  await escolherPasta(a.app, py); dlg.r = 'confirmar'; await vincularPelaTela(a.page, 'API Python'); await dlg.conf.aguardar(1);
+  await a.page.locator('.ds-proj-modulo[data-servico="local"][data-vinculado="sim"]').waitFor();
+  const proposta = dlg.conf.registro[0]; assert.match(proposta.detalhe, /Python/); assert.match(proposta.detalhe, /somente leitura/); assert.match(proposta.detalhe, /pytest.*2\.11/);
   assert.equal(JSON.parse(fs.readFileSync(path.join(py, 'qa.project.json'), 'utf8')).execution.readOnly, true);
   const ruim = pastaTemp(t, { 'qa.project.json': '{"schemaVersion":1}' });
   await escolherPasta(a.app, ruim); await vincularPelaTela(a.page, 'Quebrado');
@@ -67,10 +73,12 @@ test('Ajuda: a busca encontra variações e várias palavras, com a página cert
 
 test('o projeto selecionado é o mesmo na lateral, no Suporte e em Projetos (inclusive a demonstração)', { timeout: 90000 }, async (t) => {
   const a = await abrir(t, novoDados(t));
-  await a.page.getByRole('button', { name: 'Adicionar projeto de demonstração' }).click();
+  // 2.19: o botão de demonstração saiu da tela; o canal projetos:demo continua e é o que se exercita aqui.
+  assert.ok((await a.page.evaluate(() => window.prumo.adicionarDemo())).ok); await ir(a.page, 'ajuda'); await ir(a.page, 'projetos');
+  // A pasta da demonstração não é projeto do Prumo: entra no seletor da lateral (Pastas locais) e fica atual quando a pessoa a escolhe.
+  await a.page.click('#projeto-botao'); await a.page.locator('#projeto-lista [data-seletor-item="local"]', { hasText: 'Publicações sintéticas' }).click();
   await a.page.waitForFunction(() => /Publicações sintéticas/.test(document.querySelector('#projeto-atual')?.textContent || ''));
   const lateral = (await a.page.textContent('#projeto-atual')).trim();
-  await a.page.waitForSelector('#projeto-legado'); assert.match(await a.page.textContent('#projeto-legado'), /pasta com contrato local/);
   await ir(a.page, 'suporte');
   await a.page.waitForFunction((n) => [...document.querySelectorAll('#conteudo div > span')].some((s) => s.textContent.trim() === n), lateral);
 });
@@ -87,14 +95,13 @@ test('Atualizar agora: confirma, baixa e confere o SHA-256 da release; em desenv
   });
   await new Promise((ok) => srv.listen(0, '127.0.0.1', ok)); t.after(() => srv.close());
   const base = `http://127.0.0.1:${srv.address().port}`;
-  const a = await abrir(t, novoDados(t), [], { PRUMO_UPDATE_TEST_URL: `${base}/latest`, PRUMO_UPDATE_TEST_DOWNLOAD: `${base}/dl` });
+  const a = await abrir(t, novoDados(t), [], { PRUMO_UPDATE_TEST_URL: `${base}/latest`, PRUMO_UPDATE_TEST_DOWNLOAD: `${base}/dl` }); const dlg = confirmacoes(t, a.app);
   await ir(a.page, 'ajuda'); await a.page.click('.indice button:has-text("Atualizações")');
   await a.page.click('#verificar-atualizacao'); await a.page.waitForSelector('#atualizar-agora');
-  await responder(a.app, 0); await a.page.click('#atualizar-agora');
-  for (let i = 0; i < 50 && !(await mostrados(a.app)).length; i++) await new Promise((ok) => setTimeout(ok, 100));
-  const [pergunta] = await mostrados(a.app); assert.match(pergunta.message, /versão 99\.0\.0/); assert.match(pergunta.detail, /confere o SHA-256/);
+  dlg.r = 'cancelar'; await a.page.click('#atualizar-agora'); await dlg.conf.aguardar(1);
+  const pergunta = dlg.conf.registro[0]; assert.equal(pergunta.resposta, 'cancelar'); assert.match(pergunta.mensagem, /versão 99\.0\.0/); assert.match(pergunta.detalhe, /confere o SHA-256/);
   assert.ok(!pedidos.some((p) => p.startsWith('/dl/')), 'cancelar não baixa nada');
-  await responder(a.app, 1); await a.page.click('#atualizar-agora');
+  dlg.r = 'confirmar'; await a.page.click('#atualizar-agora');
   await a.page.waitForSelector('#atualizacao-conferida');
   assert.match(await a.page.textContent('#atualizacao-conferida'), /99\.0\.0 baixado e conferido.*nada foi instalado/);
   assert.deepEqual(pedidos.filter((p) => p.startsWith('/dl/')), [`/dl/${nome}.sha256`, `/dl/${nome}`]);

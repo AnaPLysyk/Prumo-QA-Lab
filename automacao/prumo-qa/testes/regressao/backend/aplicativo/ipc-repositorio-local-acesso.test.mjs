@@ -26,11 +26,12 @@ let situacao = 'SEM_SESSAO';
 let nivel = 'VER';
 let trocarSenha = false;
 mock.module('electron', { exports: {
-  app: { getVersion: () => 'teste' }, BrowserWindow: class {}, Tray: class {},
+  app: { getVersion: () => 'teste' }, BrowserWindow: class {}, WebContentsView: class {}, Tray: class {},
   dialog: {}, shell: {}, Menu: class {}, session: {}, nativeImage: {}, safeStorage: {}, Notification: class { static isSupported() { return false; } },
   ipcMain: { handle: (nome, fn) => registrados.set(nome, fn) }
 } });
-mock.module('../../../../dist/logs/banco/registrarDiagnostico.js', { exports: {
+mock.module('../../../../dist/logs/banco/diagnostico.js', { exports: {
+  ...(await import('../../../../dist/logs/banco/diagnostico.js')),
   registrarDiagnostico: reg => diagnosticos.push(reg)
 } });
 mock.module('../../../../dist/login/regras/sessao.js', { exports: {
@@ -55,17 +56,18 @@ mock.module('../../../../dist/login/regras/sessao.js', { exports: {
   telasDoPapel: () => ({}),
   telasDaConta: () => ({})
 } });
-mock.module('../../../../dist/projetos/banco/obterEspaco.js', { exports: {
+mock.module('../../../../dist/projetos/banco/projetos.js', { exports: {
+  ...(await import('../../../../dist/projetos/banco/projetos.js')),
   obterEspaco: id => { if (id !== a) throw new Error('WORKSPACE_NOT_FOUND'); return projeto; }
 } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: { listarPropostas: () => [] } });
+mock.module('../../../../dist/tickets/banco/tickets.js', { exports: { ...(await import('../../../../dist/tickets/banco/tickets.js')), listarPropostas: () => [] } });
 
 const { registrarCanal } = await import('../../../../dist/aplicativo/api/registrarCanal.js');
 const { estadoDoAplicativo } = await import('../../../../dist/aplicativo/estadoDoAplicativo.js');
 const { origemPermitida } = await import('../../../../dist/aplicativo/tipos/aplicativo.js');
-const { repositorioListar } = await import('../../../../dist/testes/api/repositorioListar.js');
-const { repositorioCaso } = await import('../../../../dist/testes/api/repositorioCaso.js');
-const { repositorioSuite } = await import('../../../../dist/testes/api/repositorioSuite.js');
+const { repositorioListar } = await import('../../../../dist/testes/controlador.js');
+const { repositorioCaso } = await import('../../../../dist/testes/controlador.js');
+const { repositorioSuite } = await import('../../../../dist/testes/controlador.js');
 
 registrarCanal('repositorio:listar', repositorioListar);
 registrarCanal('repositorio:caso', repositorioCaso);
@@ -170,13 +172,14 @@ test('schema estrito recusa campo inesperado e projeto inválido antes de consul
   assert.equal(consultasSessao.length, antes);
 });
 
-test('Qase vinculado impede cadastro local mesmo com permissão de escrita', async () => {
+// 2.20: o cenário e a suíte do Prumo coexistem com o Qase vinculado (têm número P-n próprio e só vão ao Qase pela publicação, com escrita habilitada e confirmação).
+test('Qase vinculado não impede cadastro local: o cenário e a suíte nascem só no Prumo', async () => {
   projeto.vinculos = [{ servico: 'qase' }];
   try {
     const c = await chamar('repositorio:caso', { espacoId: a, dados: { titulo: 'Caso remoto concorrente' } });
     const s = await chamar('repositorio:suite', { espacoId: a, titulo: 'Suíte remota concorrente' });
-    assert.match(c.error, /LOCAL_CASE_QASE_LINKED/);
-    assert.match(s.error, /LOCAL_SUITE_QASE_LINKED/);
+    assert.equal(c.error, undefined, 'cadastro local permitido com o Qase vinculado');
+    assert.equal(s.error, undefined, 'suíte local permitida com o Qase vinculado');
   } finally { projeto.vinculos = []; }
 });
 

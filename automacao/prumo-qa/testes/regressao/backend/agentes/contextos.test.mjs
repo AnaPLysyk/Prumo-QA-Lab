@@ -6,24 +6,24 @@ import os from 'node:os';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
-import { contextoCompleto } from '../../../../dist/agentes/mcp/contextoCompleto.js';
+import { contextoCompleto } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
 import { criarServidor } from '../../../../dist/agentes/mcp/criarServidor.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-import { excluirContexto } from '../../../../dist/agentes/banco/excluirContexto.js';
-import { excluirTodosContextos } from '../../../../dist/agentes/banco/excluirTodosContextos.js';
-import { gravarPermissaoDeContextosNoMcp } from '../../../../dist/agentes/banco/gravarPermissaoDeContextosNoMcp.js';
-import { pastaContextos } from '../../../../dist/agentes/banco/pastaContextos.js';
-import { aprovarContexto } from '../../../../dist/agentes/regras/aprovarContexto.js';
-import { contextosParaMcp } from '../../../../dist/agentes/regras/contextosParaMcp.js';
-import { criarContexto } from '../../../../dist/agentes/regras/criarContexto.js';
-import { desatualizarContexto } from '../../../../dist/agentes/regras/desatualizarContexto.js';
-import { editarContexto } from '../../../../dist/agentes/regras/editarContexto.js';
-import { listarContextos } from '../../../../dist/agentes/regras/listarContextos.js';
-import { marcarConflito } from '../../../../dist/agentes/regras/marcarConflito.js';
-import { obterContexto } from '../../../../dist/agentes/regras/obterContexto.js';
-import { resolverConflito } from '../../../../dist/agentes/regras/resolverConflito.js';
-import { substituirContexto } from '../../../../dist/agentes/regras/substituirContexto.js';
-import { revisarCobertura } from '../../../../dist/testes/regras/revisarCobertura.js';
+import { excluirContexto } from '../../../../dist/agentes/banco/contextos.js';
+import { excluirTodosContextos } from '../../../../dist/agentes/banco/contextos.js';
+import { gravarPermissaoDeContextosNoMcp } from '../../../../dist/agentes/banco/contextos.js';
+import { pastaContextos } from '../../../../dist/agentes/banco/contextos.js';
+import { aprovarContexto } from '../../../../dist/agentes/regras/cicloDosContextos.js';
+import { contextosParaMcp } from '../../../../dist/agentes/regras/consultasDeContextos.js';
+import { criarContexto } from '../../../../dist/agentes/regras/cicloDosContextos.js';
+import { desatualizarContexto } from '../../../../dist/agentes/regras/cicloDosContextos.js';
+import { editarContexto } from '../../../../dist/agentes/regras/cicloDosContextos.js';
+import { listarContextos } from '../../../../dist/agentes/regras/consultasDeContextos.js';
+import { marcarConflito } from '../../../../dist/agentes/regras/cicloDosContextos.js';
+import { obterContexto } from '../../../../dist/agentes/regras/consultasDeContextos.js';
+import { resolverConflito } from '../../../../dist/agentes/regras/cicloDosContextos.js';
+import { substituirContexto } from '../../../../dist/agentes/regras/cicloDosContextos.js';
+import { revisarCobertura } from '../../../../dist/testes/regras/revisaoDeCobertura.js';
 
 const base = { tipo: 'requisito', titulo: 'Somente Editor grava', texto: 'R1: Apenas Editor grava registros.', chave: 'RQ-1', origem: { tipo: 'documento', referencia: 'README.md' } };
 const proj = async (t, extra) => { const f = await fixture(t, extra); return { f, p: await carregarProjeto(f.root) }; };
@@ -193,11 +193,11 @@ test('projetos antigos sem contextos continuam compatíveis: contexto_projeto ma
   assert.equal(JSON.parse(fs.readFileSync(path.join(f.root, 'qa.project.json'), 'utf8')).schemaVersion, 2, 'o contrato v2 não foi alterado');
 });
 
-test('protocolo MCP real: oito ferramentas, contexto_projeto traz contextos autorizados e revisar_cobertura aceita contextoId', async (t) => {
+test('protocolo MCP real: dez ferramentas, contexto_projeto traz contextos autorizados e revisar_cobertura aceita contextoId', async (t) => {
   const { f, p } = await proj(t); const r = criarContexto(p, base, 'ana'); aprovarContexto(p, r.id, 'ana'); gravarPermissaoDeContextosNoMcp(p, true);
   const servidor = await criarServidor(f.root); const [a, b] = InMemoryTransport.createLinkedPair(); await servidor.connect(b);
   const cli = new Client({ name: 'teste-contextos', version: '1.0.0' }); await cli.connect(a); t.after(() => cli.close());
-  assert.deepEqual((await cli.listTools()).tools.map((x) => x.name).sort(), ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
+  assert.deepEqual((await cli.listTools()).tools.map((x) => x.name).sort(), ['consultar_evidencias', 'consultar_repositorio', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'perguntar_ao_orquestrador', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
   const ctx = JSON.parse((await cli.callTool({ name: 'contexto_projeto', arguments: {} })).content[0].text);
   assert.equal(ctx.contextos.disponivel, true); assert.equal(ctx.contextos.referencias[0].estado, 'APROVADO'); assert.equal(ctx.contextos.referencias[0].id, r.id);
   const rev = JSON.parse((await cli.callTool({ name: 'revisar_cobertura', arguments: plano(base.texto, { contextoId: r.id }) })).content[0].text);

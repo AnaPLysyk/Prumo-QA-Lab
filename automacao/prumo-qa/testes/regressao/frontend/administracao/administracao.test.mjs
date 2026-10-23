@@ -12,12 +12,13 @@ test('Administração › Documentação viva: arquivo escolhido mostra o códig
   // 2.11: a Administração abre em Usuários; a documentação viva fica na própria aba.
   await a.page.getByRole('tab', { name: 'Documentação viva' }).click();
   await a.page.waitForSelector('.adm-ide .adm-arvore');
-  await a.page.fill('#adm-busca', 'skillsCriar');
-  await a.page.click('[data-caminho="backend/agentes/api/skillsCriar.ts"]');
+  // 2.19.0: os tratadores de Skills foram consolidados em backend/agentes/controlador.ts.
+  await a.page.fill('#adm-busca', 'agentes/controlador');
+  await a.page.click('[data-caminho="backend/agentes/controlador.ts"]');
   await a.page.waitForFunction(() => /skillsCriar/.test(document.querySelector('.adm-codigo pre')?.textContent || ''));
   const explicacao = await a.page.textContent('.adm-explica');
-  for (const trecho of ['skillsCriar.ts', 'backend/agentes/api/skillsCriar.ts', 'skills:criar']) assert.ok(explicacao.includes(trecho), trecho);
-  assert.equal(await a.page.locator('.adm-bolinha.ativo[data-no="backend/agentes/api/skillsCriar.ts"]').count(), 1, 'o arquivo escolhido aparece destacado no fluxo');
+  for (const trecho of ['controlador.ts', 'backend/agentes/controlador.ts', 'skills:criar']) assert.ok(explicacao.includes(trecho), trecho);
+  assert.equal(await a.page.locator('.adm-bolinha.ativo[data-no="backend/agentes/controlador.ts"]').count(), 1, 'o arquivo escolhido aparece destacado no fluxo');
   assert.equal(await a.page.locator('.adm-bolinha[data-no="canal:skills:criar"]').count(), 1, 'o canal que leva até ele aparece no caminho');
   const noCaminho = await a.page.locator('.adm-bolinha').count();
   await a.page.click('#adm-fluxo-modo');

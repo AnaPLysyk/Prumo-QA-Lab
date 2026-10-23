@@ -19,15 +19,15 @@ test('instalação nova: criar a conta com e-mail e código; código errado avis
   const certo = caixa.ultimoCodigo(email);
   await p.fill('#confirmar-codigo', certo === '000000' ? '111111' : '000000'); await p.click('#entrada-enviar');
   await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /Código incorreto/);
-  await p.click('#entrada-voltar'); await p.waitForSelector('#primeiro-nome');
+  await p.getByRole('navigation', { name: 'Você está em' }).getByRole('button', { name: 'Criar conta', exact: true }).click(); await p.waitForSelector('#primeiro-nome');
   assert.equal(await p.inputValue('#primeiro-nome'), 'Lia Lima'); assert.equal(await p.inputValue('#primeiro-email'), 'lia@prumo.test');
   await p.fill('#primeiro-senha', 'Cadastro-firme-26'); await p.fill('#primeiro-confirma', 'Cadastro-firme-26'); await p.click('#entrada-enviar'); await p.waitForSelector('#confirmar-codigo');
   assert.equal(doEmail().length, 1, 'mesmo e-mail: o código já mandado continua valendo');
   await p.fill('#confirmar-codigo', certo); await Promise.all([p.waitForEvent('load'), p.click('#entrada-enviar')]);
-  await p.waitForSelector('#conta-botao'); assert.match(await p.textContent('#conta-botao'), /Lia Lima/);
+  await p.waitForSelector('#conta-botao'); assert.match(await p.getAttribute('#conta-botao', 'aria-label'), /Lia Lima/);
   assert.equal(await p.locator('#entrada-codigo').count(), 0, 'nenhuma tela de código de recuperação');
   await p.click('#conta-botao'); await p.click('#conta-minha'); await p.locator('#qualidade-dialog[open]').waitFor();
-  assert.match(await p.textContent('#qualidade-dialog'), /lia@prumo\.test/); assert.equal(await p.locator('#minha-recuperar-senha').count(), 1);
+  assert.match(await p.textContent('#qualidade-dialog'), /lia@prumo\.test/); await p.getByRole('tab', { name: 'Segurança' }).click(); assert.equal(await p.locator('#minha-recuperar-senha').count(), 1);
   assert.deepEqual(a.erros.filter((e) => !/LOGIN_SETUP_REQUIRED|CODE_INVALID/.test(e)), []);
 });
 
@@ -49,7 +49,7 @@ test('duas etapas na janela: Esqueci a senha sempre na entrada; ligada em Minha 
   await p.click('#entrada-enviar'); await p.waitForSelector('#confirmar-codigo'); await p.fill('#confirmar-codigo', caixa.ultimoCodigo(email));
   await Promise.all([p.waitForEvent('load'), p.click('#entrada-enviar')]); await p.waitForSelector('#conta-botao');
   await p.click('#conta-botao'); await p.click('#conta-minha'); await p.locator('#qualidade-dialog[open]').waitFor();
-  await p.fill('#minha-duas-senha', senha); await p.click('#minha-duas-etapas'); await p.waitForFunction(() => /ligada/i.test(document.querySelector('#aviso')?.textContent || ''));
+  await p.getByRole('tab', { name: 'Segurança' }).click(); await p.fill('#minha-duas-senha', senha); await p.click('#minha-duas-etapas'); await p.waitForFunction(() => /ligada/i.test(document.querySelector('#aviso')?.textContent || ''));
   await p.keyboard.press('Escape'); await p.click('#conta-botao'); await Promise.all([p.waitForEvent('load'), p.click('#conta-sair')]);
   await p.waitForSelector('#entrada[open] #entrada-login'); const antes = caixa.mensagens.length;
   await p.fill('#entrada-login', email); await p.fill('#entrada-senha', senha); await p.click('#entrada-enviar');

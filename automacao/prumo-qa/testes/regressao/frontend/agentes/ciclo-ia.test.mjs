@@ -18,7 +18,7 @@ async function preparar(t) {
   });
   async function selecionar(e) {
     await ir(a.page, 'projetos');
-    await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
+    await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${e.id}"]`).click();
     await a.page.waitForFunction(nome => document.querySelector('#projeto-atual').textContent === nome, e.nome);
     await ir(a.page, 'inicio');
     await a.page.waitForSelector('#chat-input');

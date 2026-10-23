@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { criarMundo } from '../../infra/mundo-servicos.mjs';
-import { lerDetalheDoServico as lerExtra } from '../../../../dist/conexoes/integracoes/lerDetalheDoServico.js';
+import { lerDetalheDoServico as lerExtra } from '../../../../dist/conexoes/integracoes/leiturasDeServicos.js';
 import { operacoesServico } from '../../../../dist/conexoes/tipos/adaptador.js';
-import { filtrosSchema, operacoesExtras } from '../../../../dist/conexoes/tipos/leituras.js';
-import { jqlDeTickets } from '../../../../dist/tickets/integracoes/jqlDeTickets.js';
+import { filtrosSchema, operacoesExtras } from '../../../../dist/conexoes/tipos/adaptador.js';
+import { jqlDeTickets } from '../../../../dist/tickets/integracoesJira.js';
 
 const pg = { offset: 0, limite: 50 };
 const ctxDe = (m, servico) => m.executor.comContexto('x', servico, async (c) => c);

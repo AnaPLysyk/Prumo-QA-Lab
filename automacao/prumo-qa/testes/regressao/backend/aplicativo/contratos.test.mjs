@@ -52,7 +52,8 @@ test('IPC: esquemas recusam argumentos extras, inválidos e escopos desconhecido
   assert.ok(!ok('app:info', { qualquer: 1 }));
   assert.ok(!ok('projeto:logs', { root: 'x', filter: { limit: 0 } }));
   assert.ok(!ok('projeto:evidencias', { root: 'x', jobId: '../../etc' }));
-  assert.ok(!ok('conexao:aplicar', { root: 'x', client: 'claude' }));
+  assert.ok(!ok('conexao:aplicar', { root: 'x', client: 'outro' }));
+  assert.ok(ok('conexao:aplicar', { root: 'x', client: 'claude' }));
   assert.ok(ok('dados:excluir', { escopo: 'diagnostico' }));
   assert.ok(!ok('dados:excluir', { escopo: 'historico' }), 'historico exige projeto');
   assert.ok(!ok('dados:excluir', { escopo: 'tudo', root: 'x' }));
@@ -60,15 +61,17 @@ test('IPC: esquemas recusam argumentos extras, inválidos e escopos desconhecido
 });
 
 test('IPC: exclusão exige confirmação nativa e nunca é alcançável por MCP; consultas frequentes não geram diagnóstico de sucesso', () => {
-  assert.match(ler('backend/ajuda/api/dadosExcluir.ts'), /showMessageBox[\s\S]*?response !== 1/);
-  assert.match(ler('backend/atualizacoes/api/atualizacaoAbrir.ts'), /showMessageBox/);
+  assert.match(ler('backend/ajuda/controlador.ts'), /perguntarNaJanela[\s\S]*?response !== 1/);
+  assert.match(ler('backend/atualizacoes/controlador.ts'), /perguntarNaJanela/);
   for (const c of ['projeto:logs', 'projeto:visao', 'projeto:historico']) assert.ok(canaisFrequentes.has(c), c);
   assert.ok(!canaisFrequentes.has('dados:excluir'));
   const importsMcp = ['backend/mcp.ts', ...arquivosTs('backend/agentes/mcp')].map(ler).join('\n').match(/^import .*$/gm).join('\n');
-  assert.doesNotMatch(importsMcp, /excluir|privacidade\/|diagnostico\/|Vinculo/i, 'o servidor MCP não importa exclusão, dados, diagnóstico nem vínculos de pasta');
+  // O mapa de vínculos (mapaDeVinculosDoProjeto) é leitura para os agentes; o que grava, troca ou remove vínculo e pasta continua proibido.
+  assert.doesNotMatch(importsMcp, /excluir|privacidade\/|diagnostico\/|vincular[A-Z]|adicionarVinculo|alternarVinculo|atualizarEstadoDoVinculo|removerVinculo|gravarPastasVinculadas/,
+    'o servidor MCP não importa exclusão, dados, diagnóstico nem escrita de vínculos e pastas');
 });
 
-test('MCP: servidor real lista exatamente as oito ferramentas (quatro originais e três da 2.9 e aprendizado) e o catálogo descreve os mesmos argumentos', async (t) => {
+test('MCP: servidor real lista exatamente as dez ferramentas (quatro originais e três da 2.9 e aprendizado) e o catálogo descreve os mesmos argumentos', async (t) => {
   const f = await fixture(t);
   const servidor = await criarServidor(f.root);
   const [a, b] = InMemoryTransport.createLinkedPair();
@@ -77,7 +80,7 @@ test('MCP: servidor real lista exatamente as oito ferramentas (quatro originais 
   t.after(() => cliente.close());
   assert.equal(cliente.getServerVersion().version, JSON.parse(ler('package.json')).version, 'o MCP informa a versão do package.json');
   const ferramentas = (await cliente.listTools()).tools;
-  assert.deepEqual(ferramentas.map((x) => x.name).sort(), ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
+  assert.deepEqual(ferramentas.map((x) => x.name).sort(), ['consultar_evidencias', 'consultar_repositorio', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'perguntar_ao_orquestrador', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
   assert.deepEqual(mcpCatalogo.map((o) => o.nome).sort(), ferramentas.map((x) => x.name).sort());
   for (const tool of ferramentas) {
     const doc = mcpCatalogo.find((o) => o.nome === tool.name);

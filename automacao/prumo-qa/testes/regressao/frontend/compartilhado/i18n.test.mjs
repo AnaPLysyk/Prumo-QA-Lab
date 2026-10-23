@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { abrir, novoDados, ir, abas, ajustes } from '../../infra/janela.mjs';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
-import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/concluirTrabalho.js';
-import { enfileirar } from '../../../../dist/agendamentos/banco/enfileirar.js';
-import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendamentos/banco/pegarProximoTrabalho.js';
-import { criarRotina } from '../../../../dist/agendamentos/regras/criarRotina.js';
+import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/fila.js';
+import { enfileirar } from '../../../../dist/agendamentos/banco/fila.js';
+import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendamentos/banco/fila.js';
+import { criarRotina } from '../../../../dist/agendamentos/regras/cicloDaRotina.js';
 
 // Heurística de texto em português: acentos próprios do idioma ou palavras funcionais/de domínio muito comuns.
 const PORTUGUES = /[ãõçáéíóúâêôà]|\b(não|para|com|sem|você|projetos?|execuç\w+|nenhum[a]?|selecion\w+|clique|vincul\w+|rotinas?|agendament\w+|pasta|erro|aprova\w+|ainda|todos|todas|desta|deste|nesta|neste|seu|sua|uma?|dos|das|nos|nas|pelo|pela)\b/i;
@@ -30,11 +30,11 @@ test('inglês: nenhuma tela traz texto de interface em português (dados do usu�
   await ajustes(a.page); await a.page.selectOption('#idioma', 'en'); await a.page.waitForFunction(() => document.querySelector('[data-aba=agenda]').textContent.trim() === 'Schedules');
   const achados = [];
   for (const selecionado of [false, true]) {
-    if (selecionado) { await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: /Select project/ }).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'ENG-LAB'); }
+    if (selecionado) { await ir(a.page, 'projetos'); await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${e.id}"]`).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'ENG-LAB'); }
     for (const aba of abas) {
       await ir(a.page, aba); await a.page.waitForTimeout(250);
       if (aba === 'agenda') { await a.page.click('#rotina-nova'); await a.page.selectOption('#rotina-tipo', 'k6'); await a.page.selectOption('#rotina-freq', 'semanal'); }
-      if (aba === 'execucoes') { const d = a.page.locator('#runs-tabela td.ds-acao button').first(); if (await d.count()) await d.click(); }
+      if (aba === 'execucoes') { const d = a.page.locator('#runs-lista [data-exec]').first(); if (await d.count()) await d.click(); }
       for (const texto of await visiveis(a.page)) if (PORTUGUES.test(texto)) achados.push(`[${aba}${selecionado ? ' +projeto' : ''}] ${texto.slice(0, 700)}`);
     }
   }

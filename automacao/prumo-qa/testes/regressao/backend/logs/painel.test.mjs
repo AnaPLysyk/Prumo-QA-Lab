@@ -4,22 +4,22 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
-import { lerDocumentosDaAjuda } from '../../../../dist/ajuda/regras/lerDocumentosDaAjuda.js';
+import { lerDocumentosDaAjuda } from '../../../../dist/ajuda/servicoAjuda.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-import { situacaoDasConexoesDeIa } from '../../../../dist/conexoes/ia/situacaoDasConexoesDeIa.js';
-import { salvarEvidencia } from '../../../../dist/testes/banco/salvarEvidencia.js';
-import { listarEvidenciasDoProjeto } from '../../../../dist/testes/regras/listarEvidenciasDoProjeto.js';
-import { listarHistoricoDoProjeto } from '../../../../dist/logs/regras/listarHistoricoDoProjeto.js';
-import { exportarLogs } from '../../../../dist/logs/regras/exportarLogs.js';
+import { situacaoDasConexoesDeIa } from '../../../../dist/conexoes/servicoIaDiagnostico.js';
+import { salvarEvidencia } from '../../../../dist/testes/banco/publicacoes.js';
+import { listarEvidenciasDoProjeto } from '../../../../dist/testes/servicoExecucoes.js';
+import { listarHistoricoDoProjeto } from '../../../../dist/logs/regras/consultasDoDiario.js';
+import { exportarLogs } from '../../../../dist/logs/regras/consultasDoDiario.js';
 import { iniciarAtividade } from '../../../../dist/logs/regras/iniciarAtividade.js';
-import { listarLogsDoProjeto } from '../../../../dist/logs/regras/listarLogsDoProjeto.js';
-import { copiarDemonstracao } from '../../../../dist/projetos/regras/copiarDemonstracao.js';
-import { desvincularPasta } from '../../../../dist/projetos/regras/desvincularPasta.js';
-import { listarPastasVinculadas } from '../../../../dist/projetos/regras/listarPastasVinculadas.js';
-import { situacaoProjeto } from '../../../../dist/projetos/regras/situacaoProjeto.js';
-import { adicionarVinculo as vincularPasta } from '../../../../dist/projetos/regras/adicionarVinculo.js';
-import { visaoGeralDoProjeto } from '../../../../dist/projetos/regras/visaoGeralDoProjeto.js';
-import { documentosAjuda } from '../../../../dist/projetos/tipos/painel.js';
+import { listarLogsDoProjeto } from '../../../../dist/logs/regras/consultasDoDiario.js';
+import { copiarDemonstracao } from '../../../../dist/projetos/servicoRepositorioGit.js';
+import { desvincularPasta } from '../../../../dist/projetos/servicoProjetos.js';
+import { listarPastasVinculadas } from '../../../../dist/projetos/servicoProjetos.js';
+import { situacaoProjeto } from '../../../../dist/projetos/servicoProjetos.js';
+import { adicionarVinculo as vincularPasta } from '../../../../dist/projetos/servicoProjetos.js';
+import { visaoGeralDoProjeto } from '../../../../dist/projetos/servicoProjetos.js';
+import { documentosAjuda } from '../../../../dist/projetos/contratos.js';
 
 const demo = path.resolve('backend/projetos/exemplos/projeto-demo');
 const registrar = async (root, tool, resultado, entrada = {}) => {
@@ -166,13 +166,13 @@ test('evidências: leitura de resultado sintético preserva PASS/FAIL/BLOCKED/NO
 test('conexões: proposta sem alterar nada e com runtime embutido quando empacotado', async (t) => {
   const f = await fixture(t); await vincularPasta(f.root);
   const c = await situacaoDasConexoesDeIa(f.root);
-  assert.deepEqual(c.map((x) => x.client), ['codex', 'claude']);
+  assert.deepEqual(c.map((x) => x.client), ['codex', 'claude', 'copilot', 'gemini']);
   for (const x of c) { assert.match(x.configuration.args[0], /mcp\.js$/); assert.match(x.notice, /Nenhum arquivo foi alterado/); assert.equal(x.configuration.env.ELECTRON_RUN_AS_NODE, undefined); }
 });
 
 test('aplicativo empacotado: filho node e proposta de conexão usam o runtime embutido (ELECTRON_RUN_AS_NODE) e nada mais vaza', async (t) => {
   const f = await fixture(t); await vincularPasta(f.root);
-  const { ambienteMinimo } = await import('../../../../dist/testes/regras/ambienteMinimo.js');
+  const { ambienteMinimo } = await import('../../../../dist/testes/regras/executarValidacao.js');
   const p = await carregarProjeto(f.root);
   const comando = { executable: 'node', args: ['tests/test.mjs'], cwd: '.', env: {}, requiredFiles: [], requiredEnv: [] };
   process.env.SEGREDO_DO_HOST = 'nao-herdar';

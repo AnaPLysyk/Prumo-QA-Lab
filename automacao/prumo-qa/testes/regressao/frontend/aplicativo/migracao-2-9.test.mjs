@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { abrir, novoDados, ir } from '../../infra/janela.mjs';
-import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/concluirTrabalho.js';
-import { enfileirar } from '../../../../dist/agendamentos/banco/enfileirar.js';
-import { obterTrabalho } from '../../../../dist/agendamentos/banco/obterTrabalho.js';
-import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendamentos/banco/pegarProximoTrabalho.js';
-import { criarRotina } from '../../../../dist/agendamentos/regras/criarRotina.js';
+import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/fila.js';
+import { enfileirar } from '../../../../dist/agendamentos/banco/fila.js';
+import { obterTrabalho } from '../../../../dist/agendamentos/banco/fila.js';
+import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendamentos/banco/fila.js';
+import { criarRotina } from '../../../../dist/agendamentos/regras/cicloDaRotina.js';
 
 // Dados no formato da 2.8 (agenda, fila, histórico), sem nenhum dos arquivos novos da 2.9.
 // No modelo atual, a pasta legado permanece intacta, mas nao e atribuida automaticamente a uma conta.

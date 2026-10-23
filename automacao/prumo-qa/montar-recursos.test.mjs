@@ -11,7 +11,8 @@ test('recursos unitários só existem durante a execução e são retirados depo
   fs.mkdirSync(path.join(raiz, 'testes', 'unitario'), { recursive: true });
   const pasta = path.join(raiz, 'testes', 'unitario', 'infra');
   const limpar = montarRecursosUnitarios(raiz);
-  assert.equal(fs.readdirSync(pasta).length, 9);
+  assert.equal(fs.readdirSync(pasta).length, 10);
+  assert.ok(fs.existsSync(path.join(pasta, 'electron-simulado.mjs')));
   assert.throws(() => montarRecursosUnitarios(raiz), /LAB_INFRA_OCUPADA/);
   limpar();
   limpar();

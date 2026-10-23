@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, escolherPasta, abas, dadosDaConta } from '../../infra/janela.mjs';
+import { abrir, novoDados, ir, abrirConexoes, usarProjeto, escolherPasta, abas, dadosDaConta, atenderConfirmacoes } from '../../infra/janela.mjs';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { servidorFixture } from '../../../../site/scripts/servicos-fixtures.mjs';
-import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/concluirTrabalho.js';
-import { enfileirar } from '../../../../dist/agendamentos/banco/enfileirar.js';
-import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendamentos/banco/pegarProximoTrabalho.js';
-import { criarRotina } from '../../../../dist/agendamentos/regras/criarRotina.js';
+import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/fila.js';
+import { enfileirar } from '../../../../dist/agendamentos/banco/fila.js';
+import { pegarProximoTrabalho as reivindicar } from '../../../../dist/agendamentos/banco/fila.js';
+import { criarRotina } from '../../../../dist/agendamentos/regras/cicloDaRotina.js';
 
 // v40 (Design System + Grupo B): janela/IPC reais; perfil, projeto e serviços sintéticos (servidor local).
 // Não comprova contas de produção nem autenticação humana do Windows; confirmações nativas são doubles do runner.
@@ -20,7 +20,7 @@ async function preparar(t, { pasta = false } = {}) {
     https.request = (url, opts, cb) => http.request({ hostname: '127.0.0.1', port, path: url.pathname + url.search, method: opts.method, headers: { ...opts.headers, 'x-fixture-host': url.hostname } }, cb);
     process.getBuiltinModule('node:module').syncBuiltinESMExports();
   }, s.port);
-  await a.app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
+  const conf = atenderConfirmacoes(a.app, () => 'confirmar'); t.after(() => conf.parar());
   const e = (await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'Qualidade V40', descricao: 'Fixture isolada' }))).data;
   for (const servico of ['jira', 'qase']) {
     const c = await a.page.evaluate((d) => window.prumo.servicoAdicionar(d), { servico, nome: servico + ' fixture', token: 'fixture-v40-secret', ...(servico === 'jira' ? { instancia: 'https://lab.atlassian.net', usuario: 'qa@example.test' } : {}) });
@@ -29,13 +29,28 @@ async function preparar(t, { pasta = false } = {}) {
   }
   let f = null; if (pasta) { f = await fixture(t); await escolherPasta(a.app, f.root); assert.equal((await a.page.evaluate((id) => window.prumo.espacoPasta(id), e.id)).ok, true); }
   await selecionar(a.page, e);
-  return { ...a, dados, s, e, f };
+  return { ...a, dados, s, e, f, conf };
 }
-async function selecionar(page, e) { await ir(page, 'projetos'); await page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: /Selecionar projeto|Projeto selecionado/ }).click(); await page.waitForFunction((n) => document.querySelector('#projeto-atual').textContent === n, e.nome); }
+async function selecionar(page, e) { await usarProjeto(page, e.id); await page.waitForFunction(n => document.querySelector('#projeto-atual').textContent === n, e.nome); }
 const modal = (page) => page.locator('#qualidade-dialog[open]');
 async function fecharModal(page) { await page.keyboard.press('Escape'); await page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' }); }
 async function captura(a, nome) { if (!process.env.PRUMO_V40_CAPTURAS) return; const dir = path.resolve(process.env.PRUMO_V40_CAPTURAS); fs.mkdirSync(dir, { recursive: true }); await a.page.screenshot({ path: path.join(dir, nome + '.png') }); }
-const semRolagemHorizontal = async (page) => { const r = await page.evaluate(() => { const W = innerWidth; if (document.documentElement.scrollWidth <= W + 1) return true; return [...document.querySelectorAll('#conteudo *, header *')].filter((el) => el.getBoundingClientRect().right > W + 1).slice(0, 6).map((el) => el.tagName + '#' + el.id + '.' + String(el.className).slice(0, 30) + ':' + Math.round(el.getBoundingClientRect().right) + '/' + W).join(' | '); }); if (r !== true) console.log('overflow:', r); return r === true; };
+const semRolagemHorizontal = async (page) => {
+  const r = await page.evaluate(() => {
+    const largura = innerWidth, doc = document.documentElement;
+    if (doc.scrollWidth <= largura + 1) return true;
+    const fora = [...document.querySelectorAll('body *')]
+      .map(el => ({ el, rect: el.getBoundingClientRect() }))
+      .filter(x => x.rect.right > largura + 1 && x.rect.width > 1)
+      .slice(0, 8).map(({ el, rect }) =>
+        el.tagName + '#' + el.id + '.' + String(el.className).slice(0, 32) +
+        ':' + Math.round(rect.left) + '..' + Math.round(rect.right));
+    return JSON.stringify({ largura, documento: doc.scrollWidth, body: document.body.scrollWidth,
+      conteudo: document.querySelector('#conteudo')?.scrollWidth, elementos: fora });
+  });
+  if (r !== true) console.log('overflow:', r);
+  return r === true;
+};
 const naoGet = (s) => s.pedidos.filter((p) => p.metodo !== 'GET');
 
 test('navegação completa, Design System no Grupo B, Evidências só dentro de Execuções e sem rolagem horizontal', async (t) => {
@@ -63,7 +78,7 @@ test('Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem só 
   await a.page.waitForSelector('#tk-tabela [data-ticket="SMART-1"]'); await a.page.waitForSelector('#tk-tabela [data-defeito="91"]');
   assert.match(await a.page.textContent('#tk-fontes'), /Jira[\s\S]*1 ticket\b[\s\S]*Qase[\s\S]*1 defeito\b/);
   assert.equal(await a.page.textContent('#tk-contagem'), '2');
-  await a.page.selectOption('#tk-origem', 'jira'); await a.page.fill('#tk-q', 'SMART'); await a.page.click('#tk-buscar');
+  await a.page.selectOption('#tk-origem', 'jira'); await a.page.fill('#tk-q', 'SMART'); await a.page.press('#tk-q', 'Enter'); // a busca é por Enter (não há mais botão #tk-buscar)
   await a.page.waitForFunction(() => !document.querySelector('#tk-tabela [data-defeito]') && document.querySelector('#tk-tabela [data-ticket="SMART-1"]'));
   const abrirT = a.page.locator('#tk-tabela [data-ticket="SMART-1"]').getByRole('button', { name: 'Abrir', exact: true });
   await abrirT.click(); await modal(a.page).locator('#tk-painel').waitFor();
@@ -77,8 +92,11 @@ test('Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem só 
   // Clicar na linha também abre; Escape fecha.
   await a.page.locator('#tk-tabela [data-ticket="SMART-1"] td').nth(2).click(); await modal(a.page).waitFor(); await fecharModal(a.page);
   // Erro da API fica explícito na fonte, sem apagar o que já foi exibido como lista vazia.
-  a.s.controle.status = 500; await a.page.click('#tk-buscar'); await a.page.waitForFunction(() => /SERVICE_/.test(document.querySelector('#tk-fontes').textContent));
-  assert.equal(await a.page.locator('#tk-lista .ds-estado[data-tipo="erro"]').count(), 1, 'estado de erro explícito');
+  // Com a origem em Jira só o Jira é consultado: volta para todas as origens (e espera a lista) antes de provocar a falha.
+  await a.page.fill('#tk-q', ''); await a.page.selectOption('#tk-origem', ''); await a.page.waitForSelector('#tk-tabela [data-defeito="91"]');
+  a.s.controle.status = 500; await a.page.press('#tk-q', 'Enter'); await a.page.waitForFunction(() => /SERVICE_/.test(document.querySelector('#tk-fontes').textContent));
+  // DECISÃO DE PRODUTO: com a fonte local (Prumo) funcionando, a lista vazia não vira estado de erro; o erro fica explícito em cada fonte consultada (chip de falha em #tk-fontes).
+  assert.equal(await a.page.locator('#tk-fontes [data-fonte] .ds-chip[data-tom="falha"]').count(), 2, 'erro explícito em Jira e Qase');
   assert.equal(naoGet(a.s).length, 0, 'nenhuma escrita'); assert.doesNotMatch(await a.page.textContent('body'), /fixture-v40-secret/);
   assert.deepEqual(a.erros, []);
 });
@@ -91,11 +109,13 @@ test('defeito Qase → ticket Jira com confirmação nativa, vínculo registrado
   assert.match(await a.page.inputValue('#tk-novo-resumo'), /\[Qase SFQ-91\]/); assert.equal(await a.page.isDisabled('#tk-novo-criar'), true, 'sem escrita habilitada o envio fica indisponível');
   await fecharModal(a.page); assert.equal(naoGet(a.s).length, 0);
   // Habilita a escrita no Jira deste projeto (confirmação nativa simulada) e repete o fluxo.
-  await ir(a.page, 'conexoes'); await a.page.click('#escrita-jira'); await a.page.waitForFunction(() => /escrita habilitada/.test(document.querySelector('[data-escrita=jira]')?.textContent || ''));
+  // Confirmar recarrega Projetos (o painel fecha): espera a confirmação e reabre Conexões para ler o estado.
+  const antes = a.conf.registro.length; await abrirConexoes(a.page, a.e.id); await a.page.click('#escrita-jira'); await a.conf.aguardar(antes + 1);
+  await abrirConexoes(a.page, a.e.id); await a.page.waitForFunction(() => /escrita habilitada/.test(document.querySelector('[data-escrita=jira]')?.textContent || ''));
   await ir(a.page, 'tickets'); await a.page.waitForSelector('#tk-tabela [data-defeito="91"]');
   await a.page.locator('#tk-tabela [data-defeito="91"]').getByRole('button', { name: 'Abrir', exact: true }).click(); await modal(a.page).locator('#def-detalhe').waitFor();
   await a.page.click('#def-jira'); await a.page.waitForSelector('#tk-novo-criar:not([disabled])'); await captura(a, 'defeito-novo-ticket');
-  await a.page.click('#tk-novo-criar'); await a.page.waitForSelector('[data-resultado-operacao="CONFIRMADA"]');
+  await a.page.click('#tk-novo-criar'); await a.page.waitForSelector('[data-resultado-operacao="CONFIRMADA"]'); assert.ok(a.conf.registro.length >= 2 && a.conf.registro.every((c) => c.resposta === 'confirmar'), 'habilitar escrita e criar ticket pediram confirmação nativa');
   await modal(a.page).getByText('Vínculo registrado: Defeito Qase 91 → SMART-99.').waitFor();
   assert.equal(a.s.criados.length, 1); assert.match(JSON.stringify(a.s.criados[0].corpo), /Qase SFQ-91/);
   assert.deepEqual([...new Set(naoGet(a.s).map((p) => p.metodo + ' ' + p.caminho))], ['POST /rest/api/3/issue'], 'a única escrita é a criação do ticket');
@@ -104,8 +124,9 @@ test('defeito Qase → ticket Jira com confirmação nativa, vínculo registrado
   // Reabrir o defeito mostra o ticket relacionado e não oferece criar outro.
   await fecharModal(a.page); await a.page.locator('#tk-tabela [data-defeito="91"]').getByRole('button', { name: 'Abrir', exact: true }).click(); await modal(a.page).locator('#def-detalhe').waitFor();
   assert.equal(await a.page.locator('#def-jira').count(), 0); await modal(a.page).getByRole('button', { name: 'Abrir jira-bug SMART-99', exact: true }).first().waitFor();
-  await fecharModal(a.page); await ir(a.page, 'rastreabilidade');
-  await a.page.getByRole('button', { name: 'Abrir qase-defeito 91', exact: true }).waitFor(); assert.match(await a.page.textContent('#vinc-tabela'), /SMART-99/);
+  await fecharModal(a.page);
+  // A tabela de vínculos saiu da interface: o vínculo registrado é conferido no mapa de vínculos (API) e já foi mostrado ao reabrir o defeito.
+  const mapa = JSON.stringify((await a.page.evaluate((id) => window.prumo.vinculosMapa(id), a.e.id)).data); assert.ok(mapa.includes('SMART-99') && mapa.includes('91'), 'vínculo defeito Qase 91 → SMART-99 no mapa');
   await captura(a, 'vinculos-defeito'); assert.equal(a.s.criados.length, 1, 'nenhum ticket duplicado');
   assert.deepEqual(a.erros, []);
 });
@@ -143,9 +164,10 @@ test('Execução em modal com Resumo, Etapas, Logs e Evidências reais; falha vi
   const r = criarRotina({ nome: 'Regressão V40', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, pastaDaConta);
   const { trabalho } = enfileirar({ chave: 'v40-fail', rotinaId: r.id, espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'MANUAL', slot: null }, pastaDaConta);
   reivindicar(pastaDaConta); concluir(trabalho.id, { status: 'FAIL', motivo: 'Falha do processo', contagem: { pass: 1, fail: 1, blocked: 0, notRun: 0 }, detalhes: 'C2: valor esperado não persistiu' }, pastaDaConta);
-  await ir(a.page, 'execucoes'); const linha = a.page.locator(`#runs-tabela [data-exec="${trabalho.id}"]`); await linha.waitFor();
-  assert.match(await linha.textContent(), /1 PASS · 1 FAIL/); assert.match(await a.page.textContent('#metricas-exec'), /1\s*FAIL/);
-  await linha.getByRole('button', { name: 'Abrir execução Regressão V40', exact: true }).click(); await modal(a.page).waitFor();
+  await ir(a.page, 'execucoes'); const linha = a.page.locator(`#runs-lista [data-exec="${trabalho.id}"]`); await linha.waitFor();
+  // Runs agora é uma lista de linhas: as contagens estão no aria-label da barra; o resumo #metricas-exec não existe mais.
+  assert.match(await linha.locator('[role=img]').getAttribute('aria-label'), /1 PASS · 1 FAIL/); assert.equal(await a.page.locator('#runs-lista [data-exec]').count(), 1);
+  await a.page.getByRole('button', { name: 'Abrir execução Regressão V40', exact: true }).click(); await modal(a.page).waitFor();
   for (const aba of ['Resumo', 'Etapas', 'Logs', 'Evidências']) assert.equal(await modal(a.page).getByRole('tab', { name: new RegExp('^' + aba) }).count(), 1, aba);
   assert.match(await modal(a.page).textContent(), /C2: valor esperado não persistiu/);
   await modal(a.page).getByRole('tab', { name: /^Etapas/ }).click(); await modal(a.page).getByText('Enfileirada').waitFor(); assert.match(await modal(a.page).textContent(), /Tentativa 1/);
@@ -157,9 +179,9 @@ test('Execução em modal com Resumo, Etapas, Logs e Evidências reais; falha vi
   const ps = (await a.page.evaluate((id) => window.prumo.propostas(id), a.e.id)).data; assert.equal(ps.length, 1); assert.equal(ps[0].tipo, 'bug'); assert.equal(ps[0].estado, 'RASCUNHO'); assert.equal(ps[0].dados.origem, 'SMART-1');
   assert.equal(naoGet(a.s).length, 0, 'rascunho não envia nada ao Jira');
   await fecharModal(a.page); assert.equal(await a.page.getAttribute('[data-aba=testes]', 'aria-current'), 'page');
-  // Evidências CLI/MCP continuam acessíveis apenas como modal de Execuções.
+  // DECISÃO DE PRODUTO: o botão global "Evidências CLI/MCP" (#exec-evidencias) saiu da lista de Runs; o modal de Evidências continua acessível (helper ir('evidencias') e Logs › Ver evidência).
   // O modal abre com "Consultando…": espera o conteúdo real antes de conferir (no CI a consulta é mais lenta).
-  await a.page.click('#exec-evidencias'); await modal(a.page).waitFor();
+  await ir(a.page, 'evidencias'); await modal(a.page).waitFor();
   await a.page.waitForFunction(() => /Nenhuma evidência|Resultados reais/.test(document.querySelector('#qualidade-dialog[open]')?.textContent ?? ''), null, { timeout: 15000 }); await fecharModal(a.page);
   assert.deepEqual(a.erros, []);
 });
@@ -167,14 +189,21 @@ test('Execução em modal com Resumo, Etapas, Logs e Evidências reais; falha vi
 test('Testes organiza casos, suites, planos e runs com dados consultados; tipo de execução explícito e estados vazios', async (t) => {
   const a = await preparar(t); await ir(a.page, 'testes');
   const subs = await a.page.locator('[data-sub]').allTextContents(); assert.deepEqual(subs, ['IDE', 'Repositório', 'Runs', 'Planos']);
-  await a.page.click('[data-sub=repositorio]'); await a.page.waitForSelector('#cat-lista [data-caso="31"]'); assert.match(await a.page.textContent('#cat-lista [data-caso="31"]'), /Manual/);
-  await a.page.waitForSelector('#suites-tabela [data-suite="1"]');
+  await a.page.click('[data-sub=repositorio]'); await a.page.locator('#cat-busca').fill('Caso fictício'); await a.page.waitForSelector('#cat-lista [data-caso="31"]'); assert.match(await a.page.textContent('#cat-lista [data-caso="31"]'), /Manual/);
+  await a.page.locator('#cat-busca').fill(''); await a.page.waitForSelector('#repo-suites .rep-suite[data-suite-chave="q:1"]');
   await a.page.click('[data-sub=planos]'); await a.page.waitForSelector('#planos-tabela [data-plano="61"]');
-  await a.page.click('[data-sub=runs]'); await a.page.waitForSelector('#runs-tabela [data-run-qase="71"]');
+  await a.page.click('[data-sub=runs]'); await a.page.waitForSelector('#runs-lista [data-run-qase="71"]');
+  // Nova run: modal 'Nova run' (seletor de casos por suíte); ao preparar, a run abre como PÁGINA no lugar da lista (#run-local), não em modal.
   await a.page.click('#run-nova'); await modal(a.page).locator('#run-casos input[data-caso="31"]').check(); await a.page.fill('#run-titulo', 'Run V40'); await a.page.click('#run-preparar'); await a.page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' });
-  await a.page.click('[data-sub=runs]'); const run = a.page.locator('#runs-tabela [data-run]').filter({ hasText: 'Run V40' }); await run.waitFor(); assert.match(await run.textContent(), /ainda não criada no Qase/);
-  await run.getByRole('button', { name: 'Abrir run Run V40' }).click(); await modal(a.page).waitFor(); assert.match(await modal(a.page).textContent(), /0 PASS|PASS/); assert.equal(await a.page.isDisabled('#qualidade-dialog [id^=run-pub-]'), true, 'publicar exige run no Qase');
-  await captura(a, 'run-modal'); await fecharModal(a.page);
+  const pagina = a.page.locator('#run-local'); await pagina.waitFor(); await pagina.locator('.qs-titulo', { hasText: 'Run V40' }).waitFor();
+  assert.match(await pagina.textContent(), /Preparada/); assert.match(await pagina.textContent(), /0% concluído/, 'nenhum resultado presumido'); assert.equal(await pagina.locator('.qs-caso[data-caso="31"]').count(), 1);
+  // Publicar exige run no Qase: sem escrita habilitada, 'Criar run no Qase…' fica indisponível e 'Publicar resultados' nem existe (só em run já criada).
+  const idRun = await pagina.getAttribute('data-run'); await a.page.locator(`#run-mais-${idRun} summary`).click();
+  assert.equal(await a.page.getByRole('menuitem', { name: 'Criar run no Qase…' }).isDisabled(), true, 'criar/publicar no Qase exige escrita'); assert.equal(await a.page.getByRole('menuitem', { name: /Publicar resultados no Qase/ }).count(), 0, 'publicar exige run no Qase');
+  await a.page.keyboard.press('Escape'); await captura(a, 'run-pagina');
+  // Voltar à lista: a run aparece como 'ainda não criada no Qase' e reabre como página.
+  await pagina.locator('.qs-voltar').click(); const run = a.page.locator('#runs-lista [data-run]').filter({ hasText: 'Run V40' }); await run.waitFor(); assert.match(await run.textContent(), /ainda não criada no Qase/);
+  await run.click(); await a.page.locator('#run-local').waitFor();
   assert.equal(naoGet(a.s).length, 0, 'preparar run é local');
   assert.deepEqual(a.erros, []);
 });
@@ -198,26 +227,37 @@ test('Testes representa Qase e código: ligação só por anotação, tags, vis�
   await f.write('tests/login.spec.ts', "import { qase } from 'playwright-qase-reporter';\ntest.describe('Login @auth', () => {\n  test(qase(31, 'editor grava @smoke'), async () => {\n    await test.step('Entrar como editor', async () => {});\n  });\n  test('rejeita senha @regression', async () => {\n    // Qase: SFQ-32\n  });\n  test('Caso fictício SFQ sem anotação', async () => {});\n});\n");
   const dados = novoDados(t), s = await servidorFixture(t), a = await abrir(t, dados);
   await a.app.evaluate((_, port) => { const https = process.getBuiltinModule('node:https'), http = process.getBuiltinModule('node:http'); process.getBuiltinModule('node:dns').promises.lookup = async () => ({ address: '93.184.216.34', family: 4 }); https.request = (url, opts, cb) => http.request({ hostname: '127.0.0.1', port, path: url.pathname + url.search, method: opts.method, headers: { ...opts.headers, 'x-fixture-host': url.hostname } }, cb); process.getBuiltinModule('node:module').syncBuiltinESMExports(); }, s.port);
-  await a.app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
+  const conf = atenderConfirmacoes(a.app, () => 'confirmar'); t.after(() => conf.parar());
   const e = (await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'Testes V40', descricao: '' }))).data;
   const c = await a.page.evaluate((d) => window.prumo.servicoAdicionar(d), { servico: 'qase', nome: 'qase fixture', token: 'fixture-v40-secret' }); const rec = await a.page.evaluate((id) => window.prumo.servicoRecursos(id), c.data.id);
   await a.page.evaluate(([id, conta, r]) => window.prumo.servicoVincular(id, conta, r), [e.id, c.data.id, rec.data.recursos[0]]);
   await escolherPasta(a.app, f.root); assert.equal((await a.page.evaluate((id) => window.prumo.espacoPasta(id), e.id)).ok, true);
-  await selecionar(a.page, e); await ir(a.page, 'testes'); await a.page.waitForSelector('#cat-resumo');
-  const resumo = await a.page.textContent('#cat-resumo');
-  assert.match(resumo, /1\s*casos carregados do Qase/); assert.match(resumo, /3\s*testes no código/); assert.match(resumo, /1\s*casos com código/); assert.match(resumo, /2\s*testes sem caso/);
-  const caso = a.page.locator('#cat-lista tr[data-caso="31"]').first(); assert.match(await caso.textContent(), /login\.spec\.ts:3[\s\S]*Caso com código/);
+  await selecionar(a.page, e); await ir(a.page, 'testes'); await a.page.waitForSelector('#cat-contagem');
+  // O resumo #cat-resumo saiu; a lista agrupa por suíte (grupos fechados), então a busca (que desliga o agrupamento) mostra os 3 testes do arquivo.
+  await a.page.locator('#cat-busca').fill('login.spec'); await a.page.waitForSelector('#cat-lista .rep-linha');
+  assert.match(await a.page.textContent('#cat-contagem'), /3 de 3/, '1 caso do Qase com código + 2 testes sem caso = 3 linhas');
+  assert.equal(await a.page.locator('#cat-lista .rep-linha[data-caso]').count(), 1, 'só 1 caso do Qase'); assert.equal(await a.page.locator('#cat-lista .rep-linha:not([data-caso])').count(), 2, '2 testes sem caso');
+  const caso = a.page.locator('#cat-lista .rep-linha[data-caso="31"]').first(); assert.match(await caso.textContent(), /Caso com código/); // login.spec.ts:3 aparece no painel do caso (abaixo)
   assert.match(await a.page.textContent('#cat-lista'), /Anota Qase SFQ-32, caso não encontrado/);
-  const homonimo = a.page.locator('#cat-lista tr', { hasText: 'Caso fictício SFQ sem anotação' }).first(); assert.match(await homonimo.textContent(), /Código sem caso no Qase/, 'nome parecido com o caso não cria ligação');
-  await a.page.locator('#cat-tipos label', { hasText: '@regression' }).click(); await a.page.waitForFunction(() => [...document.querySelectorAll('#cat-lista tbody tr')].every((r) => /rejeita senha/.test(r.textContent)));
-  await a.page.locator('#cat-tipos label', { hasText: '@regression' }).click();
-  // Modal do caso mostra o código que o implementa e leva à visão de código na linha certa.
-  await caso.getByRole('button', { name: /^Abrir / }).click(); await modal(a.page).getByText('Código que implementa').waitFor();
-  await modal(a.page).getByRole('button', { name: 'tests/login.spec.ts:3' }).click(); await a.page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' });
-  await a.page.waitForSelector('.ds-ide-linhas [data-linha="3"][aria-current="true"]'); assert.equal(await a.page.getAttribute('[data-sub=ide]', 'aria-pressed'), 'true');
-  assert.match(await a.page.textContent('.ds-ide-painel'), /Caso 31/); assert.match(await a.page.textContent('.ds-ide-painel'), /Entrar como Editor fictício|Entrar como editor/i);
-  await a.page.waitForFunction(() => /executar testes: exige autorização/.test(document.querySelector('#ide-agentes')?.textContent || ''));
-  assert.match(await a.page.textContent('#ide-agentes'), /branch, commit e PR: somente pessoa/, 'escrita no repositório continua sendo da pessoa');
+  const homonimo = a.page.locator('#cat-lista .rep-linha', { hasText: 'Caso fictício SFQ sem anotação' }).first(); assert.match(await homonimo.textContent(), /Código sem caso no Qase/, 'nome parecido com o caso não cria ligação');
+  // Filtro por tag fica no popover "Filtros" (#cat-filtros).
+  await a.page.locator('#cat-filtros').click(); await a.page.locator('select[data-filtro="tag"]').selectOption('regression'); await a.page.waitForFunction(() => { const l = [...document.querySelectorAll('#cat-lista .rep-linha')]; return l.length > 0 && l.every((r) => /rejeita senha/.test(r.textContent)); });
+  await a.page.locator('select[data-filtro="tag"]').selectOption(''); await a.page.waitForFunction(() => document.querySelectorAll('#cat-lista .rep-linha').length === 3); await a.page.keyboard.press('Escape');
+  // O painel lateral do caso mostra o código que o implementa e leva à visão de código na linha certa.
+  await caso.click(); const painelCaso = a.page.locator('#caso-painel'); await painelCaso.waitFor(); await a.page.locator('#caso-painel-codigo-bloco').waitFor();
+  await painelCaso.getByRole('button', { name: 'tests/login.spec.ts:3' }).click();
+  // Monaco abre o arquivo na linha declarada pelo caso.
+  await a.page.frameLocator('.ds-wb-editor-quadro').locator('.monaco-editor .view-lines').waitFor();
+  await a.page.waitForFunction(() => /Ln 3, Col/.test(document.querySelector('.ds-wb-status')?.textContent || ''));
+  assert.equal(await a.page.getAttribute('[data-sub=ide]', 'aria-pressed'), 'true');
+  // Nova IDE é uma bancada de edição do REPOSITÓRIO, não o antigo painel de caso/agent.
+  assert.equal(await a.page.locator('.ds-wb-aba[data-ativa="true"] .ds-wb-aba-titulo').getAttribute('data-aba'), 'tests/login.spec.ts');
+  assert.match(await a.page.locator('#ide-envio-estado').innerText(), /rascunho local|Sem altera\u00e7\u00f5es desde/);
+  await a.page.locator('#ide-acoes-projeto').click();
+  assert.equal(await a.page.getByRole('menuitem', { name: 'Publicar no GitHub', exact: true }).count(), 1);
+  await a.page.keyboard.press('Escape');
+  assert.equal(await a.page.locator('#ide-salvar').count(), 1);
+  assert.match(await a.page.frameLocator('.ds-wb-editor-quadro').locator('.monaco-editor .view-lines').innerText(), /qase\(31,\s*'editor\s+grava\s+@smoke'\)/); // o Monaco só desenha as linhas visíveis: confere a linha do caso aberto, não o fim do arquivo
   await captura(a, 'testes-codigo');
   // Leitura de arquivo é restrita a testes da pasta vinculada.
   const fora = await a.page.evaluate((id) => window.prumo.testesArquivo(id, 'src/app.mjs'), e.id); assert.equal(fora.ok, false);
@@ -230,11 +270,10 @@ test('vínculos lidos do código mostram feature e cenário sem Qase e não inve
   await a.f.write('tests/login.spec.ts', "describe('Login sintético', () => {\ntest('entra como editor', () => {});\n});\n");
   const removido = await a.page.evaluate((id) => window.prumo.servicoDesvincular(id, 'qase'), a.e.id);
   assert.equal(removido.ok, true);
-  await ir(a.page, 'vinculos');
-  await a.page.waitForSelector('#vinc-tabela');
-  const tabela = await a.page.textContent('#vinc-tabela');
-  assert.match(tabela, /Login sintético/); assert.match(tabela, /entra como editor/);
-  assert.match(tabela, /Lido no código · sem execução/); assert.doesNotMatch(tabela, /Resultado observado/);
+  // A tabela #vinc-tabela saiu da interface: o teste lido do código aparece no Repositório (sem caso, sem resultado) e a origem do vínculo é conferida na API.
+  await ir(a.page, 'testes'); await a.page.locator('#cat-busca').fill('entra como editor');
+  const linhaCodigo = a.page.locator('#cat-lista .rep-linha').first(); await linhaCodigo.waitFor();
+  assert.match(await linhaCodigo.textContent(), /entra como editor/); assert.match(await linhaCodigo.textContent(), /Código sem caso no Qase/); assert.doesNotMatch(await linhaCodigo.textContent(), /(PASS|FAIL|BLOCKED)|Resultado observado/, 'não inventa execução');
   const mapa = (await a.page.evaluate((id) => window.prumo.vinculosMapa(id), a.e.id)).data;
   assert.ok(mapa.arestas.some(x => x.origem === 'OBSERVADO_NO_CODIGO'));
   assert.ok(!mapa.arestas.some(x => x.origem === 'OBSERVADO'));

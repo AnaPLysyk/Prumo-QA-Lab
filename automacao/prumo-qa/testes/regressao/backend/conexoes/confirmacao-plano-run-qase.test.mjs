@@ -1,10 +1,10 @@
 /** Confirma plano/run do Qase por releitura; dados simulados, sem rede ou banco. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { criarPlanoNoQase } from '../../../../dist/testes/integracoes/criarPlanoNoQase.js';
-import { criarRunNoQaseOperacao } from '../../../../dist/testes/integracoes/criarRunNoQaseOperacao.js';
-import { conferirIdsDoObjetoQase } from '../../../../dist/testes/integracoes/conferirIdsDoObjetoQase.js';
-import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/marcadorDaOperacao.js';
+import { criarPlanoNoQase } from '../../../../dist/testes/integracoes/execucoesQase.js';
+import { criarRunNoQaseOperacao } from '../../../../dist/testes/integracoes/execucoesQase.js';
+import { conferirIdsDoObjetoQase } from '../../../../dist/testes/integracoes/casosQase.js';
+import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/chaveDaOperacao.js';
 
 const chave = 'ed'.repeat(32);
 const marcador = marcadorDaOperacao(chave);

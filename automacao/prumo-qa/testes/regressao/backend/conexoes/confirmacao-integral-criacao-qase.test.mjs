@@ -1,8 +1,8 @@
 /** Simula releituras da API Qase após a criação. Nunca acessa a rede nem arquivos do projeto. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { criarCasoNoQase } from '../../../../dist/testes/integracoes/criarCasoNoQase.js';
-import { corpoDoCasoQase } from '../../../../dist/testes/integracoes/corpoDoCasoQase.js';
+import { criarCasoNoQase } from '../../../../dist/testes/integracoes/casosQase.js';
+import { corpoDoCasoQase } from '../../../../dist/testes/integracoes/casosQase.js';
 import { esquemaCaso } from '../../../../dist/testes/tipos/escritaQase.js';
 
 const p = esquemaCaso.parse({
@@ -43,7 +43,7 @@ test('Qase: mesmo ID com campos obrigatórios omitidos não recebe sucesso', asy
 });
 
 test('Qase: suíte criada precisa aparecer na releitura com ID, título, descrição e pai corretos', async () => {
-  const { criarSuiteNoQase } = await import('../../../../dist/testes/integracoes/criarSuiteNoQase.js');
+  const { criarSuiteNoQase } = await import('../../../../dist/testes/integracoes/casosQase.js');
   const entrada = { titulo: 'Suíte login', descricao: 'Cobertura de login', paiId: 9 };
   const dados = { id: 23, title: 'Suíte login', description: 'Cobertura de login', parent_id: 9 };
   let retorno = dados;
@@ -57,7 +57,7 @@ test('Qase: suíte criada precisa aparecer na releitura com ID, título, descri�
   assert.equal(await criarSuiteNoQase.confirmar(ctx, qase, entrada, { id: '23' }), false);
 });
 test('Qase: suíte de raiz não confunde nomes iguais em outras suítes', async () => {
-  const { criarSuiteNoQase } = await import('../../../../dist/testes/integracoes/criarSuiteNoQase.js');
+  const { criarSuiteNoQase } = await import('../../../../dist/testes/integracoes/casosQase.js');
   const entrada = { titulo: 'Regressão', descricao: 'Suite raiz' };
   const ctx = { ler: async () => ({ result: { entities: [
     { id: 30, title: 'Regressão', description: 'Suite filha', parent_id: 2 },
@@ -69,7 +69,7 @@ test('Qase: suíte de raiz não confunde nomes iguais em outras suítes', async 
   assert.equal(conciliado.id, '31');
 });
 test('Qase: associação ao Jira exige releitura contendo o ticket exato', async () => {
-  const { associarTicketAoCasoNoQase } = await import('../../../../dist/testes/integracoes/associarTicketAoCasoNoQase.js');
+  const { associarTicketAoCasoNoQase } = await import('../../../../dist/testes/integracoes/casosQase.js');
   let issues = [{ type: 'jira-cloud', issues: [{ id: 'KAN-7' }] }];
   const ctx = { ler: async url => {
     assert.equal(url, '/v1/case/PQ/21?include=external_issues');

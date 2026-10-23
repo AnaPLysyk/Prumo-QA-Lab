@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { avisoDeVersaoPendente as avisoPendente } from '../../../../dist/atualizacoes/regras/avisoDeVersaoPendente.js';
-import { marcarVersaoVista as marcarVisualizada } from '../../../../dist/atualizacoes/regras/marcarVersaoVista.js';
-import { registrarConsultaDeVersao as registrarConsulta } from '../../../../dist/atualizacoes/regras/registrarConsultaDeVersao.js';
-import { lerPreferencias } from '../../../../dist/configuracoes/banco/lerPreferencias.js';
-import { alterarPreferencias } from '../../../../dist/configuracoes/regras/alterarPreferencias.js';
-import { padrao } from '../../../../dist/configuracoes/tipos/configuracoes.js';
+import { avisoDeVersaoPendente as avisoPendente } from '../../../../dist/atualizacoes/servicoVerificacao.js';
+import { marcarVersaoVista as marcarVisualizada } from '../../../../dist/atualizacoes/servicoVerificacao.js';
+import { registrarConsultaDeVersao as registrarConsulta } from '../../../../dist/atualizacoes/servicoVerificacao.js';
+import { lerPreferencias } from '../../../../dist/configuracoes/servico.js';
+import { alterarPreferencias } from '../../../../dist/configuracoes/servico.js';
+import { padrao } from '../../../../dist/configuracoes/servico.js';
 
 const base = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-pref-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };
 const nova = { versao: '9.9.0', notas: '- Correção importante\n- Segurança reforçada' };

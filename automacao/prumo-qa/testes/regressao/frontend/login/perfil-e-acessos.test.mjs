@@ -25,15 +25,16 @@ test('Minha conta: primeiro acesso sem nada liberado, como Administrador e como 
 
   // 2. Administrador: cria a conta e já entra, vê tudo, troca o nome e a senha em Minha conta.
   await primeiroAcesso(p, { nome: 'Ana Admin', login: 'ana.admin', senha: SENHA_ADMIN });
-  assert.match(await p.textContent('#conta-botao'), /Ana Admin/);
-  for (const aba of ['administracao', 'testes', 'conexoes', 'agentes', 'projetos']) assert.equal(await p.isVisible(`[data-aba=${aba}]`), true, 'Administrador vê ' + aba);
+  assert.match(await p.getAttribute('#conta-botao', 'aria-label'), /Ana Admin/);
+  // 2.19: Conexões saiu do menu e fica dentro de Projetos (cada conexão pertence ao projeto).
+  for (const aba of ['administracao', 'testes', 'tickets', 'agentes', 'projetos']) assert.equal(await p.isVisible(`[data-aba=${aba}]`), true, 'Administrador vê ' + aba);
   await capturar(p, 'perfil-administrador-menu');
   await p.click('#conta-botao'); await p.click('#conta-minha'); await p.locator('#qualidade-dialog[open]').waitFor();
   assert.match(await p.textContent('#qualidade-dialog'), /ana\.admin/); assert.match(await p.textContent('#qualidade-dialog'), /Administrador/);
   await p.fill('#minha-nome', 'Ana Lysyk'); await p.click('#minha-salvar-nome');
-  await p.waitForFunction(() => /Ana Lysyk/.test(document.querySelector('#conta-botao')?.textContent || ''));
+  await p.waitForFunction(() => /Ana Lysyk/.test(document.querySelector('#conta-botao')?.getAttribute('aria-label') || ''));
   await capturar(p, 'perfil-administrador-minha-conta');
-  await p.fill('#minha-atual', SENHA_ADMIN); await p.fill('#minha-nova', SENHA_ADMIN_NOVA); await p.fill('#minha-confirma', SENHA_ADMIN_NOVA);
+  await p.getByRole('tab', { name: 'Segurança' }).click(); await p.fill('#minha-atual', SENHA_ADMIN); await p.fill('#minha-nova', SENHA_ADMIN_NOVA); await p.fill('#minha-confirma', SENHA_ADMIN_NOVA);
   await p.click('#minha-trocar-senha'); await p.waitForFunction(() => /Senha trocada/.test(document.querySelector('#aviso')?.textContent || ''));
   await p.keyboard.press('Escape'); await sair(p); await p.fill('#entrada-login', 'ana.admin'); await p.fill('#entrada-senha', SENHA_ADMIN); await p.click('#entrada-enviar');
   await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /incorretos/i, 'a senha antiga deixou de valer');
@@ -50,14 +51,14 @@ test('Minha conta: primeiro acesso sem nada liberado, como Administrador e como 
   await p.fill('#entrada-login', 'carla'); await p.fill('#entrada-senha', temporaria); await p.click('#entrada-enviar'); await p.waitForSelector('#trocar-atual');
   await p.fill('#trocar-atual', temporaria); await p.fill('#trocar-nova', SENHA_QA); await p.fill('#trocar-confirma', SENHA_QA);
   await Promise.all([p.waitForEvent('load'), p.click('#entrada-enviar')]); await recarregou(p); await p.waitForSelector('#conta-botao');
-  assert.match(await p.textContent('#conta-botao'), /Carla QA/);
+  assert.match(await p.getAttribute('#conta-botao', 'aria-label'), /Carla QA/);
   assert.equal(await p.isHidden('[data-aba=administracao]'), true, 'usuário comum não vê Administração');
   for (const aba of ['testes', 'tickets', 'projetos', 'agentes']) assert.equal(await p.isVisible(`[data-aba=${aba}]`), true, 'usuário comum vê ' + aba);
   await capturar(p, 'perfil-usuario-comum-menu');
   await p.click('#conta-botao'); await p.click('#conta-minha'); await p.locator('#qualidade-dialog[open]').waitFor();
   assert.match(await p.textContent('#qualidade-dialog'), /carla/); assert.match(await p.textContent('#qualidade-dialog'), /Analista de QA/);
   await p.fill('#minha-nome', 'Carla Souza'); await p.click('#minha-salvar-nome');
-  await p.waitForFunction(() => /Carla Souza/.test(document.querySelector('#conta-botao')?.textContent || ''));
+  await p.waitForFunction(() => /Carla Souza/.test(document.querySelector('#conta-botao')?.getAttribute('aria-label') || ''));
   await capturar(p, 'perfil-usuario-comum-minha-conta');
   await p.keyboard.press('Escape');
   const recusa = await p.evaluate(async () => (await window.prumo.usuariosListar()).error);

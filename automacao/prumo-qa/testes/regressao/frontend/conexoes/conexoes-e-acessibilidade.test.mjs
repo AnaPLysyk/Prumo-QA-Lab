@@ -1,19 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
-import { abrir,novoDados,ir,escolherPasta } from '../../infra/janela.mjs';
+import { abrir,novoDados,ir,vincularPasta,esperarPastaVinculada,raizDoProjetoAtual } from '../../infra/janela.mjs';
+// 2.19.0: o diagnóstico dos clientes MCP fica em Agentes › Políticas do projeto › Clientes MCP.
+const abrirClientesMcp=async page=>{await page.click('[data-agent-tab="policies"]');await page.locator('[data-ia="codex"]').click();await page.locator('#ia-mcp-testar').waitFor();};
 
 test('janela verifica protocolo real, distingue SDK e preserva evidência após reabrir',async t=>{
   const f=await fixture(t);const dados=novoDados(t);const a=await abrir(t,dados);
-  await escolherPasta(a.app,f.root);await a.page.getByRole('button',{name:'Vincular pasta…',exact:true}).click();
-  await a.page.waitForSelector('table');await ir(a.page,'agentes');
-  await a.page.getByRole('button',{name:'Testar integração codex',exact:true}).click();
-  await a.page.waitForFunction(()=>document.querySelector('#conteudo')?.textContent.includes('PROTOCOL_OK'),null,{timeout:20000});
-  const texto=await a.page.textContent('#conteudo');assert.match(texto,/handshake: true/);assert.match(texto,/Última chamada observada do cliente.*nenhuma/);assert.match(texto,/consultar_evidencias/);
-  assert.doesNotMatch(texto,/\bnull\b|undefined/,'campos ausentes não viram texto na interface');assert.match(texto,/Configuração: [A-Z_]+/);
-  const h=await a.page.evaluate(root=>window.prumo.historico(root),f.root);
+  await vincularPasta(a.app,a.page,f.root);await esperarPastaVinculada(a.page,f.root);const raiz=await raizDoProjetoAtual(a.page);
+  await ir(a.page,'agentes');await abrirClientesMcp(a.page);
+  await a.page.click('#ia-mcp-testar');
+  await a.page.waitForSelector('.ia-mcp-resultado.ok',{timeout:20000});
+  const texto=await a.page.textContent('#conteudo');assert.match(texto,/Funcionando/);assert.match(texto,/Último teste \(SDK\).*VALIDADO/);assert.match(texto,/Ainda sem chamadas do Codex/);
+  assert.doesNotMatch(texto,/\bnull\b|undefined/,'campos ausentes não viram texto na interface');assert.match(texto,/Arquivo de configuração/);
+  const h=await a.page.evaluate(root=>window.prumo.historico(root),raiz);
   assert.equal(h.data.activities.length,1);assert.equal(h.data.activities[0].client,'sdk');assert.equal(h.data.activities[0].tool,'consultar_evidencias');
-  await a.fechar();const b=await abrir(t,dados);await ir(b.page,'agentes');assert.match(await b.page.textContent('#conteudo'),/PROTOCOL_OK/);assert.deepEqual([...a.erros,...b.erros],[]);
+  await a.fechar();const b=await abrir(t,dados);await ir(b.page,'agentes');await abrirClientesMcp(b.page);assert.match(await b.page.textContent('#conteudo'),/Funcionando/);assert.deepEqual([...a.erros,...b.erros],[]);
 });
 
 test('teclado, foco, zoom 200/400% e reflow: ações e campos permanecem acessíveis',async t=>{

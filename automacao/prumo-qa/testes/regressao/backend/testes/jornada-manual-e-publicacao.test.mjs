@@ -6,19 +6,19 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { criarMundo } from '../../infra/mundo-servicos.mjs';
 import { executarOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';
-import { habilitarEscrita } from '../../../../dist/conexoes/escrita/habilitarEscrita.js';
-import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
-import { vincularServicoAoEspaco as gravarVinculo } from '../../../../dist/projetos/regras/vincularServicoAoEspaco.js';
-import { obterRunLocal } from '../../../../dist/testes/banco/obterRunLocal.js';
-import { criarRunNoQase } from '../../../../dist/testes/integracoes/criarRunNoQase.js';
+import { habilitarEscrita } from '../../../../dist/conexoes/escrita/permissoes.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
+import { vincularServicoAoEspaco as gravarVinculo } from '../../../../dist/projetos/servicoProjetos.js';
+import { obterRunLocal } from '../../../../dist/testes/banco/runs.js';
+import { criarRunNoQase } from '../../../../dist/testes/integracoes/publicarRunLocal.js';
 import { publicarRunLocal } from '../../../../dist/testes/integracoes/publicarRunLocal.js';
-import { declararResultadoManual } from '../../../../dist/testes/regras/declararResultadoManual.js';
-import { prepararRunLocal } from '../../../../dist/testes/regras/prepararRunLocal.js';
+import { declararResultadoManual } from '../../../../dist/testes/servicoExecucoes.js';
+import { prepararRunLocal } from '../../../../dist/testes/servicoExecucoes.js';
 import { propostasDeBugs } from '../../../../dist/testes/regras/propostasDeBugs.js';
-import { obterProposta } from '../../../../dist/tickets/banco/obterProposta.js';
-import { criarProposta } from '../../../../dist/tickets/regras/criarProposta.js';
-import { editarProposta } from '../../../../dist/tickets/regras/editarProposta.js';
-import { marcarPublicada } from '../../../../dist/tickets/regras/marcarPublicada.js';
+import { obterProposta } from '../../../../dist/tickets/banco/tickets.js';
+import { criarProposta } from '../../../../dist/tickets/servicoPropostas.js';
+import { editarProposta } from '../../../../dist/tickets/servicoPropostas.js';
+import { marcarPublicada } from '../../../../dist/tickets/servicoPropostas.js';
 
 // Jornada manual: primeiro SEM nenhuma conexão (run local, resultado declarado pela pessoa, rascunho de bug) e só depois, conectando
 // Jira, Qase e GitHub, a publicação do trabalho. Serviços simulados (mundo-servicos); nada externo é tocado.

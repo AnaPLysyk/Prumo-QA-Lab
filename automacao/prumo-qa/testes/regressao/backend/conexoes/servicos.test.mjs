@@ -4,18 +4,18 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
-import { cofreCredenciais } from '../../../../dist/conexoes/banco/cofreCredenciais.js';
+import { cofreCredenciais } from '../../../../dist/conexoes/banco/credenciais.js';
 import { AdaptadorServico } from '../../../../dist/conexoes/integracoes/AdaptadorServico.js';
-import { enderecoPublico } from '../../../../dist/conexoes/integracoes/enderecoPublico.js';
-import { ErroServico } from '../../../../dist/conexoes/integracoes/ErroServico.js';
-import { instanciaServico } from '../../../../dist/conexoes/integracoes/instanciaServico.js';
-import { lerDoServico as transporteHttps } from '../../../../dist/conexoes/integracoes/lerDoServico.js';
+import { enderecoPublico } from '../../../../dist/conexoes/integracoes/requisicoes.js';
+import { ErroServico } from '../../../../dist/conexoes/integracoes/configuracaoDosServicos.js';
+import { instanciaServico } from '../../../../dist/conexoes/integracoes/configuracaoDosServicos.js';
+import { lerDoServico as transporteHttps } from '../../../../dist/conexoes/integracoes/requisicoes.js';
 import { nucleoServicos } from '../../../../dist/conexoes/regras/nucleoServicos.js';
-import { listarEspacos } from '../../../../dist/projetos/banco/listarEspacos.js';
-import { obterEspaco } from '../../../../dist/projetos/banco/obterEspaco.js';
-import { associarEspaco } from '../../../../dist/projetos/regras/associarEspaco.js';
-import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
-import { removerVinculoServico } from '../../../../dist/projetos/regras/removerVinculoServico.js';
+import { listarEspacos } from '../../../../dist/projetos/banco/projetos.js';
+import { obterEspaco } from '../../../../dist/projetos/banco/projetos.js';
+import { associarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
+import { removerVinculoServico } from '../../../../dist/projetos/servicoProjetos.js';
 import {respostaFixture,servidorFixture,instalarTransporteControlado} from '../../../../site/scripts/servicos-fixtures.mjs';
 const base=t=>{const b=fs.mkdtempSync(path.join(os.tmpdir(),'prumo-servicos-fixture-'));t.after(()=>fs.rmSync(b,{recursive:true,force:true}));return b;};
 // Double opaco para teste de contrato. Não é criptografia nem substitui safeStorage em produção.
@@ -38,7 +38,7 @@ test('IDs independentes, seleção paginada, leitura e relações nunca atravess
   const ea=obterEspaco(a.id,b),ec=obterEspaco(c.id,b);assert.throws(()=>associarEspaco(a.id,{de:{tipo:'jira',id:'SMART-1',vinculoId:ec.vinculos[0].id,origem:'fixture'},para:{tipo:'qase',id:'31',vinculoId:ea.vinculos[1].id,origem:'fixture'},justificativa:'Fixture'},b),/TRACE_LINK_SCOPE/);
   const dados={de:{tipo:'jira',id:'SMART-1',vinculoId:ea.vinculos[0].id,origem:'fixture'},para:{tipo:'qase',id:'31',vinculoId:ea.vinculos[1].id,origem:'fixture'},justificativa:'Associação declarada, não cobertura'};associarEspaco(a.id,dados,b);assert.equal(obterEspaco(c.id,b).relacoes.length,0);removerVinculoServico(a.id,'jira',b);assert.equal(obterEspaco(a.id,b).relacoes.length,1);
 });
-test('Qase não inventa ID de conta; retirada da conexão invalida apenas os vínculos dela',async t=>{const {n,b,a,c}=await montar(t);const conta=await n.adicionar({servico:'qase',nome:'Fixture',token:'fixture-token'});assert.match(conta.contaId,/^conexao-local:/);const recursos=(await n.listar(conta.id)).recursos;await n.vincular(a.id,conta.id,recursos[0]);await n.vincular(c.id,conta.id,recursos[1]);n.removerConta(conta.id);assert.equal(obterEspaco(a.id,b).vinculos[0].estado,'SEM_CREDENCIAL');await assert.rejects(n.consultar(c.id,'qase','casos'),/CREDENTIAL_UNAVAILABLE/);assert.equal(n.contas()[0].ativa,false);});
+test('Qase não inventa ID de conta; retirada da conexão invalida apenas os vínculos dela',async t=>{const {n,b,a,c}=await montar(t);const conta=await n.adicionar({servico:'qase',nome:'Fixture',token:'fixture-token'});assert.match(conta.contaId,/^conexao-local:/);const recursos=(await n.listar(conta.id)).recursos;await n.vincular(a.id,conta.id,recursos[0]);await n.vincular(c.id,conta.id,recursos[1]);await n.removerConta(conta.id);assert.equal(obterEspaco(a.id,b).vinculos[0].estado,'SEM_CREDENCIAL');await assert.rejects(n.consultar(c.id,'qase','casos'),/CREDENTIAL_UNAVAILABLE/);assert.equal(n.contas()[0].ativa,false);});
 test('todos os endpoints de leitura do fixture são consultáveis; escrita e IDs injetados recusados',async()=>{
   for(const servico of ['jira','qase','github']){
     const c={id:randomUUID(),servico,instancia:instanciaServico(servico,'https://lab.atlassian.net'),contaId:'fixture',usuario:'fixture@example.test',token:'fixture-token'},a=new AdaptadorServico(c,transporte),r=(await a.listar()).recursos[0];

@@ -1,10 +1,10 @@
 /** Correções achadas na homologação real com o Qase (15/10/2026), reproduzidas sem rede. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fixarIp, motivoDaRecusa } from '../../../../dist/conexoes/integracoes/requisitarServico.js';
-import { consultarNoServico } from '../../../../dist/conexoes/integracoes/consultarNoServico.js';
-import { ErroServico } from '../../../../dist/conexoes/integracoes/ErroServico.js';
-import { codigoDaFalhaDeOperacao } from '../../../../dist/conexoes/escrita/codigoDaFalhaDeOperacao.js';
+import { fixarIp, motivoDaRecusa } from '../../../../dist/conexoes/integracoes/requisicoes.js';
+import { consultarNoServico } from '../../../../dist/conexoes/integracoes/leiturasDeServicos.js';
+import { ErroServico } from '../../../../dist/conexoes/integracoes/configuracaoDosServicos.js';
+import { codigoDaFalhaDeOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';
 
 test('IP fixado responde no formato pedido: lista quando o Node chama com {all:true} (antes: "Invalid IP address: undefined")', () => {
   const lookup = fixarIp('3.134.200.51'); const r = [];
@@ -34,8 +34,8 @@ test('plano do Qase sem external_issues (HTTP 402): a lista de casos é relida s
 });
 
 test('run no Qase: a releitura real não traz include_all_cases nem is_autotest e mesmo assim confirma', async () => {
-  const { criarRunNoQaseOperacao: op } = await import('../../../../dist/testes/integracoes/criarRunNoQaseOperacao.js');
-  const { marcadorDaOperacao } = await import('../../../../dist/conexoes/escrita/marcadorDaOperacao.js');
+  const { criarRunNoQaseOperacao: op } = await import('../../../../dist/testes/integracoes/execucoesQase.js');
+  const { marcadorDaOperacao } = await import('../../../../dist/conexoes/escrita/chaveDaOperacao.js');
   const k = 'ab'.repeat(32); const p = { titulo: 'Run', descricao: '', casos: [1], autoteste: false };
   const real = { id: 1, title: 'Run', description: `[${marcadorDaOperacao(k)}]`, status: 1, environment: null, milestone: null, cases: [1] }; // formato do GET homologado
   const ctx = (r) => ({ ler: async () => ({ status: true, result: r }) });
@@ -45,8 +45,8 @@ test('run no Qase: a releitura real não traz include_all_cases nem is_autotest 
 });
 
 test('resultados no Qase: o envio em lote aparece com atraso e a confirmação relê antes de desistir', async () => {
-  const mod = await import('../../../../dist/testes/integracoes/publicarResultadosNoQase.js');
-  const { marcadorDaOperacao } = await import('../../../../dist/conexoes/escrita/marcadorDaOperacao.js');
+  const mod = await import('../../../../dist/testes/integracoes/execucoesQase.js');
+  const { marcadorDaOperacao } = await import('../../../../dist/conexoes/escrita/chaveDaOperacao.js');
   mod.definirEsperaDaConfirmacao(1);
   const k = 'cd'.repeat(32); const p = { runId: 1, resultados: [{ casoId: 1, status: 'passed', comentario: 'ok' }] };
   let leituras = 0; const ctx = { ler: async () => { leituras++; return { status: true, result: { total: leituras < 2 ? 0 : 1, entities: leituras < 2 ? [] : [{ case_id: 1, comment: `ok\n[${marcadorDaOperacao(k)}]` }] } }; } };

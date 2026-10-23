@@ -1,4 +1,4 @@
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,19 +6,29 @@ import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { iniciarAtividade } from '../../../../dist/logs/regras/iniciarAtividade.js';
-import { criarEvidenciaInicial } from '../../../../dist/testes/regras/criarEvidenciaInicial.js';
-import { salvarEvidencia } from '../../../../dist/testes/banco/salvarEvidencia.js';
+import { criarEvidenciaInicial } from '../../../../dist/testes/regras/executarValidacao.js';
+import { salvarEvidencia } from '../../../../dist/testes/banco/publicacoes.js';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
-import { versao, exe, novoDados, abrir, ir, escolherPasta, mcp } from '../../infra/janela.mjs';
+import { versao, exe, novoDados, abrir, ir, vincularPasta, esperarPastaVinculada, mcp, atenderConfirmacoes } from '../../infra/janela.mjs';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 
 /** Ajuda 2.3 na janela real: central, versões, integrações técnicas, atualização, privacidade, exportação, exclusão e diagnóstico. */
 const abrirAjuda = async (page, titulo) => { await ir(page, 'ajuda'); await page.click(`.indice button:has-text("${titulo}")`); await page.waitForTimeout(300); };
-const dialogos = (app, resposta, salvar) => app.evaluate(({ dialog }, [r, destino]) => {
-  dialog.showMessageBox = async () => ({ response: r, checkboxChecked: false });
+// 2.20.0: as confirmações são a caixa da própria janela (perguntarNaJanela), atendida por atenderConfirmacoes (criada no primeiro uso de cada app).
+// dialogos() escolhe a resposta (1 confirma, 0 cancela) e o destino do "Salvar como"; esperar() aguarda a próxima pergunta ser respondida.
+const estados = new WeakMap(); const atendentes = [];
+after(() => Promise.all(atendentes.map((c) => c.parar())));
+const esperar = (app) => { const e = estados.get(app); return e.conf.aguardar(++e.n); };
+const dialogos = (app, resposta, salvar) => {
+  let e = estados.get(app); if (!e) { e = { resposta: 'cancelar', n: 0 }; e.conf = atenderConfirmacoes(app, () => e.resposta); estados.set(app, e); atendentes.push(e.conf); }
+  e.resposta = resposta ? 'confirmar' : 'cancelar';
+  return app.evaluate(({ dialog }, [, destino]) => {
+  // showMessageBox não é mais chamado pelo app; só o "Salvar como" continua nativo.
   dialog.showSaveDialog = async () => ({ canceled: !destino, filePath: destino });
-}, [resposta, salvar]);
-async function vincular(app, page, root) { await escolherPasta(app, root); await page.click('text=Vincular pasta…'); await page.waitForSelector('table'); }
+  }, [resposta, salvar]);
+};
+// 2.19.0: a pasta entra por um projeto do Prumo (Projetos › bolha Pasta local); não há mais tabela logo depois de vincular.
+async function vincular(app, page, root) { await vincularPasta(app, page, root); await esperarPastaVinculada(page, root); }
 const chamar = (page, fn, ...args) => page.evaluate(([f, a]) => window.prumo[f](...a), [fn, args]);
 // Uma conta autenticada tem diario proprio; MCP iniciado sem sessao nao recebe esse escopo.
 const dadosDaConta = async (page, dados) => {
@@ -76,12 +86,12 @@ test('Integrações técnicas: catálogo de IPC e MCP corresponde ao código e f
   const { page } = await abrir(t, dados);
   await abrirAjuda(page, 'Integrações técnicas');
   const total = Object.keys(esquemasIpc).length;
-  assert.equal(await page.locator('details.operacao').count(), total + 8);
-  await page.selectOption('#filtro-tipo', 'MCP'); assert.equal(await page.locator('details.operacao').count(), 8);
+  assert.equal(await page.locator('details.operacao').count(), total + 10);
+  await page.selectOption('#filtro-tipo', 'MCP'); assert.equal(await page.locator('details.operacao').count(), 10);
   await page.selectOption('#filtro-tipo', 'IPC'); assert.equal(await page.locator('details.operacao').count(), total);
   const logs = page.locator('details.operacao', { hasText: 'prumo:projeto:logs' }).first(); await logs.locator('summary').click();
   const t1 = await logs.textContent();
-  for (const trecho of ['Tipo', 'IPC', 'prumo:projeto:logs', 'Interface > Logs', 'backend/logs/api/projetoLogs.ts > listarLogsDoProjeto', 'Projeto selecionado + filtros', 'Projeto previamente vinculado', 'Consulta local; não altera o projeto']) assert.ok(t1.includes(trecho), trecho);
+  for (const trecho of ['Tipo', 'IPC', 'prumo:projeto:logs', 'Interface > Logs', 'backend/logs/controlador.ts > projetoLogs', 'Projeto selecionado + filtros', 'Projeto previamente vinculado', 'Consulta local; não altera o projeto']) assert.ok(t1.includes(trecho), trecho);
   await page.selectOption('#filtro-tipo', 'MCP');
   const exec = page.locator('details.operacao', { hasText: 'executar_validacao' }); await exec.locator('summary').click();
   const t2 = await exec.textContent();
@@ -113,9 +123,9 @@ test('Atualizações: release mais nova, igual, inexistente e indisponível; abr
   assert.doesNotMatch(JSON.stringify(pedidos), /Users|AppData|prumo dados|projects/i);
   // abrir: cancelar não abre; confirmar abre somente a URL oficial reconstruída da tag
   await app.evaluate(({ shell }) => { globalThis.__abertas = []; shell.openExternal = async (u) => { globalThis.__abertas.push(u); }; });
-  await dialogos(app, 0); await page.click('text=Abrir página oficial…'); await page.waitForTimeout(300);
+  await dialogos(app, 0); await page.click('text=Abrir página oficial…'); await esperar(app);
   assert.deepEqual(await app.evaluate(() => globalThis.__abertas), []);
-  await dialogos(app, 1); await page.click('text=Abrir página oficial…'); await page.waitForTimeout(300);
+  await dialogos(app, 1); await page.click('text=Abrir página oficial…'); await esperar(app);
   assert.deepEqual(await app.evaluate(() => globalThis.__abertas), ['https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v99.0.0']);
   modo = 'igual'; await page.click('text=Verificar atualizações'); await page.waitForSelector('text=já usa a versão mais recente');
   assert.equal(await page.locator('text=Abrir página oficial…').count(), 0);
@@ -146,36 +156,35 @@ test('Privacidade e dados: resumo real, exportação, exclusão separada por esc
   const f = await fixture(t); const dados = novoDados(t);
   const { app, page } = await abrir(t, dados);
   await vincular(app, page, f.root);
-  await mcp(f.root, dados, [['contexto_projeto', {}]]);
-  await registrarAtividadeDaConta(page, dados, f.root, 'executar_validacao', 'BLOCKED');
-  const projeto = await carregarProjeto(f.root);
-  const job = randomUUID(); const agora = new Date().toISOString();
-  await salvarEvidencia(projeto, criarEvidenciaInicial(projeto, 'unit', job, agora));
+  // 2.19.0: exportar e excluir valem para o projeto selecionado, cuja raiz é a de contextos do Prumo; a pasta do código só confere que nada dela é apagado.
+  const raiz = await page.evaluate(() => window.prumo.espacos().then((r) => r.data[0].raizContextos));
+  await mcp(raiz, dados, [['contexto_projeto', {}]]);
+  await registrarAtividadeDaConta(page, dados, raiz, 'executar_validacao', 'BLOCKED');
   await abrirAjuda(page, 'Privacidade e dados');
   const painel = await page.textContent('article');
-  assert.ok(painel.includes(dados)); assert.match(painel, /Projetos vinculados: 1/); assert.match(painel, /Sem retenção automática/); assert.match(painel, /não recebe as conversas/); assert.match(painel, /processo principal consulta atualizações.*chamados públicos no GitHub oficial/i); assert.match(painel,/nenhum dado de projeto é enviado/);
+  // 2.19.0: a pasta entra num projeto do Prumo, que já registra a própria raiz de contextos; com a pasta, são dois vínculos.
+  assert.ok(painel.includes(dados)); assert.match(painel, /Projetos vinculados: 2/); assert.match(painel, /Sem retenção automática/); assert.match(painel, /não recebe as conversas/); assert.match(painel, /processo principal consulta atualizações.*chamados públicos no GitHub oficial/i); assert.match(painel,/nenhum dado de projeto é enviado/);
   assert.match(painel, /historico/); assert.match(painel, /vinculos/);
   // exportar
   const destino = path.join(dados, 'exportado.json');
-  await dialogos(app, 1, destino); await page.click('#exportar-dados'); await page.waitForTimeout(500);
+  const vinculosAntes = (await chamar(page, 'projetos')).data.length;
+  await dialogos(app, 1, destino); await page.click('#exportar-dados'); await esperar(app);
   const exportado = JSON.parse(fs.readFileSync(destino, 'utf8')); assert.equal(exportado.events.length, 4);
   assert.doesNotMatch(JSON.stringify(exportado), /prumo espaço|AppData/i);
   // cancelar não apaga
   await dialogos(app, 0); await page.click('#excluir-historico'); await page.waitForSelector('text=Cancelado; nada foi excluído.');
-  assert.equal((await chamar(page, 'visao', f.root)).data.metrics.totalOperations, 2);
-  // excluir só evidências: histórico permanece
-  const antes = (await chamar(page, 'evidencias', f.root)).data.results.length; assert.equal(antes, 1);
-  await dialogos(app, 1); await page.click('#excluir-evidencias'); await page.waitForSelector('text=Excluídos: 1 arquivo(s).');
-  assert.equal((await chamar(page, 'evidencias', f.root)).data.results.length, 0);
-  assert.equal((await chamar(page, 'visao', f.root)).data.metrics.totalOperations, 2, 'histórico não foi tocado');
+  assert.equal((await chamar(page, 'visao', raiz)).data.metrics.totalOperations, 2);
+  // excluir evidências não toca o histórico (o que acontece com as evidências da pasta do código está no teste pendente abaixo)
+  await dialogos(app, 1); await page.click('#excluir-evidencias'); await page.waitForSelector('text=Excluídos: 0 arquivo(s).');
+  assert.equal((await chamar(page, 'visao', raiz)).data.metrics.totalOperations, 2, 'histórico não foi tocado');
   // excluir histórico: código e vínculo permanecem
   await page.click('#excluir-historico'); await page.waitForSelector('text=Excluídos: 2 arquivo(s).');
-  assert.equal((await chamar(page, 'visao', f.root)).data.metrics.totalOperations, 0);
-  assert.equal((await chamar(page, 'projetos')).data.length, 1, 'vínculo mantido');
+  assert.equal((await chamar(page, 'visao', raiz)).data.metrics.totalOperations, 0);
+  assert.equal((await chamar(page, 'projetos')).data.length, vinculosAntes, 'vínculo mantido');
   for (const arq of ['qa.project.json', 'README.md', 'src/app.mjs', 'tests/test.mjs']) assert.ok(fs.existsSync(path.join(f.root, arq)), arq);
   // MCP conectado à conta atual registra uma operação após a limpeza, no escopo autenticado.
-  await mcp(f.root, dados, [['consultar_evidencias', {}]]);
-  assert.equal((await chamar(page, 'visao', f.root)).data.metrics.totalOperations, 1);
+  await mcp(raiz, dados, [['consultar_evidencias', {}]]);
+  assert.equal((await chamar(page, 'visao', raiz)).data.metrics.totalOperations, 1);
 });
 
 test('exclusão não é possível sem confirmação nativa nem para projeto não vinculado ou escopo inventado', async (t) => {
@@ -186,6 +195,19 @@ test('exclusão não é possível sem confirmação nativa nem para projeto não
   assert.match((await chamar(page, 'excluirDados', 'tudo', f.root)).error, /INVALID_ARGUMENTS/);
   assert.match((await page.evaluate((r) => window.prumo.excluirDados('historico', r), '..\\..')).error, /PROJECT_NOT_LINKED|INVALID_ARGUMENTS/);
   assert.ok(fs.existsSync(f.root));
+});
+
+test('Privacidade: excluir evidências alcança as evidências da pasta do código do projeto selecionado', async (t) => {
+  const f = await fixture(t); const dados = novoDados(t);
+  const { app, page } = await abrir(t, dados);
+  await vincular(app, page, f.root);
+  const projeto = await carregarProjeto(f.root);
+  await salvarEvidencia(projeto, criarEvidenciaInicial(projeto, 'unit', randomUUID(), new Date().toISOString()));
+  assert.equal((await chamar(page, 'evidencias', f.root)).data.results.length, 1);
+  await abrirAjuda(page, 'Privacidade e dados');
+  await dialogos(app, 1); await page.click('#excluir-evidencias'); await page.waitForSelector('text=Excluídos: 1 arquivo(s).', { timeout: 15000 });
+  assert.equal((await chamar(page, 'evidencias', f.root)).data.results.length, 0);
+  for (const arq of ['qa.project.json', 'README.md', 'src/app.mjs', 'tests/test.mjs']) assert.ok(fs.existsSync(path.join(f.root, arq)), arq);
 });
 
 test('diagnóstico IPC: erros ficam registrados sem argumentos; polling não gera diagnóstico nem evento de QA', async (t) => {

@@ -1,12 +1,12 @@
 /** Publicação em GitHub Issues e leitura das issues abertas: serviço sintético sem rede, rotas conferidas na lista fechada. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { criarIssueNoGithub } from '../../../../dist/conexoes/github/criarIssueNoGithub.js';
-import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/rotaEscritaPermitida.js';
+import { criarIssueNoGithub } from '../../../../dist/conexoes/github/fluxoRepositorio.js';
+import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/permissoes.js';
 import { idsDeOperacao } from '../../../../dist/conexoes/tipos/operacoesExternas.js';
-import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/marcadorDaOperacao.js';
-import { lerDetalheDoServico } from '../../../../dist/conexoes/integracoes/lerDetalheDoServico.js';
-import { parametrosDaIssueGithub } from '../../../../dist/tickets/regras/publicarProposta.js';
+import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/chaveDaOperacao.js';
+import { lerDetalheDoServico } from '../../../../dist/conexoes/integracoes/leiturasDeServicos.js';
+import { parametrosDaIssueGithub } from '../../../../dist/tickets/servicoPropostas.js';
 
 const chave = 'ab'.repeat(32), rec = { chave: 'ana/loja' };
 const dados = { titulo: 'Carrinho perde itens', corpo: 'Ao recarregar, o carrinho esvazia. token=SEGREDO1234567890abcdef', rotulos: ['bug', 'prumo-qa'] };

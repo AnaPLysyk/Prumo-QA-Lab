@@ -2,18 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, mcp } from '../../infra/janela.mjs';
+import { abrir, novoDados, ir, mcp, atenderConfirmacoes } from '../../infra/janela.mjs';
 
 // Contratos reais em Electron/IPC/MCP, sempre com perfil temporário e projeto
 // sintético criado no próprio perfil. Sem banco, contas ou projetos externos.
 async function prepare(t) {
   const dados = novoDados(t), a = await abrir(t, dados);
-  await a.app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
+  // 2.20.0: as confirmações são a caixa da própria janela; por padrão confirma, e a.resposta troca para 'cancelar' quando o teste recusa.
+  const est = { resposta: 'confirmar' }; const conf = atenderConfirmacoes(a.app, () => est.resposta); t.after(() => conf.parar());
   const r = await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'V36 isolado', descricao: 'Projeto sintético para teste de apresentação' }));
   assert.equal(r.ok, true); const e = r.data;
-  await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
+  await ir(a.page, 'projetos'); await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${e.id}"]`).click();
   await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'V36 isolado');
-  return { ...a, dados, e };
+  return { ...a, dados, e, est, conf };
 }
 async function capture(a, nome) {
   if (!process.env.PRUMO_V36_CAPTURAS) return;
@@ -23,14 +24,16 @@ async function capture(a, nome) {
 
 test('agentes reais, prévia validada/persistida, descarte, confirmação nativa e Cérebro', async t => {
   const a = await prepare(t); await ir(a.page, 'agentes'); await a.page.waitForSelector('[data-agent="qa-geral"]');
-  assert.equal(await a.page.locator('[data-agent-tab]').count(), 2);
-  assert.equal(await a.page.locator('[data-agent]').count(), 8);
+  assert.equal(await a.page.locator('[data-agent-tab]').count(), 3, 'Agentes, Políticas do projeto e Painel de atividades');
+  assert.equal(await a.page.locator('[data-agent]').count(), 9);
   await capture(a, 'agentes');
-  await a.page.locator('#v36-clients summary').first().click();
-  await a.page.waitForFunction(() => /Claude Code/.test(document.querySelector('#v36-client-panel').textContent));
-  assert.match(await a.page.textContent('#v36-client-panel'), /Codex/);
-  assert.match(await a.page.textContent('#v36-client-panel'), /não comprova|não confirma|CONFIGURAVEL|NÃO CONFIGURADO|NAO_CONFIGURADO/i);
-  await a.page.locator('#v36-clients > summary').click();
+  // 2.20.0: os clientes MCP ficam na aba IA e regras › Conectar IA (a aba mantém data-agent-tab="policies").
+  await a.page.click('[data-agent-tab="policies"]');
+  await a.page.locator('#v36-politicas-conectar .ia-mcp-ia[data-ia="claude"]').waitFor();
+  await a.page.waitForFunction(() => /Claude Code/.test(document.querySelector('#v36-politicas-conectar').textContent));
+  assert.match(await a.page.textContent('#v36-politicas-conectar'), /Codex/);
+  assert.match(await a.page.textContent('#v36-politicas-conectar'), /não comprova|não confirma|CONFIGURAVEL|NÃO CONFIGURADO|NAO_CONFIGURADO/i);
+  await a.page.click('[data-agent-tab="agents"]');
   await a.page.click('[data-agent="qa-geral"]');
   assert.equal(await a.page.locator('#v36-agent-save').isDisabled(), true);
   await a.page.selectOption('[data-pol=propor_casos]', 'BLOQUEADO');
@@ -39,15 +42,19 @@ test('agentes reais, prévia validada/persistida, descarte, confirmação nativa
   assert.equal(await a.page.locator('#v36-agent-save').isDisabled(), true);
   assert.equal(await a.page.inputValue('[data-pol=propor_casos]'), 'PERMITIDO');
   await a.page.selectOption('[data-pol=propor_casos]', 'BLOQUEADO');
-  await a.app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 0, checkboxChecked: false }); });
-  await a.page.click('#v36-agent-save'); await a.page.waitForFunction(() => !document.querySelector('#v36-agent-save').disabled);
+  a.est.resposta = 'cancelar';
+  await a.page.click('#v36-agent-save'); await a.conf.aguardar(1); await a.page.waitForFunction(() => !document.querySelector('#v36-agent-save').disabled);
   assert.notEqual((await a.page.evaluate(id => window.prumo.agentesEstado(id), a.e.id)).data.configuracao.politicas.propor_casos, 'BLOQUEADO', 'cancelar confirmação nativa não persiste');
-  await a.app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
-  await a.page.click('#v36-agent-save'); await a.page.waitForSelector('[data-agent="qa-geral"]');
+  a.est.resposta = 'confirmar';
+  await a.page.click('#v36-agent-save'); await a.conf.aguardar(2); await a.page.waitForSelector('[data-agent="qa-geral"]');
   assert.equal((await a.page.evaluate(id => window.prumo.agentesEstado(id), a.e.id)).data.configuracao.politicas.propor_casos, 'BLOQUEADO');
   await a.page.click('[data-agent="qa-geral"]'); await capture(a, 'configuracao'); await a.page.click('#v36-brain-open');
   await a.page.click('[data-neuron="Skill"]'); assert.match(await a.page.textContent('.v36-brain-inspect'), /skills\/qa/); await capture(a, 'cerebro');
-  await a.page.getByRole('button', { name: '← Configuração', exact: true }).click(); await a.page.getByRole('button', { name: '← Agentes', exact: true }).click();
+  // 2.20.0: sem botões "← Configuração"/"← Agentes"; o Cérebro volta pela trilha (Agentes › agente › Cérebro).
+  const trilha = a.page.locator('#trilha-de-telas');
+  assert.equal(await trilha.locator('[aria-current=page]').textContent(), 'Cérebro');
+  await trilha.locator('.ds-trilha-link').last().click(); await a.page.locator('#v36-brain-open').waitFor();
+  await trilha.getByRole('button', { name: 'Agentes', exact: true }).click(); await a.page.locator('#v36-agent-new').waitFor();
   await a.page.click('#v36-agent-new'); await a.page.fill('#v36-agent-name', 'Prévia de QA'); await a.page.click('#v36-agent-save');
   assert.equal(await a.page.locator('.v36-dialog').count(), 0, 'campos obrigatórios impedem salvamento');
   await a.page.fill('#v36-agent-goal', 'Consultar contexto'); await a.page.fill('#v36-agent-instructions', '<script>throw Error("não executar")</script>');
@@ -70,7 +77,7 @@ test('agentes reais, prévia validada/persistida, descarte, confirmação nativa
   await a.app.evaluate(({ dialog }, filePath) => { dialog.showSaveDialog = async () => ({ canceled: false, filePath }); }, exported);
   await a.page.getByRole('button', { name: 'Exportar JSON', exact: true }).click(); await a.page.waitForFunction(() => /Arquivo exportado/.test(document.querySelector('#aviso').textContent));
   assert.match(fs.readFileSync(exported, 'utf8'), /não executar/);
-  const policies = (await a.page.evaluate(id => window.prumo.agentesEstado(id), a.e.id)).data; assert.equal(policies.especializacoes.length, 8, 'prévia não cria especialização no backend');
+  const policies = (await a.page.evaluate(id => window.prumo.agentesEstado(id), a.e.id)).data; assert.equal(policies.especializacoes.length, 9, 'prévia não cria especialização no backend (nove oficiais)');
   await a.fechar(); const b = await abrir(t, a.dados); await ir(b.page, 'agentes'); await b.page.waitForSelector('[data-agent^="pessoal-"]');
   assert.match(await b.page.textContent('[data-agent^="pessoal-"]'), /Prévia de QA/); assert.deepEqual([...a.erros, ...b.erros], []);
 });
@@ -79,12 +86,13 @@ test('MCP isolado e diario da conta alimentam terminal, filtros, graficos e pain
   const a = await prepare(t);
   const out = await mcp(a.e.raizContextos, a.dados, [['contexto_projeto', {}], ['consultar_evidencias', {}]]);
   assert.ok(out.every(r => !r.isError));
-  await ir(a.page, 'logs'); await a.page.waitForSelector('.v36-log-line'); assert.equal(await a.page.locator('.v36-log-line').count(), 4); await capture(a, 'logs');
+  await ir(a.page, 'logs'); await a.page.waitForSelector('.v36-log-line'); // Logs mostram tudo o que acontece no Prumo: a criação do projeto (ação auditada) e as quatro linhas das duas operações MCP.
+  assert.equal(await a.page.locator('.v36-log-line').count(), 5); await capture(a, 'logs');
   await a.page.fill('#v36-logs-busca', 'NOT_VERIFIED'); assert.equal(await a.page.locator('.v36-log-line').count(), 1);
   await a.page.locator('.v36-log-line').first().click(); assert.match(await a.page.textContent('.v36l-detalhe'), /contexto_projeto/);
   await a.page.click('#v36-logs-limpar'); await a.page.check('#acompanhar');
   await mcp(a.e.raizContextos, a.dados, [['consultar_evidencias', {}]]);
-  await a.page.waitForFunction(() => document.querySelectorAll('.v36-log-line').length === 6, null, { timeout: 8000 });
+  await a.page.waitForFunction(() => document.querySelectorAll('.v36-log-line').length === 7, null, { timeout: 8000 });
   await ir(a.page, 'metricas'); await a.page.waitForSelector('#v36-met-graficos [data-grafico]'); await capture(a, 'metricas');
   assert.equal(await a.page.locator('#v36-met-graficos [data-grafico]').count(), 3, 'três gráficos padrão do protótipo');
   await a.page.getByRole('button', { name: 'Filtros', exact: true }).click();
@@ -108,7 +116,7 @@ test('MCP isolado e diario da conta alimentam terminal, filtros, graficos e pain
 test('Home, robô original, chat lateral e flutuante, reflow/zoom e redução de movimento', async t => {
   const a = await prepare(t); await ir(a.page, 'inicio'); await a.page.waitForSelector('#chat-input'); await capture(a, 'inicio');
   await a.page.emulateMedia({ reducedMotion: 'reduce' });
-  await a.page.fill('#chat-input', 'Qual a situação do projeto?'); await a.page.locator('#chat-form button').click();
+  await a.page.fill('#chat-input', 'Qual a situação do projeto?'); await a.page.locator('#chat-form button[type=submit]').click();
   await a.page.waitForFunction(() => document.querySelectorAll('#chat-msgs .msg.prumo').length >= 1);
   assert.match(await a.page.getAttribute('#v36-chat-open img', 'src'), /robo-original.png/);
   assert.equal(await a.page.locator('#v36-chat-open').isVisible(), false, 'no Início a conversa ocupa a tela; o atalho flutuante some');
@@ -145,17 +153,22 @@ test('exportação nativa recusa tipo, tamanho e extensão arbitrários; cancela
   assert.deepEqual(a.erros, []);
 });
 
-test('Agentes sempre disponível e Conexões distribui MCP (Claude/Codex) e testes (Qase/Jira)', async t => {
+test('Agentes sempre disponível e Projetos distribui MCP (Claude/Codex) e testes (Qase/Jira/GitHub)', async t => {
+  // 2.19.0: não há mais aba Conexões; o atalho de Agentes leva a Projetos › Contas e permissões do projeto.
   const sem = await abrir(t, novoDados(t)); await ir(sem.page, 'agentes');
   await sem.page.waitForSelector('#v36-orquestrador-sempre');
-  assert.equal(await sem.page.locator('#v36-agentes-conexoes').count(), 1, 'sem projeto a tela de Agentes ainda leva a Conexões');
-  await sem.page.click('#v36-agentes-conexoes'); await sem.page.waitForSelector('#integracoes-agentes');
-  for (const id of ['claude', 'codex', 'qase', 'jira', 'github']) assert.equal(await sem.page.locator(`#integracoes-agentes [data-integracao="${id}"]`).count(), 1, id);
-  await sem.page.click('#integracao-abrir-agentes'); await sem.page.waitForSelector('#v36-orquestrador-sempre');
+  assert.equal(await sem.page.locator('#v36-agentes-conexoes').count(), 1, 'sem projeto a tela de Agentes ainda leva às conexões');
+  await sem.page.click('#v36-agentes-conexoes');
+  await sem.page.waitForFunction(() => document.querySelector('#nav [data-aba="projetos"]')?.getAttribute('aria-current') === 'page');
+  await sem.page.locator('#projetos-vazio').waitFor();
   await sem.fechar();
   const a = await prepare(t); await ir(a.page, 'agentes'); await a.page.waitForSelector('#v36-agentes-integracoes');
-  await a.page.click('#v36-agentes-integracoes'); await a.page.waitForSelector('#integracao-claude');
-  await a.page.click('#integracao-codex'); await a.page.waitForFunction(() => /Codex/.test(document.querySelector('#conexao-mcp-painel')?.textContent || ''));
-  await a.page.click('#integracao-conectar-qase'); assert.equal(await a.page.inputValue('#conexao-servico'), 'qase');
+  await a.page.click('#v36-agentes-integracoes');
+  const painel = a.page.locator('#projeto-painel:not([hidden])');
+  await painel.locator('#integracoes-agentes').waitFor();
+  for (const id of ['claude', 'codex', 'qase', 'jira', 'github']) assert.equal(await painel.locator(`#integracoes-agentes [data-integracao="${id}"]`).count(), 1, id);
+  await painel.locator('#integracao-codex').click();
+  await a.page.waitForFunction(() => /Codex/.test(document.querySelector('#conexao-mcp-painel')?.textContent || ''));
+  await painel.locator('#integracao-abrir-agentes').click(); await a.page.waitForSelector('#v36-agentes-integracoes');
   assert.deepEqual(a.erros, []);
 });

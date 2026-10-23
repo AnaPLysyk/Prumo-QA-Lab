@@ -10,7 +10,7 @@ test('Agentes › Painel de atividades: orquestração do chat mostra agentes, o
   await a.page.emulateMedia({ reducedMotion: 'reduce' });
   const projeto = await a.page.evaluate(async () => { const r = await window.prumo.espacoCriar({ nome: 'Orquestração local' }); if (!r.ok) throw Error(r.error?.message); return r.data; });
   await ir(a.page, 'projetos');
-  await a.page.locator(`[data-espaco="${projeto.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
+  await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${projeto.id}"]`).click();
   await a.page.waitForFunction((nome) => document.querySelector('#projeto-atual').textContent === nome, projeto.nome);
 
   await ir(a.page, 'inicio'); await a.page.waitForSelector('#chat-input');
@@ -26,6 +26,9 @@ test('Agentes › Painel de atividades: orquestração do chat mostra agentes, o
   assert.doesNotMatch(JSON.stringify(lista.data), /como está a regressão/, 'o registro não guarda a pergunta');
 
   await ir(a.page, 'agentes'); await a.page.click('[data-agent-tab="activity"]');
+  // Painel novo: o canvas mostra só o que acontece agora; o histórico de orquestrações fica na lateral, recolhida.
+  await a.page.click('#pa-lateral-botao');
+  assert.equal(await a.page.getAttribute('#pa-lateral-botao', 'aria-expanded'), 'true');
   const item = a.page.locator('.v36a-orq-item').first(); await item.waitFor();
   const texto = await item.textContent();
   assert.match(texto, /1\. Investigação de Bugs[\s\S]*2\. Regressão/); assert.match(texto, /\d+ ms/); assert.match(texto, /Concluída|Parcial|Falhou/);

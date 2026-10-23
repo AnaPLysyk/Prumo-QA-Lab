@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { editarCasoNoQase } from '../../../../dist/testes/integracoes/editarCasoNoQase.js';
-import { editarTicket } from '../../../../dist/tickets/integracoes/editarTicket.js';
+import { editarCasoNoQase } from '../../../../dist/testes/integracoes/casosQase.js';
+import { editarTicket } from '../../../../dist/tickets/integracoesJira.js';
 
 const recursoQase = { chave: 'QA' };
 const recursoJira = { chave: 'QA' };

@@ -5,12 +5,12 @@ import path from 'node:path';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
-import { consultarEvidencias } from '../../../../dist/testes/banco/consultarEvidencias.js';
+import { consultarEvidencias } from '../../../../dist/testes/banco/publicacoes.js';
 
 // Double APENAS neste processo de testes. Nenhum adaptador aceita isso do usuário/IA.
 let autorizar=async scope=>({subject:'FIXTURE-NON-HUMAN',method:'test-double',scopeHash:scope.scopeHash,at:new Date().toISOString()});
-mock.module('../../../../dist/testes/aprovacao/solicitarAprovacao.js',{exports:{solicitarAprovacao:scope=>autorizar(scope)}});
-const { executarValidacao } = await import('../../../../dist/testes/regras/executarValidacao.js'); const { ambienteMinimo } = await import('../../../../dist/testes/regras/ambienteMinimo.js');
+mock.module('../../../../dist/testes/servicoAprovacao.js',{exports:{solicitarAprovacao:scope=>autorizar(scope)}});
+const { executarValidacao } = await import('../../../../dist/testes/regras/executarValidacao.js'); const { ambienteMinimo } = await import('../../../../dist/testes/regras/executarValidacao.js');
 
 test('sem consentimento, capability ausente e bloqueio de política não executam',async t=>{
   const f=await fixture(t);let p=await carregarProjeto(f.root);
@@ -79,10 +79,10 @@ test('evidência corrompida e transferida para outro projeto recusadas',async t=
   const e2=await executarValidacao(p,'unit',true);const r=JSON.parse(await readFile(e2.evidencePath,'utf8'));const data=JSON.parse(r.payload);data.rootHash=hash('outro');r.payload=JSON.stringify(data);r.sha256=hash(r.payload);await writeFile(e2.evidencePath,JSON.stringify(r));
   await assert.rejects(consultarEvidencias(p,e2.jobId),/outro contexto/);
 });
-test('demo end-to-end: assertions reais e relatório de seis casos, broker substituído explicitamente',async t=>{
+test('demo end-to-end: assertions reais e relatório dos dezesseis casos do demo (2.19.0), broker substituído explicitamente',async t=>{
   const {cp,mkdtemp,rm}=await import('node:fs/promises');const os=await import('node:os');
   const root=await mkdtemp(path.join(os.tmpdir(),'prumo demo espaço '));t.after(()=>rm(root,{recursive:true,force:true}));
   await cp(path.resolve('backend/projetos/exemplos/projeto-demo'),root,{recursive:true,filter:s=>!s.includes('.prumo')});
   const e=await executarValidacao(await carregarProjeto(root),'unit',true);
-  assert.equal(e.status,'PASS');assert.equal(e.cases.length,6);assert.ok(e.cases.every(c=>c.status==='PASS'));assert.equal(e.approval.method,'test-double');
+  assert.equal(e.status,'PASS');assert.equal(e.cases.length,16);assert.ok(e.cases.every(c=>c.status==='PASS'));assert.equal(e.approval.method,'test-double');
 });

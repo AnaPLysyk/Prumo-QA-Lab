@@ -1,11 +1,11 @@
 /** Qase paginado sintético: não acessa rede, banco nem projeto externo. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { listarNoQase } from '../../../../dist/testes/integracoes/listarNoQase.js';
-import { criarCasoNoQase } from '../../../../dist/testes/integracoes/criarCasoNoQase.js';
-import { criarSuiteNoQase } from '../../../../dist/testes/integracoes/criarSuiteNoQase.js';
-import { criarPlanoNoQase } from '../../../../dist/testes/integracoes/criarPlanoNoQase.js';
-import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/marcadorDaOperacao.js';
+import { listarNoQase } from '../../../../dist/testes/integracoes/casosQase.js';
+import { criarCasoNoQase } from '../../../../dist/testes/integracoes/casosQase.js';
+import { criarSuiteNoQase } from '../../../../dist/testes/integracoes/casosQase.js';
+import { criarPlanoNoQase } from '../../../../dist/testes/integracoes/execucoesQase.js';
+import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/chaveDaOperacao.js';
 
 const rec = { chave: 'PQ' };
 function servico(lista, { semContagem = false, totalIncoerente = false } = {}) {

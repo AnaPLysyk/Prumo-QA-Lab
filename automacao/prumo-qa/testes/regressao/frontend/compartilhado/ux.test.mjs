@@ -52,11 +52,13 @@ test('UX: botões mantêm cor e contraste ao passar o mouse, em todas as telas e
 test('UX: caixas de seleção alinhadas ao texto, indicador sem pasta neutro e barras de rolagem no tema', async (t) => {
   const a = await abrir(t, novoDados(t));
   await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'Sem pasta', descricao: 'UX' }));
-  // Indicador "Sem pasta local" não usa a cor de sucesso/identidade de pasta vinculada.
+  // 2.19.0: a pasta local é uma bolha da bancada; sem pasta, o estado "Não vinculada" não usa a cor de sucesso.
   await ir(a.page, 'projetos');
-  const cores = await a.page.$$eval('.proj-vinculo[data-servico] .ds-origem', (os) => os.map((o) => ({ texto: o.textContent.trim(), cor: getComputedStyle(o.querySelector('i')).backgroundColor })));
-  const sem = cores.find((c) => /Sem pasta local/.test(c.texto)); assert.ok(sem, 'indicador sem pasta presente');
-  const [r, g, b] = sem.cor.match(/\d+/g).map(Number); assert.ok(!(g > r + 40 && g > b + 20), `"Sem pasta local" não pode ser verde (${sem.cor})`);
+  const local = a.page.locator('.ds-proj-modulo[data-servico="local"]'); await local.waitFor();
+  assert.match(await local.textContent(), /Não vinculada/, 'indicador sem pasta presente');
+  // Cor lida pelo canvas: getComputedStyle pode devolver oklab/color() e os números enganam.
+  const [r, g, b] = await local.locator('.ds-proj-status-led').evaluate((el) => { const c = document.createElement('canvas'); c.width = c.height = 1; const x = c.getContext('2d'); x.fillStyle = getComputedStyle(el).backgroundColor; x.fillRect(0, 0, 1, 1); return [...x.getImageData(0, 0, 1, 1).data].slice(0, 3); });
+  assert.ok(!(g > r + 40 && g > b + 20), `"Não vinculada" não pode ser verde (rgb ${r}, ${g}, ${b})`);
   // Caixas de seleção da Ajuda › Atualizações: ao lado do texto, na mesma linha.
   await ir(a.page, 'ajuda'); await a.page.click('.indice button:has-text("Atualizações")'); await a.page.waitForSelector('#pref-som');
   const desalinhadas = await a.page.$$eval('#conteudo label:has(input[type=checkbox])', (ls) => ls.flatMap((l) => {

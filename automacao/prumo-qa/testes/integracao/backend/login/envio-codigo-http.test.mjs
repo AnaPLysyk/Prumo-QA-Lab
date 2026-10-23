@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { enviarCodigoPorEmail } from '../../../../dist/login/integracoes/enviarCodigoPorEmail.js';
+import { enviarCodigoPorEmail } from '../../../../dist/login/integracoes/envioEmail.js';
 import { criarServico } from '../../../../backend/aplicativo/servidor/servidor.mjs';
 
 test('cliente do serviço: fala com o serviço local e traduz as respostas; endereço fora de HTTPS e de 127.0.0.1 é recusado sem rede', async (t) => {

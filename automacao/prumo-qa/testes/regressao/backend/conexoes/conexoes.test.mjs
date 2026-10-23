@@ -4,7 +4,7 @@ import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 const chamadas=[];let respostaLista={status:0,stdout:'[]'};let respostaEscrita={status:0};
 mock.module('node:child_process',{exports:{spawnSync:(exe,args,opts)=>{chamadas.push({exe,args,opts});return args[1]==='list'?respostaLista:respostaEscrita;}}});
-const { prepararConexao } = await import('../../../../dist/conexoes/ia/prepararConexao.js'); const { aplicarConexao } = await import('../../../../dist/conexoes/ia/aplicarConexao.js');
+const { prepararConexao } = await import('../../../../dist/conexoes/ia/conectarIa.js'); const { aplicarConexao } = await import('../../../../dist/conexoes/ia/conectarIa.js');
 test('conector exige confirmação exata e preserva configuração existente',async t=>{
   const f=await fixture(t);const p=await carregarProjeto(f.root);const plano={...prepararConexao(p,'codex'),executable:process.execPath,manualOnly:false};
   chamadas.length=0;assert.equal(aplicarConexao(plano,'sim').configured,false);assert.equal(chamadas.length,0);

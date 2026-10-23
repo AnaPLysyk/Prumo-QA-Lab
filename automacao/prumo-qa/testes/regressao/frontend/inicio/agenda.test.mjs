@@ -5,43 +5,50 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import electronPath from 'electron';
 import { repo, exe, abrir, novoDados, ir, ajustes, dadosDaConta } from '../../infra/janela.mjs';
-import { dicaDaBandeja as dicaBandeja } from '../../../../dist/aplicativo/bandeja/dicaDaBandeja.js';
-import { itensDoMenuDaBandeja as modeloMenuBandeja } from '../../../../dist/aplicativo/bandeja/itensDoMenuDaBandeja.js';
-import { resumoDoWorker as resumoEstado } from '../../../../dist/aplicativo/bandeja/resumoDoWorker.js';
-import { textoNoIdioma as tm } from '../../../../dist/aplicativo/bandeja/textoNoIdioma.js';
+import { dicaDaBandeja as dicaBandeja } from '../../../../dist/aplicativo/bandeja/cicloDaBandeja.js';
+import { itensDoMenuDaBandeja as modeloMenuBandeja } from '../../../../dist/aplicativo/bandeja/cicloDaBandeja.js';
+import { resumoDoWorker as resumoEstado } from '../../../../dist/aplicativo/bandeja/conteudoDaBandeja.js';
+import { textoNoIdioma as tm } from '../../../../dist/aplicativo/bandeja/conteudoDaBandeja.js';
 
 const capturar = (page, nome) => { fs.mkdirSync('tmp/evidencias/telas', { recursive: true }); return page.screenshot({ path: 'tmp/evidencias/telas/' + nome + '.png' }); };
 const token = (page, nome) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), nome);
 
-test('Configurações começam fechadas, abrem em Meu perfil, têm três abas e fecham por Escape', async (t) => {
+test('Configurações começam fechadas, têm só Aparência e fecham por Escape; a conta tem Perfil, Meu perfil e Segurança', async (t) => {
   const a = await abrir(t, novoDados(t), [], {}, { inicio: true });
   assert.equal(await a.page.isVisible('#controles'), false);
   await a.page.click('#ajustes');
   await a.page.waitForSelector('#controles', { state: 'visible' });
-  assert.deepEqual(await a.page.locator('#ajustes-abas [role=tab]').allTextContents(), ['Meu perfil', 'Aparência', 'Assistente']);
-  assert.equal(await a.page.getAttribute('[data-ajustes-aba=perfil]', 'aria-selected'), 'true', 'abre em Meu perfil');
-  for (const id of ['#ia-pessoa', '#ia-papel', '#ia-experiencia', '#ia-foco', '#ia-compartilhar']) assert.equal(await a.page.isVisible(id), true, id);
-  assert.equal(await a.page.isVisible('#tema'), false, 'tema fica em Aparência');
-  await a.page.click('[data-ajustes-aba=aparencia]'); assert.equal(await a.page.isVisible('#tema'), true); assert.equal(await a.page.isVisible('#ia-pessoa'), false);
-  await a.page.click('[data-ajustes-aba=assistente]'); assert.equal(await a.page.isVisible('#ia-nome'), true);
+  assert.equal(await a.page.locator('#controles [role=tab]').count(), 0, 'Configurações têm só Aparência, sem abas');
+  assert.equal(await a.page.isVisible('#tema'), true, 'abre direto em Aparência'); assert.equal(await a.page.isVisible('#idioma'), true);
+  assert.equal(await a.page.locator('#ia-pessoa, #ia-papel, #ia-experiencia, #ia-foco, #ia-compartilhar, #ia-nome').count(), 0, 'perfil e assistente não moram mais em Configurações');
+  assert.equal(await a.page.locator('#controles').getByRole('radiogroup', { name: 'Cor de destaque' }).isVisible(), true, 'cor de destaque também fica em Aparência');
+  assert.equal(await a.page.locator('#controles :is(h2,h3)', { hasText: 'Aparência' }).count() > 0, true, 'a seção é Aparência');
+  assert.equal(await a.page.isVisible('#controles'), true);
   await a.page.keyboard.press('Escape');
   assert.equal(await a.page.isVisible('#controles'), false);
   assert.equal(await a.page.getAttribute('#ajustes', 'aria-expanded'), 'false');
+  // A conta (foto no canto) tem as abas Perfil, Meu perfil e Segurança; o perfil dos agentes mora em Meu perfil.
+  await a.page.click('#conta-botao'); await a.page.click('#conta-minha'); await a.page.locator('#qualidade-dialog[open]').waitFor();
+  assert.deepEqual(await a.page.locator('#qualidade-dialog [role=tab]').allTextContents(), ['Perfil', 'Meu perfil', 'Segurança']);
+  assert.equal(await a.page.getByRole('tab', { name: 'Perfil', exact: true }).getAttribute('aria-selected'), 'true', 'abre em Perfil');
+  await a.page.getByRole('tab', { name: 'Meu perfil', exact: true }).click();
+  for (const id of ['#ia-pessoa', '#ia-papel', '#ia-experiencia', '#ia-foco', '#ia-compartilhar']) assert.equal(await a.page.isVisible(id), true, id);
+  await a.page.keyboard.press('Escape'); assert.equal(await a.page.locator('#qualidade-dialog[open]').count(), 0, 'Escape fecha Minha conta');
   assert.deepEqual(a.erros, []);
 });
 
 test('Meu perfil: salva nome, papel, experiência, foco e o compartilhamento; os agentes passam a conhecer a pessoa', async (t) => {
   const a = await abrir(t, novoDados(t), [], {}, { inicio: true }); const p = a.page;
-  await p.click('#ajustes'); await p.waitForSelector('#ia-pessoa');
+  await p.click('#conta-botao'); await p.click('#conta-minha'); await p.locator('#qualidade-dialog[open]').waitFor(); await p.getByRole('tab', { name: 'Meu perfil', exact: true }).click(); await p.waitForSelector('#ia-pessoa');
   await p.fill('#ia-pessoa', 'Ana'); await p.selectOption('#ia-papel', 'qa'); await p.selectOption('#ia-experiencia', 'avancado');
   await p.fill('#ia-foco', 'automação de API e regressão'); await p.locator('#ia-foco').blur();
-  assert.equal(await p.textContent('.ajuste-contador'), '28/160', 'contador de caracteres do foco');
+  assert.equal(await p.getByText('28/160', { exact: true }).count(), 1, 'contador de caracteres do foco');
   await p.waitForFunction(() => /Perfil salvo/.test(document.querySelector('#ia-perfil-estado')?.textContent || ''));
   await p.check('#ia-compartilhar'); await p.waitForTimeout(300);
   const salvo = (await p.evaluate(() => window.prumo.perfilObter())).data;
   assert.deepEqual({ ...salvo, atualizadoEm: null }, { comoChamar: 'Ana', papel: 'qa', experiencia: 'avancado', foco: 'automação de API e regressão', compartilharComIa: true, atualizadoEm: null });
-  // Conta: sem login o painel explica; o botão leva à explicação
-  assert.match(await p.textContent('#ia-conta'), /Admin Teste/); await p.click('#ia-abrir-conta'); await p.locator('#qualidade-dialog[open]').waitFor(); assert.match(await p.textContent('#qualidade-dialog'), /admin-teste/);
+  // Conta: a aba Perfil mostra quem está logado
+  await p.getByRole('tab', { name: 'Perfil', exact: true }).click(); assert.match(await p.textContent('#qualidade-dialog'), /Admin Teste/); assert.match(await p.textContent('#qualidade-dialog'), /admin-teste/);
   await p.keyboard.press('Escape');
   // O assistente abre a conversa pelo nome e mostra o foco
   const abertura = (await p.evaluate(() => window.prumo.assistenteAbertura(null))).data;
@@ -58,7 +65,9 @@ test('Início com esfera Quality Control: parada quando nada roda; tema e idioma
   assert.equal(await a.page.getAttribute('[data-aba=inicio]', 'aria-current'), 'page');
   assert.equal((await a.page.textContent('#conteudo h1')).trim(), 'Prumo QA');
   assert.equal(await a.page.getAttribute('#conteudo .qc-campo', 'data-estado'), 'ocioso', 'sem trabalho real a esfera não pode parecer ocupada');
-  assert.match(await a.page.textContent('#worker-estado'), /Worker ativo/); assert.equal(await a.page.getAttribute('#worker-estado', 'data-nivel'), 'ok');
+  // 2.20.0: o Worker é um botão só com ícone; o estado vai no nome acessível (e na dica) e a cor vem de data-nivel.
+  await a.page.waitForFunction(() => /Worker ativo/.test(document.querySelector('#worker-estado')?.getAttribute('aria-label') || ''));
+  assert.equal(await a.page.getAttribute('#worker-estado', 'data-nivel'), 'ok'); assert.equal(await a.page.getAttribute('#worker-estado', 'data-fase'), 'ativo');
   // Os três temas
   await ajustes(a.page); await a.page.selectOption('#tema', 'claro'); assert.equal(await a.page.evaluate(() => document.documentElement.dataset.tema), 'claro'); assert.equal(await token(a.page, '--fundo'), '#f5f8fc');
   await ajustes(a.page); await a.page.selectOption('#tema', 'escuro'); assert.equal(await token(a.page, '--fundo'), '#040712');
@@ -88,7 +97,10 @@ test('esfera só anima com trabalho real e respeita redução de movimento; foco
   assert.ok(await a.page.evaluate(() => { const s = getComputedStyle(document.activeElement); return s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) >= 2; }), 'foco visível');
   await a.page.keyboard.press('Enter');
   // Nomes acessíveis dos controles do cabeçalho
-  assert.equal(await a.page.getAttribute('#tema', 'aria-label'), 'Tema'); assert.equal(await a.page.getAttribute('#idioma', 'aria-label'), 'Idioma'); assert.equal(await a.page.getAttribute('#worker-estado', 'role'), 'status');
+  assert.equal(await a.page.getAttribute('#tema', 'aria-label'), 'Tema'); assert.equal(await a.page.getAttribute('#idioma', 'aria-label'), 'Idioma');
+  // O Worker virou botão (abre Agendamentos): o nome acessível traz o estado e a próxima execução.
+  assert.equal(await a.page.evaluate(() => document.querySelector('#worker-estado').tagName), 'BUTTON');
+  assert.match(await a.page.getAttribute('#worker-estado', 'aria-label'), /^(Worker ativo|Worker parado|Agendamentos pausados|Executando uma rotina)\. Próxima execução: /);
   assert.ok(!(await a.page.evaluate(() => document.querySelector('.qc-orb').getAttribute('alt'))), 'esfera decorativa não tem texto alternativo próprio'); // o rótulo fica na imagem do campo
   for (const zoom of [2, 4]) {
     await a.app.evaluate(({ BrowserWindow }, z) => { const w = BrowserWindow.getAllWindows()[0]; w.setSize(1280, 900); w.webContents.setZoomFactor(z); }, zoom);

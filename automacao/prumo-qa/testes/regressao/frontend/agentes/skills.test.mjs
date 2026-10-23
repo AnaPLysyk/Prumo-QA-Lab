@@ -11,7 +11,7 @@ test('Agentes › Skills: trecho da equipe nasce aprovado, aparece na lista e po
   await a.page.emulateMedia({ reducedMotion: 'reduce' });
   const projeto = await a.page.evaluate(async () => { const r = await window.prumo.espacoCriar({ nome: 'Skills locais' }); if (!r.ok) throw Error(r.error?.message); return r.data; });
   await ir(a.page, 'projetos');
-  await a.page.locator(`[data-espaco="${projeto.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
+  await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${projeto.id}"]`).click();
   await a.page.waitForFunction((nome) => document.querySelector('#projeto-atual').textContent === nome, projeto.nome);
 
   await ir(a.page, 'agentes'); await a.page.click('[data-agent="api-rest"]');

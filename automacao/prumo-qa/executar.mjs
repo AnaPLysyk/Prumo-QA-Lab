@@ -81,7 +81,7 @@ export function executar(argv = process.argv.slice(2)) {
     }
     const caminhos = lista.map(n => 'testes/' + op.tipo + '/' + n);
     const cmd = ['--require', './testes/unitario/infra/conhecimento-hook.cjs',
-      '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...caminhos];
+      '--experimental-test-module-mocks', '--test', '--test-reporter=tap', '--test-timeout=180000', '--test-concurrency=1', ...caminhos];
     const r = spawnSync(process.execPath, cmd, { cwd: qa, env: { ...process.env, NODE_OPTIONS: '' },
       stdio: 'inherit', windowsHide: true });
     if (r.error) throw r.error;

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { abrir, novoDados, ir } from '../../infra/janela.mjs';
+import { abrir, novoDados, ir, atenderConfirmacoes } from '../../infra/janela.mjs';
 
 // Um caminho longo e sem ponto de quebra (como o do runner do CI) não pode alargar a página nem em janela pequena nem com zoom.
 const estoura = (page) => page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
@@ -12,7 +12,8 @@ test('Projetos com pasta de caminho longo não gera rolagem horizontal em 1024×
   const pasta = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-' + 'x'.repeat(70)));
   fs.writeFileSync(path.join(pasta, 'package.json'), '{"name":"longo","scripts":{"test":"node --test"}}'); t.after(() => fs.rmSync(pasta, { recursive: true, force: true }));
   const a = await abrir(t, novoDados(t)); const p = a.page;
-  await a.app.evaluate(({ dialog }, d) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [d] }); }, pasta);
+  const conf = atenderConfirmacoes(a.app); t.after(() => conf.parar()); // criar o contrato e vincular a pasta pede a confirmação do aplicativo
+  await a.app.evaluate(({ dialog }, d) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [d] }); }, pasta);
   const e = (await p.evaluate(() => window.prumo.espacoCriar({ nome: 'Longo', descricao: 'caminho longo' }))).data; await p.evaluate((id) => window.prumo.espacoPasta(id), e.id);
   await ir(p, 'projetos');
   for (const [w, h, zoom] of [[1024, 768, 1], [1280, 900, 2], [1280, 900, 4]]) {

@@ -6,12 +6,12 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import '../../../unitario/infra/conhecimento-memoria.mjs';
 import { falhasConhecimento } from '../../../unitario/infra/conhecimento-falso.mjs';
-import { listarConhecimentos } from '../../../../dist/agentes/banco/listarConhecimentos.js';
+import { listarConhecimentos } from '../../../../dist/agentes/banco/conhecimento.js';
 import { criarServidor } from '../../../../dist/agentes/mcp/criarServidor.js';
-import { textoDoPrompt } from '../../../../dist/agentes/mcp/textoDoPrompt.js';
-import { salvarConfiguracao } from '../../../../dist/agentes/politicas/salvarConfiguracao.js';
+import { textoDoPrompt } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
+import { salvarConfiguracao } from '../../../../dist/agentes/servicoPoliticas.js';
 import { promptsPrumo } from '../../../../dist/agentes/tipos/roteiros.js';
-import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
 import '../../../unitario/infra/fixtures.mjs';
 
 test('MCP: prompts list/get, validação e aprendizado em rascunho obedecem política sem banco', async t => {

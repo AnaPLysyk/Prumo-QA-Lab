@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { abrir, novoDados, ir } from '../../infra/janela.mjs';
 
-// Janela real, perfil temporário: Claude Code e Codex aparecem como opção, nascem não autorizados e o chat responde só com dados locais.
-test('chat: Claude Code e Codex listados, não autorizados por padrão; o chat responde localmente e pelo agente escolhido', { timeout: 120000 }, async (t) => {
+// Janela real, perfil temporário: quatro IAs externas aparecem, não autorizadas, e o chat responde localmente.
+test('chat: quatro IAs listadas, não autorizadas por padrão; o chat responde localmente e pelo agente escolhido', { timeout: 120000 }, async (t) => {
   const a = await abrir(t, novoDados(t));
   const e = (await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'Chat IA Lab', descricao: 'sintético' }))).data;
-  await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
+  await ir(a.page, 'projetos'); await a.page.locator('#projeto-botao').click(); await a.page.locator(`.projeto-item[data-projeto="${e.id}"]`).click();
   await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'Chat IA Lab');
   const r = await a.page.evaluate((id) => window.prumo.assistenteAgentes(id), e.id);
-  assert.equal(r.ok, true); assert.deepEqual(r.data.provedores.map((p) => p.id).sort(), ['claude', 'codex']);
+  assert.equal(r.ok, true); assert.deepEqual(r.data.provedores.map((p) => p.id).sort(), ['claude', 'codex', 'copilot', 'gemini']);
   assert.ok(r.data.provedores.every((p) => p.autorizado === false), 'nenhuma IA externa autorizada de início');
   await ir(a.page, 'inicio'); await a.page.waitForSelector('#chat-input');
   for (const agente of ['', 'api-rest']) {

@@ -1,7 +1,7 @@
 /** Testa o encaminhamento das consultas por serviço sem acessar rede ou contas reais. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lerDetalheDoServico } from '../../../../dist/conexoes/integracoes/lerDetalheDoServico.js';
+import { lerDetalheDoServico } from '../../../../dist/conexoes/integracoes/leiturasDeServicos.js';
 
 const recurso = { chave: 'equipe/prumo', id: 'fixture' };
 const montarContexto = (servico, resposta) => {

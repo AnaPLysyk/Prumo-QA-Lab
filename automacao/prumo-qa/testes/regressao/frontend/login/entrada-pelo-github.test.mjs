@@ -22,7 +22,7 @@ test('com o OAuth App configurado: botão em Entrar e em Criar conta, abre a aut
   const a = await comLoginLigado(t, ENV);
   await a.app.evaluate(({ shell }) => { globalThis.__abertas = []; shell.openExternal = async (u) => { globalThis.__abertas.push(u); }; });
   await a.page.locator('#entrada-github').getByText('Entrar com o GitHub').waitFor();
-  await a.page.click('#entrada-ir-cadastro'); await a.page.locator('#entrada-github').getByText('Cadastrar com o GitHub').waitFor(); await a.page.click('#entrada-voltar');
+  await a.page.click('#entrada-ir-cadastro'); await a.page.locator('#entrada-github').getByText('Cadastrar com o GitHub').waitFor(); await a.page.getByRole('navigation', { name: 'Você está em' }).getByRole('button', { name: 'Entrar', exact: true }).click();
   await a.page.click('#entrada-github'); await a.page.locator('#entrada-github-espera').waitFor();
   const abertas = await a.app.evaluate(() => globalThis.__abertas); assert.equal(abertas.length, 1);
   const u = new URL(abertas[0]); assert.equal(u.origin + u.pathname, 'https://github.com/login/oauth/authorize'); assert.equal(u.searchParams.get('client_id'), ENV.PRUMO_GITHUB_CLIENT_ID); assert.equal(u.searchParams.get('code_challenge_method'), 'S256'); assert.doesNotMatch(abertas[0], /segredo-de-teste/);
@@ -37,7 +37,7 @@ test('primeiro acesso: sem nenhuma conta o Prumo não abre; Criar conta com o Gi
   await a.app.evaluate(({ shell }) => { globalThis.__abertas = []; shell.openExternal = async (u) => { globalThis.__abertas.push(u); }; });
   await a.page.waitForSelector('#entrada-login'); assert.equal(await a.page.textContent('#entrada-github'), 'Criar conta com o GitHub', 'sem contas o botão cria a primeira conta, não entra');
   await a.page.click('#entrada-github'); await a.page.locator('#entrada-github-espera').waitFor(); await a.page.click('#entrada-github-cancelar'); await a.page.waitForSelector('#primeiro-nome');
-  await a.page.click('#entrada-voltar'); await a.page.waitForSelector('#entrada-login');
+  await a.page.getByRole('navigation', { name: 'Você está em' }).getByRole('button', { name: 'Entrar', exact: true }).click(); await a.page.waitForSelector('#entrada-login');
   await a.page.click('#entrada-ir-cadastro'); await a.page.waitForSelector('#primeiro-nome');
   await a.page.click('#entrada-github'); await a.page.locator('#entrada-github-espera').waitFor();
   const abertas = await a.app.evaluate(() => globalThis.__abertas); assert.equal(abertas.length, 2); for (const u of abertas) assert.match(u, /^https:\/\/github\.com\/login\/oauth\/authorize\?/);

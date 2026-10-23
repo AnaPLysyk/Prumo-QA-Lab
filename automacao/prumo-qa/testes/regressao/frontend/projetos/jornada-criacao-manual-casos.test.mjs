@@ -20,11 +20,11 @@ after(() => {
 });
 
 const { esquemasIpc } = await import('../../../../dist/aplicativo/api/catalogoDeContratos.js');
-const { criarEspaco } = await import('../../../../dist/projetos/regras/criarEspaco.js');
-const { listarEspacos } = await import('../../../../dist/projetos/banco/listarEspacos.js');
-const { salvarSuiteLocal } = await import('../../../../dist/testes/regras/salvarSuiteLocal.js');
-const { salvarCasoLocal } = await import('../../../../dist/testes/regras/salvarCasoLocal.js');
-const { listarRepositorioLocal } = await import('../../../../dist/testes/regras/listarRepositorioLocal.js');
+const { criarEspaco } = await import('../../../../dist/projetos/servicoProjetos.js');
+const { listarEspacos } = await import('../../../../dist/projetos/banco/projetos.js');
+const { salvarSuiteLocal } = await import('../../../../dist/testes/servicoCasos.js');
+const { salvarCasoLocal } = await import('../../../../dist/testes/servicoCasos.js');
+const { listarRepositorioLocal } = await import('../../../../dist/testes/servicoCasos.js');
 const validar = (canal, entrada, fn) => {
   const r = esquemasIpc[canal].safeParse(entrada);
   if (!r.success) return Promise.resolve({ ok: false, error: 'INVALID_ARGUMENTS' });
@@ -57,6 +57,7 @@ class No {
   replaceChildren(...xs) { this.children = []; this.append(...xs); }
   remove() { if (this.parent) this.parent.children = this.parent.children.filter(x => x !== this); }
   focus() { this.focused = true; }
+  addEventListener() {}
   querySelectorAll(selector) {
     const out = [], match = n => selector.startsWith('#') ? n.attrs.id === selector.slice(1)
       : selector.startsWith('.') ? String(n.attrs.class || '').split(' ').includes(selector.slice(1))
@@ -73,7 +74,16 @@ const h = (tag, attrs, ...filhos) => new No(tag, attrs, filhos);
 const source = p => fs.readFileSync(path.join(raiz, p), 'utf8');
 const campo = (_, attrs) => { const input = h('input', attrs); return { input, no: h('label', {}, input) }; };
 const suitesJS = source('frontend/testes/fluxos-repositorio-local.parte.js');
-const i = suitesJS.indexOf('  function formularioSuiteLocal(e, suites, atual = null) {');
+const i = suitesJS.indexOf('  function formularioSuiteLocal(');
+const botaoJS = source('frontend/design-system/ds.js').split(/\r?\n/).find(l => l.startsWith('const botao = '));
+const propostaJS = source('frontend/testes/propostas.js').split('/** Mostra cada proposta')[0];
+// Projetos agora é um arquivo só: carrega apenas escolherEspaco e abrirFormularioProjeto (o formulário real de cadastro).
+const projetosCompleto = source('frontend/projetos/tela-projetos.js');
+const projetosJS = projetosCompleto.slice(0, projetosCompleto.indexOf('/** Projetos: importa cada recurso'));
+assert.ok(projetosJS.includes('function abrirFormularioProjeto(') && projetosJS.includes('function escolherEspaco('));
+// A bancada real de um projeto (montarSecaoProjeto), com o mapa de conexões substituído por um bloco vazio.
+const bancadaJS = projetosCompleto.slice(projetosCompleto.indexOf('/** Projetos: uma bancada por vez'), projetosCompleto.indexOf('/** Tela Projetos: um único mapa ativo'));
+assert.ok(bancadaJS.includes('function montarSecaoProjeto('));
 const j = suitesJS.indexOf('  async function telaCasosLocais(e, _mem, corpo) {', i);
 assert.ok(i > 0 && j > i);
 
@@ -95,13 +105,14 @@ function montarUI() {
   };
   const ctx = {
     estado, abas, api, h, DS, window: { PrumoConta: { pode: aba => aba !== 'testes' || controle.podeTestes } },
-    tr: texto => texto, selo: x => h('span', {}, x), hora: x => x,
+    tr: texto => texto, textoErro: t => String(t), selo: x => h('span', {}, x), hora: x => x,
     avisar: mensagem => controle.avisos.push(mensagem),
     campoPlataforma: campo,
     campoTexto: (_titulo, id, attrs) => campo('', { ...attrs, id }),
     salvarRaiz: () => { controle.raizSalva++; },
     chamar: async fn => { const r = await fn(); if (!r.ok) { controle.avisos.push(r.error); return null; } return r.data; },
     abrirRepositoriosGithub: () => {},
+    montarFluxoProjeto: () => h('div', {}),
     mostrar: async aba => {
       controle.tela = aba;
       if (aba === 'projetos') { controle.vista = h('main', {}); await ctx.abas.projetos(controle.vista); }
@@ -109,15 +120,10 @@ function montarUI() {
   };
   vm.createContext(ctx);
   vm.runInContext(
-    source('frontend/compartilhado/criarBotaoAcao.js') + '\n' +
-    source('frontend/projetos/selecionarProjeto.js') + '\n' +
-    source('frontend/projetos/modais/criarEditarProjeto/abrirFormularioProjeto.js') + '\n' +
-    source('frontend/projetos/componentes/montarVinculosProjeto.js') + '\n' +
-    source('frontend/projetos/componentes/montarSecaoProjeto.js') + '\n' +
-    source('frontend/projetos/componentes/montarDiagnosticoPasta.js') + '\n' +
-    source('frontend/projetos/mostrarPastasLocais.js') + '\n' +
-    source('frontend/projetos/mostrarProjetos.js') + '\n' +
-    source('frontend/testes/formularios/montarFormularioProposta.js') + '\n' +
+    botaoJS + '\n' +
+    projetosJS + '\n' +
+    bancadaJS + '\n' +
+    propostaJS + '\n' +
     suitesJS.slice(i, j) +
     '\nthis.criarCaso = (e,c,s) => formularioProposta(e,c,() => this.salvo(),s); this.criarSuite = formularioSuiteLocal;', ctx);
   ctx.salvo = () => { controle.salvou++; };
@@ -128,8 +134,8 @@ const preencher = (no, id, val) => { const el = no.querySelector('#' + id); asse
 const clicar = async (no, id) => { const el = no.querySelector('#' + id); assert.ok(el, 'botão '+id); await el.onclick({ currentTarget: el }); };
 
 async function criarPelaUI(nome) {
-  await u.ctx.mostrar('projetos');
-  await clicar(u.controle.vista, 'espaco-novo');
+  u.controle.vista = h('main', {});
+  u.ctx.abrirFormularioProjeto(u.controle.vista, null);
   assert.equal(u.controle.vista.querySelector('#espaco-nome').focused, true);
   preencher(u.controle.vista, 'espaco-nome', nome);
   preencher(u.controle.vista, 'espaco-descricao', 'Projeto manual sem integração');
@@ -147,7 +153,7 @@ test('criar projeto manual pela tela sem Qase ou GitHub abre repositório de tes
   assert.equal(contrato.execution.readOnly, true);
   assert.deepEqual(contrato.context.tests, []);
   assert.equal(u.controle.raizSalva, 1);
-  await clicar(u.controle.vista, 'espaco-testes-' + e.id);
+  await u.ctx.escolherEspaco(e, 'testes'); // o mesmo que o botão "Abrir testes" da bancada de Projetos chama
   assert.equal(u.controle.tela, 'testes');
   assert.equal(u.estado.sub.testes, 'repositorio');
   assert.equal(u.estado.espaco.id, e.id);
@@ -181,7 +187,7 @@ test('trocar de projeto abre repositório correto, sem casos do outro projeto', 
   const primeiro = u.estado.espaco;
   const segundo = await criarPelaUI('Projeto Independente');
   assert.notEqual(segundo.id, primeiro.id);
-  await clicar(u.controle.vista, 'espaco-testes-' + segundo.id);
+  await u.ctx.escolherEspaco(segundo, 'testes');
   const repoB = await api.repositorioLocal(segundo.id);
   assert.deepEqual(repoB.data.casos, []); assert.deepEqual(repoB.data.suites, []);
   assert.equal((await api.repositorioLocal(primeiro.id)).data.casos.length, 1);
@@ -189,13 +195,16 @@ test('trocar de projeto abre repositório correto, sem casos do outro projeto', 
   assert.equal(u.estado.sub.testes, 'repositorio');
 });
 
+// A bancada mostra um projeto por vez; cada projeto é desenhado com e sem permissão à tela Testes.
 test('atalho de casos não aparece sem permissão à tela Testes', async () => {
-  u.controle.podeTestes = false;
-  await u.ctx.mostrar('projetos');
-  const projetos = await api.espacos();
-  for (const e of projetos.data)
-    assert.equal(u.controle.vista.querySelector('#espaco-testes-' + e.id), null);
-  u.controle.podeTestes = true;
-  await u.ctx.mostrar('projetos');
-  for (const e of projetos.data) assert.ok(u.controle.vista.querySelector('#espaco-testes-' + e.id));
+  const projetos = (await api.espacos()).data;
+  assert.ok(projetos.length >= 2);
+  try {
+    for (const e of projetos) {
+      u.controle.podeTestes = false;
+      assert.equal(u.ctx.montarSecaoProjeto(e, projetos).querySelector('#espaco-testes-' + e.id), null, 'sem permissão: ' + e.nome);
+      u.controle.podeTestes = true;
+      assert.ok(u.ctx.montarSecaoProjeto(e, projetos).querySelector('#espaco-testes-' + e.id), 'com permissão: ' + e.nome);
+    }
+  } finally { u.controle.podeTestes = true; }
 });

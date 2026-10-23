@@ -4,7 +4,7 @@ import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-mock.module('../../../../dist/testes/aprovacao/solicitarAprovacao.js',{exports:{solicitarAprovacao:async s=>({method:'test-double',scopeHash:s.scopeHash})}});
+mock.module('../../../../dist/testes/servicoAprovacao.js',{exports:{solicitarAprovacao:async s=>({method:'test-double',scopeHash:s.scopeHash})}});
 mock.module('node:child_process',{exports:{spawn:()=>{
   const child=new EventEmitter();child.stdout=new PassThrough();child.stderr=new PassThrough();child.kill=()=>{};
   queueMicrotask(()=>{child.emit('error',new Error('ENOENT synthetic spawn failure'));child.emit('close',null);});return child;

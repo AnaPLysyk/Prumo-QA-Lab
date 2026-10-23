@@ -4,15 +4,15 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { criarServidor } from '../../../../dist/agentes/mcp/criarServidor.js';
-import { capacidadeEfetiva } from '../../../../dist/agentes/politicas/capacidadeEfetiva.js';
-import { configuracaoDoEspaco } from '../../../../dist/agentes/politicas/configuracaoDoEspaco.js';
-import { matrizDePoliticas } from '../../../../dist/agentes/politicas/matrizDePoliticas.js';
-import { salvarConfiguracao } from '../../../../dist/agentes/politicas/salvarConfiguracao.js';
-import { capacidades, especializacoes } from '../../../../dist/agentes/tipos/politicas.js';
-import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
-import { espacoDaRaiz } from '../../../../dist/projetos/regras/espacoDaRaiz.js';
-import { vincularPastaAoEspaco as pastaEspaco } from '../../../../dist/projetos/regras/vincularPastaAoEspaco.js';
-import { listarPropostas } from '../../../../dist/tickets/banco/listarPropostas.js';
+import { capacidadeEfetiva } from '../../../../dist/agentes/servicoPoliticas.js';
+import { configuracaoDoEspaco } from '../../../../dist/agentes/servicoPoliticas.js';
+import { matrizDePoliticas } from '../../../../dist/agentes/servicoPoliticas.js';
+import { salvarConfiguracao } from '../../../../dist/agentes/servicoPoliticas.js';
+import { capacidades, especializacoes } from '../../../../dist/agentes/tipos/persona.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
+import { espacoDaRaiz } from '../../../../dist/projetos/servicoProjetos.js';
+import { vincularPastaAoEspaco as pastaEspaco } from '../../../../dist/projetos/servicoProjetos.js';
+import { listarPropostas } from '../../../../dist/tickets/banco/tickets.js';
 
 async function cliente(t, raiz) {
   const servidor = await criarServidor(raiz); const [a, b] = InMemoryTransport.createLinkedPair(); const c = new Client({ name: 'claude-teste', version: '1.0.0' });
@@ -37,13 +37,13 @@ test('especializações por projeto: capacidade só existe se houver especializa
   salvarConfiguracao(e.id, { especializacoes: ['monitoramento'], politicas: {} }, 'ana'); const efetivo = (cap) => capacidadeEfetiva(e.id, cap).estado;
   assert.deepEqual(['consultar_contexto', 'consultar_evidencias', 'propor_casos', 'propor_bugs', 'executar_testes', 'revisar_cobertura'].map(efetivo), ['PERMITIDO', 'PERMITIDO', 'BLOQUEADO', 'BLOQUEADO', 'BLOQUEADO', 'BLOQUEADO']);
   salvarConfiguracao(e.id, { especializacoes: ['regressao', 'qa-geral'], politicas: { propor_casos: 'BLOQUEADO' } }, 'ana'); assert.deepEqual(['executar_testes', 'propor_bugs', 'propor_casos', 'revisar_cobertura'].map(efetivo), ['EXIGE_AUTORIZACAO', 'PERMITIDO', 'BLOQUEADO', 'PERMITIDO']);
-  assert.match(capacidadeEfetiva(e.id, 'propor_casos').motivo, /Bloqueada pela política/); salvarConfiguracao(e.id, { especializacoes: [], politicas: {} }, 'ana'); assert.ok(matrizDePoliticas(e.id).filter((x) => x.editavel.length).every((x) => x.estado === 'BLOQUEADO'), 'nenhuma especialização: tudo bloqueado');
+  assert.match(capacidadeEfetiva(e.id, 'propor_casos').motivo, /Bloqueada pela política/); salvarConfiguracao(e.id, { especializacoes: [], politicas: {} }, 'ana'); assert.ok(matrizDePoliticas(e.id).filter((x) => x.editavel.length && x.id !== 'perguntar_ao_orquestrador').every((x) => x.estado === 'BLOQUEADO'), 'nenhuma especialização: tudo bloqueado, menos perguntar ao Orquestrador (leitura independente de especialização)');
   assert.equal(configuracaoDoEspaco(e.id).padrao, false);
 });
 
-test('MCP real: oito ferramentas; propostas só em rascunho; política bloqueia no backend, inclusive executar; sem projeto Prumo não há proposta', async (t) => {
+test('MCP real: dez ferramentas; propostas só em rascunho; política bloqueia no backend, inclusive executar; sem projeto Prumo não há proposta', async (t) => {
   const e = await criarEspaco({ nome: 'AG-MCP' }); const c = await cliente(t, e.raizContextos);
-  const nomes = (await c.listTools()).tools.map((x) => x.name).sort(); assert.deepEqual(nomes, ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
+  const nomes = (await c.listTools()).tools.map((x) => x.name).sort(); assert.deepEqual(nomes, ['consultar_evidencias', 'consultar_repositorio', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'perguntar_ao_orquestrador', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
   const pol = await chamar(c, 'listar_politicas'); assert.equal(pol.erro, false); assert.equal(pol.dados.projetoPrumo, 'AG-MCP'); assert.equal(pol.dados.capacidades.find((x) => x.id === 'criar_casos_qase').estado, 'SOMENTE_PESSOA'); assert.match(pol.dados.aviso, /só a pessoa/);
   const p1 = await chamar(c, 'propor_caso', { ...caso('Editor persiste valor após recarregar'), requisito: 'RQ-01', risco: 'alto' }); assert.equal(p1.erro, false); assert.equal(p1.dados.estado, 'RASCUNHO'); assert.match(p1.dados.aviso, /Nada foi enviado ao Jira, Qase ou GitHub/);
   const lista = listarPropostas(e.id); assert.equal(lista.length, 1); assert.equal(lista[0].origem, 'IA'); assert.equal(lista[0].cliente, 'claude-teste'); assert.equal(lista[0].estado, 'RASCUNHO');

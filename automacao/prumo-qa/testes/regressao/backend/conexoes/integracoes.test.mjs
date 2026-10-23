@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fixture } from '../../../unitario/infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-import { registrosIntegracao } from '../../../../dist/conexoes/banco/registrosIntegracao.js';
-import { conferirServidores } from '../../../../dist/conexoes/ia/conferirServidores.js';
-import { prepararConexao } from '../../../../dist/conexoes/ia/prepararConexao.js';
-import { testarProtocolo } from '../../../../dist/conexoes/ia/testarProtocolo.js';
-import { consultarAtividades } from '../../../../dist/logs/banco/consultarAtividades.js';
+import { registrosIntegracao } from '../../../../dist/conexoes/servicoIaDiagnostico.js';
+import { conferirServidores } from '../../../../dist/conexoes/servicoIaDiagnostico.js';
+import { prepararConexao } from '../../../../dist/conexoes/ia/conectarIa.js';
+import { testarProtocolo } from '../../../../dist/conexoes/servicoIaDiagnostico.js';
+import { consultarAtividades } from '../../../../dist/logs/regras/iniciarAtividade.js';
 import { iniciarAtividade } from '../../../../dist/logs/regras/iniciarAtividade.js';
 
 test('configuração exige runtime, servidor, raiz e ambiente exatos, sem expor credenciais', async t => {
@@ -25,7 +25,7 @@ test('configuração exige runtime, servidor, raiz e ambiente exatos, sem expor 
 test('protocolo stdio real: handshake, quatro tools e leitura; evidência persiste e SDK não é Codex', async t => {
   const f=await fixture(t); const p=await carregarProjeto(f.root);
   const r=await testarProtocolo(p,'codex');
-  assert.equal(r.state,'VALIDADO'); assert.equal(r.handshake,true); assert.equal(r.read,true); assert.equal(r.tools.length,8);
+  assert.equal(r.state,'VALIDADO'); assert.equal(r.handshake,true); assert.equal(r.read,true); assert.equal(r.tools.length,10);
   const h=consultarAtividades(p); assert.equal(h.activities.length,1); assert.equal(h.activities[0].client,'sdk');
   assert.equal(h.activities[0].tool,'consultar_evidencias'); assert.equal(h.activities[0].summary.executed,undefined);
   const l=registrosIntegracao(await carregarProjeto(f.root)); assert.deepEqual(l.records,[r]); assert.equal(l.problems,0);
@@ -52,6 +52,6 @@ test('referências de contexto preservam somente id, versão, hash e estado; nom
 test('falha real na leitura de evidência preserva handshake e lista, registra erro e não executa capability',async t=>{
   const f=await fixture(t);const p=await carregarProjeto(f.root);fs.mkdirSync(path.join(f.root,'.prumo/evidencias'),{recursive:true});
   fs.writeFileSync(path.join(f.root,'.prumo/evidencias/ebdd3a36-90b8-4a09-af7f-d4087f910126.json'),'{}');
-  const r=await testarProtocolo(p,'claude');assert.equal(r.state,'ERRO');assert.equal(r.handshake,true);assert.equal(r.tools.length,8);assert.equal(r.read,false);
+  const r=await testarProtocolo(p,'claude');assert.equal(r.state,'ERRO');assert.equal(r.handshake,true);assert.equal(r.tools.length,10);assert.equal(r.read,false);
   const h=consultarAtividades(p);assert.equal(h.activities.length,1);assert.equal(h.activities[0].tool,'consultar_evidencias');assert.equal(h.activities[0].state,'ERROR');assert.equal(h.activities[0].client,'sdk');
 });

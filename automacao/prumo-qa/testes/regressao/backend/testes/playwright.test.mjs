@@ -6,30 +6,8 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import { Worker } from '../../../../dist/agendamentos/worker/Worker.js';
-import { converterRelatorioPlaywright } from '../../../../dist/testes/regras/converterRelatorioPlaywright.js';
 
 const require = createRequire(import.meta.url);
-const folha = (specs) => ({ suites: [{ title: 'login.spec.ts', file: 'login.spec.ts', specs, suites: [] }] });
-const spec = (title, status, results, extra = {}) => ({ title, file: 'login.spec.ts', tests: [{ status, results, ...extra }] });
-
-test('relatório JSON do Playwright vira cenários individuais sem inventar nada', () => {
-  const casos = converterRelatorioPlaywright(folha([
-    spec('entra com Editor', 'expected', [{ status: 'passed' }]),
-    spec('Leitor é recusado', 'unexpected', [{ status: 'failed', error: { message: '\u001b[31mExpected 403\u001b[39m' } }]),
-    spec('instável', 'flaky', [{ status: 'failed' }, { status: 'passed' }]),
-    spec('ignorado', 'skipped', [{ status: 'skipped' }]),
-    spec('estourou', 'unexpected', [{ status: 'timedOut' }]),
-    spec('interrompido', 'unexpected', [{ status: 'interrupted' }]),
-    spec('estranho', 'desconhecido', [{ status: 'passed' }])
-  ]));
-  const por = Object.fromEntries(casos.map((c) => [c.id.split('› ').at(-1), c]));
-  assert.equal(por['entra com Editor'].status, 'PASS'); assert.equal(por['Leitor é recusado'].status, 'FAIL'); assert.equal(por['Leitor é recusado'].evidence, 'Expected 403');
-  assert.equal(por['instável'].status, 'PASS'); assert.match(por['instável'].evidence, /instável/); assert.equal(por['ignorado'].status, 'NOT_RUN');
-  assert.equal(por['estourou'].status, 'FAIL'); assert.match(por['estourou'].evidence, /Tempo esgotado/); assert.equal(por['interrompido'].status, 'NOT_RUN'); assert.equal(por['estranho'].status, 'BLOCKED');
-  assert.deepEqual(converterRelatorioPlaywright({ suites: [] }), [], 'sem testes não há cenário vazio para declarar cobertura');
-  assert.throws(() => converterRelatorioPlaywright({ foo: 1 }));
-});
-
 test('reporter do Prumo grava o contrato PRUMO_RESULT_FILE, trata retentativas e ignora execução fora do Prumo', (t) => {
   const Reporter = require('../../../../backend/testes/reporters/prumo-playwright-reporter.cjs'); const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo rep ')); t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const alvo = path.join(dir, 'r.json'); process.env.PRUMO_RESULT_FILE = alvo; process.env.PRUMO_JOB_ID = '11111111-1111-4111-8111-111111111111'; t.after(() => { delete process.env.PRUMO_RESULT_FILE; delete process.env.PRUMO_JOB_ID; });

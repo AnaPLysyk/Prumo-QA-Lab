@@ -1,11 +1,11 @@
 /** Status de defeito e leituras de milestone, ambiente e campos personalizados do Qase: serviço sintético, sem rede. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mudarStatusDefeitoNoQase as op } from '../../../../dist/testes/integracoes/mudarStatusDefeitoNoQase.js';
-import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/rotaEscritaPermitida.js';
+import { mudarStatusDefeitoNoQase as op } from '../../../../dist/testes/integracoes/defeitosQase.js';
+import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/permissoes.js';
 import { idsDeOperacao } from '../../../../dist/conexoes/tipos/operacoesExternas.js';
-import { lerDetalheDoServico } from '../../../../dist/conexoes/integracoes/lerDetalheDoServico.js';
-import { criarRunNoQaseOperacao } from '../../../../dist/testes/integracoes/criarRunNoQaseOperacao.js';
+import { lerDetalheDoServico } from '../../../../dist/conexoes/integracoes/leiturasDeServicos.js';
+import { criarRunNoQaseOperacao } from '../../../../dist/testes/integracoes/execucoesQase.js';
 
 const rec = { chave: 'PQ', id: 'PQ' };
 function mundo(status = 'open', versao = '2026-10-15T10:00:00+00:00') {
@@ -62,7 +62,7 @@ test('run no Qase leva milestone e ambiente escolhidos', async () => {
 });
 
 test('caso Qase: automação vai como 0/1 (a API real recusa true/false) e a leitura aceita os três formatos', async () => {
-  const { flagsDeAutomacao, automacaoLida } = await import('../../../../dist/testes/integracoes/automacaoNoQase.js');
+  const { flagsDeAutomacao, automacaoLida } = await import('../../../../dist/testes/integracoes/casosQase.js');
   assert.deepEqual(flagsDeAutomacao('manual'), { isManual: 1, isToBeAutomated: 0 });
   assert.deepEqual(flagsDeAutomacao('a-automatizar'), { isManual: 1, isToBeAutomated: 1 });
   assert.deepEqual(flagsDeAutomacao('automatizado'), { isManual: 0, isToBeAutomated: 0 });

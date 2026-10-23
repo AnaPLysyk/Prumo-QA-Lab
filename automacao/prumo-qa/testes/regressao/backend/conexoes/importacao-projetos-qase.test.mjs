@@ -5,9 +5,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { nucleoServicos } from '../../../../dist/conexoes/regras/nucleoServicos.js';
-import { lerEspacos } from '../../../../dist/projetos/banco/lerEspacos.js';
-import { criarEspaco } from '../../../../dist/projetos/regras/criarEspaco.js';
-import { listarContas } from '../../../../dist/conexoes/banco/listarContas.js';
+import { lerEspacos } from '../../../../dist/projetos/banco/projetos.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
+import { listarContas } from '../../../../dist/conexoes/banco/contasDeServico.js';
 
 const projeto=(i)=>({code:'Q'+String(i).padStart(3,'0'),title:'Projeto Qase '+i});
 function montar(t,qtd=3){

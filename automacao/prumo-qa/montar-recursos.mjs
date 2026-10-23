@@ -7,7 +7,7 @@ const origem = path.join(path.dirname(fileURLToPath(import.meta.url)), 'recursos
 const arquivos = [
   'bloquear-efeitos.cjs', 'caixa-de-email.mjs', 'conhecimento-falso.mjs',
   'conhecimento-hook.cjs', 'conhecimento-memoria.mjs', 'conhecimento-substitutos.cjs',
-  'contas-por-email.mjs', 'fixtures.mjs', 'repositorio-de-suporte-falso.mjs'
+  'contas-por-email.mjs', 'electron-simulado.mjs', 'fixtures.mjs', 'repositorio-de-suporte-falso.mjs'
 ];
 
 export function montarRecursosUnitarios(raizQa) {
@@ -27,7 +27,11 @@ export function montarRecursosUnitarios(raizQa) {
   };
   try {
     for (const nome of arquivos) {
-      const fonte = path.join(origem, nome), alvo = path.join(destino, nome);
+      const atual = path.join(unitarios, 'utilitarios', nome);
+      // O hook externo preserva exports reais dos módulos consolidados e simula Electron
+      // somente no Node. O hook dos unitários tem outro escopo e não substitui este.
+      const fonte = !nome.startsWith('conhecimento-') && fs.existsSync(atual) ? atual : path.join(origem, nome);
+      const alvo = path.join(destino, nome);
       if (!fs.statSync(fonte).isFile()) throw new Error('LAB_RECURSO_AUSENTE: ' + nome);
       fs.copyFileSync(fonte, alvo, fs.constants.COPYFILE_EXCL);
       criados.push(alvo);

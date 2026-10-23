@@ -1,10 +1,10 @@
 /** Publicação Qase defect: serviço sintético sem rede, permissões de escrita reais verificadas em testes do catálogo. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { criarDefeitoNoQase } from '../../../../dist/testes/integracoes/criarDefeitoNoQase.js';
-import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/rotaEscritaPermitida.js';
+import { criarDefeitoNoQase } from '../../../../dist/testes/integracoes/defeitosQase.js';
+import { rotaEscritaPermitida } from '../../../../dist/conexoes/escrita/permissoes.js';
 import { idsDeOperacao } from '../../../../dist/conexoes/tipos/operacoesExternas.js';
-import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/marcadorDaOperacao.js';
+import { marcadorDaOperacao } from '../../../../dist/conexoes/escrita/chaveDaOperacao.js';
 
 const chave='12'.repeat(32), rec={chave:'PQ'};
 const dados={titulo:'Acesso falha ao salvar',resultadoAtual:'O painel deixa de carregar após o login',severidade:3};
